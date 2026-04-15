@@ -1,6 +1,21 @@
 {
   "projects": [
     {
+      "priority": "none",
+      "order": 0,
+      "tasks": [
+        {
+          "id": "xjanwmawce9mo09l1h3",
+          "title": "Update to fix OpenAI's updated DOMs",
+          "description": "",
+          "status": "done",
+          "priority": "high",
+          "dueDate": null,
+          "order": 0,
+          "createdAt": "2026-04-15T16:28:04.407Z",
+          "completedAt": "2026-04-15T16:28:11.618Z"
+        }
+      ],
       "id": "proj_grabgpt",
       "name": "GrabGPT",
       "description": "Chrome extension for batch-downloading AI-generated images from ChatGPT conversations.",
@@ -8,13 +23,28 @@
       "machines": [
         "Windows Desktop"
       ],
-      "lastUpdated": "2026-04-10T00:00:00.000Z",
+      "lastUpdated": "2026-04-15T16:28:11.618Z",
       "repo": "github.com/Brian-Caylor/grabgpt",
       "notes": "v1.0 shipped. Firefox port worth exploring.",
-      "aiModel": "Claude",
+      "aiModel": "Gemini",
       "createdAt": "2026-03-01T00:00:00.000Z"
     },
     {
+      "priority": "none",
+      "order": 1,
+      "tasks": [
+        {
+          "description": "",
+          "priority": "medium",
+          "dueDate": null,
+          "order": 0,
+          "completedAt": null,
+          "id": "xzqkkc7tafmo09h434",
+          "title": "do more user testing for persistent data memory",
+          "status": "todo",
+          "createdAt": "2026-04-15T16:25:01.168Z"
+        }
+      ],
       "id": "proj_dgcharacter",
       "name": "Delta Green Character Manager",
       "description": "React app with KIA tracking, drag-and-drop reordering, and PDF import via the Claude API.",
@@ -23,13 +53,16 @@
         "Windows Desktop",
         "Mac Mini M4"
       ],
-      "lastUpdated": "2026-04-12T00:00:00.000Z",
+      "lastUpdated": "2026-04-15T16:25:01.168Z",
       "repo": "",
       "notes": "PDF import working. Next: character sharing and export to printable sheet.",
       "aiModel": "Claude",
       "createdAt": "2026-03-15T00:00:00.000Z"
     },
     {
+      "priority": "none",
+      "order": 2,
+      "tasks": [],
       "id": "proj_ocean",
       "name": "3D Ocean Simulation",
       "description": "Photorealistic ocean using Three.js and custom GLSL shaders. Deeply satisfying to stare at.",
@@ -44,6 +77,21 @@
       "createdAt": "2026-02-10T00:00:00.000Z"
     },
     {
+      "priority": "none",
+      "order": 3,
+      "tasks": [
+        {
+          "id": "uvma26s2smmo09udth",
+          "title": "Test task GBC",
+          "description": "",
+          "status": "todo",
+          "priority": "medium",
+          "dueDate": null,
+          "order": 0,
+          "createdAt": "2026-04-15T16:35:20.309Z",
+          "completedAt": null
+        }
+      ],
       "id": "proj_gbc",
       "name": "GBC Emulator",
       "description": "Game Boy Color emulator written in JavaScript. Because building one from scratch is a rite of passage.",
@@ -51,13 +99,16 @@
       "machines": [
         "Windows Desktop"
       ],
-      "lastUpdated": "2026-02-01T00:00:00.000Z",
+      "lastUpdated": "2026-04-15T16:35:20.309Z",
       "repo": "",
       "notes": "CPU core done. Audio is the usual nightmare — left it there for now.",
       "aiModel": "ChatGPT/Sol",
       "createdAt": "2025-12-01T00:00:00.000Z"
     },
     {
+      "priority": "none",
+      "order": 4,
+      "tasks": [],
       "id": "proj_voxel",
       "name": "Voxel Sandbox",
       "description": "Minecraft-adjacent voxel world with custom chunk generation and distance LOD.",
@@ -72,21 +123,27 @@
       "createdAt": "2025-11-01T00:00:00.000Z"
     },
     {
+      "priority": "none",
+      "order": 5,
+      "tasks": [],
       "id": "proj_promptvault",
       "name": "PromptVault",
       "description": "Electron + Gemini app for organizing, tagging, and replaying saved AI prompts.",
-      "status": "active",
+      "status": "released",
       "machines": [
         "Windows Desktop",
         "MacBook"
       ],
-      "lastUpdated": "2026-04-07T00:00:00.000Z",
+      "lastUpdated": "2026-04-15T16:25:58.030Z",
       "repo": "",
       "notes": "Core flow done. Add tagging, search, and prompt chaining.",
       "aiModel": "Gemini",
       "createdAt": "2026-01-15T00:00:00.000Z"
     },
     {
+      "priority": "none",
+      "order": 6,
+      "tasks": [],
       "id": "proj_dani",
       "name": "Dani Calder Autonomous Persona System",
       "description": "Fully AI-generated social media persona — green-skinned former biochemist in Portland. Full technical architecture: LLM orchestration, voice consistency pipeline, image gen, social posting automation.",
@@ -102,6 +159,9 @@
       "createdAt": "2026-02-01T00:00:00.000Z"
     },
     {
+      "priority": "none",
+      "order": 7,
+      "tasks": [],
       "id": "proj_storyengine",
       "name": "Story Engine",
       "description": "Claude Code-style agentic architecture scaffold for long-form fiction writing and worldbuilding.",

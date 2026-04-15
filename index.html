@@ -157,7 +157,14 @@ const normalizeProject = (p, idx) => {
   const np = { priority: 'none', order: idx, tasks: [], milestones: [], ...p };
   if (np.order == null) np.order = idx;
   np.tasks = (np.tasks || []).map((t, i) => normalizeTask(t, i));
-  np.milestones = np.milestones || [];
+  np.milestones = (np.milestones || []).map(m => ({ ...m, taskIds: [] }));
+  // Rebuild milestone.taskIds from task.milestoneId
+  np.tasks.forEach(t => {
+    if (t.milestoneId) {
+      const ms = np.milestones.find(m => m.id === t.milestoneId);
+      if (ms) ms.taskIds.push(t.id);
+    }
+  });
   return np;
 };
 
@@ -987,6 +994,9 @@ function ProjectDetail({ project, onBack, onEdit, onUpdateProject, onAddTask, on
         </div>
       </div>
 
+      {/* Milestones */}
+      <MilestonesPanel project={project} onUpdateProject={onUpdateProject} />
+
       {/* Two-panel layout */}
       <div className="detail-panels" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20, alignItems:'start' }}>
         <TaskList
@@ -1175,6 +1185,7 @@ function TaskList({ project, projectId, tasks, onAdd, onUpdate, onDelete, onReor
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
+              milestones={project ? project.milestones : []}
             />
           ))}
           {tasks.length === 0 && (
@@ -1193,7 +1204,7 @@ function TaskList({ project, projectId, tasks, onAdd, onUpdate, onDelete, onReor
 }
 
 // ── Task Row ───────────────────────────────────────────────────────────────────
-function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onDelete, onDragStart, onDragOver, onDrop, onDragEnd, onTouchStart, onTouchMove, onTouchEnd, projectLabel, hideDrag, onOpenProject }) {
+function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onDelete, onDragStart, onDragOver, onDrop, onDragEnd, onTouchStart, onTouchMove, onTouchEnd, projectLabel, hideDrag, onOpenProject, milestones }) {
   const isDone = task.status === 'done';
   const ts = TASK_STATUS[task.status] || TASK_STATUS.todo;
   const pr = PRIORITY[task.priority] || PRIORITY.medium;
@@ -1367,6 +1378,16 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
                 {Object.entries(TASK_STATUS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
               </select>
             </div>
+            {(milestones || []).length > 0 && (
+              <div>
+                <label style={{ fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Milestone</label>
+                <select value={task.milestoneId || ''} onChange={e => onUpdate(projectId, task.id, { milestoneId: e.target.value || null })}
+                  style={{ background:'#10101a', border:'1px solid #1a1a2a', borderRadius:6, padding:'6px 10px', color:'#d8d8e8', fontSize:12, outline:'none' }}>
+                  <option value="">None</option>
+                  {(milestones || []).map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
+                </select>
+              </div>
+            )}
             <div>
               <label style={{ fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>GitHub Link</label>
               <input value={task.githubLink || ''} onChange={e => onUpdate(projectId, task.id, { githubLink: e.target.value || null })}
@@ -1411,6 +1432,76 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
           {/* Sub-tasks */}
           <SubtaskPanel task={task} projectId={projectId} onUpdate={onUpdate} />
         </div>
+      )}
+    </div>
+  );
+}
+
+// ── Milestones Panel ──────────────────────────────────────────────────────────
+function MilestonesPanel({ project, onUpdateProject }) {
+  const [adding, setAdding] = useState(false);
+  const [title, setTitle] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const milestones = project.milestones || [];
+
+  const addMilestone = () => {
+    if (!title.trim()) return;
+    const ms = { id: uid(), title: title.trim(), dueDate: dueDate || null, taskIds: [] };
+    onUpdateProject(project.id, { milestones: [...milestones, ms] });
+    setTitle(''); setDueDate(''); setAdding(false);
+  };
+
+  const deleteMilestone = (msId) => {
+    onUpdateProject(project.id, { milestones: milestones.filter(m => m.id !== msId) });
+  };
+
+  if (milestones.length === 0 && !adding) {
+    return (
+      <div style={{ marginBottom:16 }}>
+        <button onClick={() => setAdding(true)}
+          style={{ fontSize:11, color:'#4a4a6a', background:'transparent', border:'1px solid #18182a', borderRadius:8, padding:'6px 12px', cursor:'pointer' }}>
+          + Add milestone
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:14, marginBottom:16 }}>
+      <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:14, fontWeight:700, letterSpacing:'0.06em', color:'#fff', textTransform:'uppercase', marginBottom:10 }}>Milestones</div>
+      {milestones.map(ms => {
+        const tasks = (project.tasks || []).filter(t => t.milestoneId === ms.id);
+        const done = tasks.filter(t => t.status === 'done').length;
+        const pct = tasks.length > 0 ? Math.round((done / tasks.length) * 100) : 0;
+        return (
+          <div key={ms.id} style={{ marginBottom:10 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}>
+              <span style={{ fontSize:13, color:'#d8d8e8', fontWeight:500, flex:1 }}>{ms.title}</span>
+              {ms.dueDate && <span style={{ fontSize:10, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>{new Date(ms.dueDate+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>}
+              <span style={{ fontSize:10, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>{done}/{tasks.length}</span>
+              <button onClick={() => deleteMilestone(ms.id)} className="icon-btn" style={{ background:'transparent', border:'none', color:'#ef5350', fontSize:11, cursor:'pointer', padding:'0 2px' }}>✕</button>
+            </div>
+            <div style={{ height:4, background:'#18182a', borderRadius:4, overflow:'hidden' }}>
+              <div style={{ height:'100%', width:`${pct}%`, background: pct === 100 ? '#00e676' : '#ffa726', transition:'width 0.3s ease' }} />
+            </div>
+          </div>
+        );
+      })}
+      {adding ? (
+        <div style={{ display:'flex', gap:6, alignItems:'center', marginTop:6 }}>
+          <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Milestone title"
+            onKeyDown={e => e.key === 'Enter' && addMilestone()}
+            style={{ flex:1, background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:6, padding:'6px 10px', color:'#d8d8e8', fontSize:12, outline:'none' }}/>
+          <input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)}
+            style={{ background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:6, padding:'6px 8px', color:'#d8d8e8', fontSize:11, outline:'none', fontFamily:"'JetBrains Mono',monospace" }}/>
+          <button onClick={addMilestone} style={{ padding:'6px 10px', background:'#00e676', border:'none', borderRadius:6, color:'#000', fontSize:11, fontWeight:600, cursor:'pointer' }}>Add</button>
+          <button onClick={() => setAdding(false)} style={{ padding:'6px 8px', background:'transparent', border:'none', color:'#4a4a6a', fontSize:11, cursor:'pointer' }}>✕</button>
+        </div>
+      ) : (
+        <button onClick={() => setAdding(true)}
+          style={{ fontSize:11, color:'#4a4a6a', background:'transparent', border:'none', cursor:'pointer', marginTop:4 }}>
+          + Add milestone
+        </button>
       )}
     </div>
   );

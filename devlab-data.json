@@ -79,7 +79,19 @@
     {
       "priority": "none",
       "order": 3,
-      "tasks": [],
+      "tasks": [
+        {
+          "id": "uvma26s2smmo09udth",
+          "title": "Test task GBC",
+          "description": "",
+          "status": "todo",
+          "priority": "medium",
+          "dueDate": null,
+          "order": 0,
+          "createdAt": "2026-04-15T16:35:20.309Z",
+          "completedAt": null
+        }
+      ],
       "id": "proj_gbc",
       "name": "GBC Emulator",
       "description": "Game Boy Color emulator written in JavaScript. Because building one from scratch is a rite of passage.",
@@ -87,7 +99,7 @@
       "machines": [
         "Windows Desktop"
       ],
-      "lastUpdated": "2026-02-01T00:00:00.000Z",
+      "lastUpdated": "2026-04-15T16:35:20.309Z",
       "repo": "",
       "notes": "CPU core done. Audio is the usual nightmare — left it there for now.",
       "aiModel": "ChatGPT/Sol",

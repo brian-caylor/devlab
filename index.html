@@ -360,6 +360,7 @@ function App() {
   const [view,    setView]    = useState('dashboard');
   const [activeProjectId, setActiveProjectId] = useState(null);
   const [openTaskId, setOpenTaskId] = useState(null);
+  const [showSearch, setShowSearch] = useState(false);
   const scrollRef  = useRef(0);
   const ideaRef    = useRef(null);
   const saveTimer  = useRef(null);
@@ -369,6 +370,15 @@ function App() {
   shaRef.current       = sha;
   projRef.current      = projects;
   ideaStateRef.current = ideas;
+
+  // ── ⌘K shortcut ──
+  useEffect(() => {
+    const handler = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); setShowSearch(true); }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
 
   // ── Load from GitHub ──
   useEffect(() => {
@@ -602,6 +612,10 @@ function App() {
               </button>
             ))}
           </div>
+          <button className="icon-btn" onClick={() => setShowSearch(true)} title="Search (⌘K)"
+            style={{ padding:'9px 11px', background:'#10101a', border:'1px solid #1a1a2a', borderRadius:9, color:'#4a4a6a', fontSize:14, cursor:'pointer' }}>
+            🔍
+          </button>
           <button className="icon-btn" onClick={() => { if(window.confirm('Disconnect from this repo? Your data stays in GitHub.')) { dropCreds(); setCreds(null); } }}
             title="Disconnect / change repo"
             style={{ padding:'9px 11px', background:'#10101a', border:'1px solid #1a1a2a', borderRadius:9, color:'#4a4a6a', fontSize:14, cursor:'pointer' }}>
@@ -749,6 +763,17 @@ function App() {
       )}
 
       {/* ── Modal ── */}
+      {/* ── Search Overlay ── */}
+      {showSearch && (
+        <SearchOverlay
+          projects={projects}
+          ideas={ideas}
+          onClose={() => setShowSearch(false)}
+          onOpenProject={openProject}
+          onOpenIdeas={() => { setTab('ideas'); if (view !== 'dashboard') { setView('dashboard'); setActiveProjectId(null); } }}
+        />
+      )}
+
       {modal && (
         <ProjectModal mode={modal.mode} data={modal.data}
           onSave={saveProject}
@@ -1284,6 +1309,130 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ── Search Overlay ────────────────────────────────────────────────────────────
+function SearchOverlay({ projects, ideas, onClose, onOpenProject, onOpenIdeas }) {
+  const [query, setQuery] = useState('');
+  const [hlIdx, setHlIdx] = useState(0);
+  const inputRef = useRef(null);
+  const debounceRef = useRef(null);
+  const [debouncedQ, setDebouncedQ] = useState('');
+
+  useEffect(() => { inputRef.current?.focus(); }, []);
+  useEffect(() => {
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setDebouncedQ(query), 150);
+    return () => clearTimeout(debounceRef.current);
+  }, [query]);
+  useEffect(() => { setHlIdx(0); }, [debouncedQ]);
+
+  const results = useMemo(() => {
+    const q = debouncedQ.toLowerCase().trim();
+    if (q.length < 2) {
+      // Show recent projects
+      return { projects: [...projects].sort((a, b) => new Date(b.lastUpdated || 0) - new Date(a.lastUpdated || 0)).slice(0, 5).map(p => ({ ...p, _type: 'project' })), tasks: [], ideas: [] };
+    }
+    const matchProjects = projects.filter(p =>
+      (p.name || '').toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q) || (p.notes || '').toLowerCase().includes(q)
+    ).slice(0, 5).map(p => ({ ...p, _type: 'project' }));
+
+    const matchTasks = projects.flatMap(p =>
+      (p.tasks || []).filter(t => (t.title || '').toLowerCase().includes(q) || (t.description || '').toLowerCase().includes(q))
+        .map(t => ({ ...t, projectId: p.id, projectName: p.name, _type: 'task' }))
+    ).slice(0, 5);
+
+    const matchIdeas = ideas.filter(i => (i.text || '').toLowerCase().includes(q))
+      .slice(0, 5).map(i => ({ ...i, _type: 'idea' }));
+
+    return { projects: matchProjects, tasks: matchTasks, ideas: matchIdeas };
+  }, [debouncedQ, projects, ideas]);
+
+  const flat = [...results.projects, ...results.tasks, ...results.ideas];
+
+  const handleKey = (e) => {
+    if (e.key === 'Escape') { onClose(); return; }
+    if (e.key === 'ArrowDown') { e.preventDefault(); setHlIdx(i => Math.min(i + 1, flat.length - 1)); }
+    if (e.key === 'ArrowUp') { e.preventDefault(); setHlIdx(i => Math.max(i - 1, 0)); }
+    if (e.key === 'Enter' && flat[hlIdx]) { select(flat[hlIdx]); }
+  };
+
+  const select = (item) => {
+    if (item._type === 'project') { onOpenProject(item.id); onClose(); }
+    else if (item._type === 'task') { onOpenProject(item.projectId, item.id); onClose(); }
+    else if (item._type === 'idea') { onOpenIdeas(); onClose(); }
+  };
+
+  const highlight = (text, q) => {
+    if (!q || q.length < 2) return text;
+    const idx = (text || '').toLowerCase().indexOf(q.toLowerCase());
+    if (idx < 0) return text;
+    return <>{text.slice(0, idx)}<span style={{ color:'#00e676' }}>{text.slice(idx, idx + q.length)}</span>{text.slice(idx + q.length)}</>;
+  };
+
+  let globalIdx = -1;
+  const ResultRow = ({ item, children }) => {
+    globalIdx++;
+    const myIdx = globalIdx;
+    const active = myIdx === hlIdx;
+    return (
+      <div onClick={() => select(item)}
+        onMouseEnter={() => setHlIdx(myIdx)}
+        style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 12px', borderRadius:8, cursor:'pointer', background: active ? '#1a1a2a' : 'transparent', borderLeft: active ? '2px solid #00e676' : '2px solid transparent', transition:'background .1s' }}>
+        {children}
+      </div>
+    );
+  };
+
+  const SectionLabel = ({ label }) => (
+    <div style={{ fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.06em', textTransform:'uppercase', padding:'10px 12px 4px' }}>{label}</div>
+  );
+
+  return (
+    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', backdropFilter:'blur(6px)', display:'flex', alignItems:'flex-start', justifyContent:'center', zIndex:300, padding:'80px 16px 16px' }}
+      onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="fade-in" style={{ width:'100%', maxWidth:560, background:'#10101a', border:'1px solid #252538', borderRadius:16, overflow:'hidden' }}>
+        <div style={{ padding:'16px 18px', borderBottom:'1px solid #18182a' }}>
+          <input ref={inputRef} value={query} onChange={e => setQuery(e.target.value)} onKeyDown={handleKey}
+            placeholder="Search projects, tasks, ideas…"
+            style={{ width:'100%', background:'transparent', border:'none', color:'#d8d8e8', fontSize:15, outline:'none' }}/>
+        </div>
+        <div style={{ maxHeight:400, overflowY:'auto', padding:'4px 6px 10px' }}>
+          {results.projects.length > 0 && <>
+            <SectionLabel label={debouncedQ.length < 2 ? 'Recent Projects' : `Projects (${results.projects.length})`} />
+            {results.projects.map(p => (
+              <ResultRow key={p.id} item={p}>
+                <span style={{ color:'#29b6f6', fontSize:12, flexShrink:0 }}>◈</span>
+                <span style={{ flex:1, fontSize:13, color:'#d8d8e8', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{highlight(p.name, debouncedQ)}</span>
+              </ResultRow>
+            ))}
+          </>}
+          {results.tasks.length > 0 && <>
+            <SectionLabel label={`Tasks (${results.tasks.length})`} />
+            {results.tasks.map(t => (
+              <ResultRow key={t.id} item={t}>
+                <span style={{ fontSize:11, flexShrink:0 }}>{t.status === 'done' ? '✓' : '□'}</span>
+                <span style={{ flex:1, fontSize:13, color:'#d8d8e8', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{highlight(t.title, debouncedQ)}</span>
+                <span style={{ fontSize:10, color:'#4a4a6a', flexShrink:0 }}>{t.projectName} →</span>
+              </ResultRow>
+            ))}
+          </>}
+          {results.ideas.length > 0 && <>
+            <SectionLabel label={`Ideas (${results.ideas.length})`} />
+            {results.ideas.map(i => (
+              <ResultRow key={i.id} item={i}>
+                <span style={{ fontSize:11, flexShrink:0 }}>💡</span>
+                <span style={{ flex:1, fontSize:13, color:'#d8d8e8', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{highlight(i.text, debouncedQ)}</span>
+              </ResultRow>
+            ))}
+          </>}
+          {flat.length === 0 && debouncedQ.length >= 2 && (
+            <div style={{ textAlign:'center', padding:'24px 0', color:'#3a3a55', fontSize:13 }}>No results found.</div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

@@ -9,7 +9,7 @@
           "title": "Update to fix OpenAI's updated DOMs",
           "description": "",
           "status": "todo",
-          "priority": "medium",
+          "priority": "high",
           "dueDate": null,
           "order": 0,
           "createdAt": "2026-04-15T16:28:04.407Z",
@@ -23,7 +23,7 @@
       "machines": [
         "Windows Desktop"
       ],
-      "lastUpdated": "2026-04-15T16:28:04.407Z",
+      "lastUpdated": "2026-04-15T16:28:06.471Z",
       "repo": "github.com/Brian-Caylor/grabgpt",
       "notes": "v1.0 shipped. Firefox port worth exploring.",
       "aiModel": "Gemini",

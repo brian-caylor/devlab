@@ -38,53 +38,6 @@
           "priority": "medium",
           "dueDate": null,
           "order": 0,
-          "completedAt": null,
-          "id": "xzqkkc7tafmo09h434",
-          "title": "do more user testing for persistent data memory",
-          "status": "todo",
-          "createdAt": "2026-04-15T16:25:01.168Z"
-        }
-      ],
-      "id": "proj_dgcharacter",
-      "name": "Delta Green Character Manager",
-      "description": "React app with KIA tracking, drag-and-drop reordering, and PDF import via the Claude API.",
-      "status": "active",
-      "machines": [
-        "Windows Desktop",
-        "Mac Mini M4"
-      ],
-      "lastUpdated": "2026-04-15T16:25:01.168Z",
-      "repo": "",
-      "notes": "PDF import working. Next: character sharing and export to printable sheet.",
-      "aiModel": "Claude",
-      "createdAt": "2026-03-15T00:00:00.000Z"
-    },
-    {
-      "priority": "none",
-      "order": 2,
-      "tasks": [],
-      "id": "proj_ocean",
-      "name": "3D Ocean Simulation",
-      "description": "Photorealistic ocean using Three.js and custom GLSL shaders. Deeply satisfying to stare at.",
-      "status": "paused",
-      "machines": [
-        "MacBook"
-      ],
-      "lastUpdated": "2026-03-20T00:00:00.000Z",
-      "repo": "",
-      "notes": "Wave physics solid. Needs foam and spray pass.",
-      "aiModel": "Claude",
-      "createdAt": "2026-02-10T00:00:00.000Z"
-    },
-    {
-      "priority": "none",
-      "order": 3,
-      "tasks": [
-        {
-          "description": "",
-          "priority": "medium",
-          "dueDate": null,
-          "order": 0,
           "completedAt": "2026-04-15T16:39:09.341Z",
           "id": "uvma26s2smmo09udth",
           "title": "Test task GBC",
@@ -118,24 +71,7 @@
     },
     {
       "priority": "none",
-      "order": 4,
-      "tasks": [],
-      "id": "proj_voxel",
-      "name": "Voxel Sandbox",
-      "description": "Minecraft-adjacent voxel world with custom chunk generation and distance LOD.",
-      "status": "paused",
-      "machines": [
-        "Windows Desktop"
-      ],
-      "lastUpdated": "2026-02-10T00:00:00.000Z",
-      "repo": "",
-      "notes": "Chunk generation solid. Needs lighting pass and a basic inventory system.",
-      "aiModel": "Claude",
-      "createdAt": "2025-11-01T00:00:00.000Z"
-    },
-    {
-      "priority": "none",
-      "order": 5,
+      "order": 2,
       "tasks": [],
       "id": "proj_promptvault",
       "name": "PromptVault",
@@ -153,7 +89,52 @@
     },
     {
       "priority": "none",
-      "order": 6,
+      "order": 3,
+      "tasks": [
+        {
+          "description": "",
+          "priority": "medium",
+          "dueDate": null,
+          "order": 0,
+          "completedAt": null,
+          "id": "xzqkkc7tafmo09h434",
+          "title": "do more user testing for persistent data memory",
+          "status": "todo",
+          "createdAt": "2026-04-15T16:25:01.168Z"
+        }
+      ],
+      "id": "proj_dgcharacter",
+      "name": "Delta Green Character Manager",
+      "description": "React app with KIA tracking, drag-and-drop reordering, and PDF import via the Claude API.",
+      "status": "active",
+      "machines": [
+        "Windows Desktop",
+        "Mac Mini M4"
+      ],
+      "lastUpdated": "2026-04-15T16:25:01.168Z",
+      "repo": "",
+      "notes": "PDF import working. Next: character sharing and export to printable sheet.",
+      "aiModel": "Claude",
+      "createdAt": "2026-03-15T00:00:00.000Z"
+    },
+    {
+      "priority": "none",
+      "order": 4,
+      "tasks": [],
+      "id": "proj_storyengine",
+      "name": "Story Engine",
+      "description": "Claude Code-style agentic architecture scaffold for long-form fiction writing and worldbuilding.",
+      "status": "released",
+      "machines": [],
+      "lastUpdated": "2026-04-15T05:43:40.384Z",
+      "repo": "https://github.com/brian-caylor/StoryEngine_Template.git",
+      "notes": "Fully functioning.",
+      "aiModel": "Claude",
+      "createdAt": "2026-03-10T00:00:00.000Z"
+    },
+    {
+      "priority": "none",
+      "order": 5,
       "tasks": [],
       "id": "proj_dani",
       "name": "Dani Calder Autonomous Persona System",
@@ -171,18 +152,37 @@
     },
     {
       "priority": "none",
+      "order": 6,
+      "tasks": [],
+      "id": "proj_ocean",
+      "name": "3D Ocean Simulation",
+      "description": "Photorealistic ocean using Three.js and custom GLSL shaders. Deeply satisfying to stare at.",
+      "status": "paused",
+      "machines": [
+        "MacBook"
+      ],
+      "lastUpdated": "2026-03-20T00:00:00.000Z",
+      "repo": "",
+      "notes": "Wave physics solid. Needs foam and spray pass.",
+      "aiModel": "Claude",
+      "createdAt": "2026-02-10T00:00:00.000Z"
+    },
+    {
+      "priority": "none",
       "order": 7,
       "tasks": [],
-      "id": "proj_storyengine",
-      "name": "Story Engine",
-      "description": "Claude Code-style agentic architecture scaffold for long-form fiction writing and worldbuilding.",
-      "status": "released",
-      "machines": [],
-      "lastUpdated": "2026-04-15T05:43:40.384Z",
-      "repo": "https://github.com/brian-caylor/StoryEngine_Template.git",
-      "notes": "Fully functioning.",
+      "id": "proj_voxel",
+      "name": "Voxel Sandbox",
+      "description": "Minecraft-adjacent voxel world with custom chunk generation and distance LOD.",
+      "status": "paused",
+      "machines": [
+        "Windows Desktop"
+      ],
+      "lastUpdated": "2026-02-10T00:00:00.000Z",
+      "repo": "",
+      "notes": "Chunk generation solid. Needs lighting pass and a basic inventory system.",
       "aiModel": "Claude",
-      "createdAt": "2026-03-10T00:00:00.000Z"
+      "createdAt": "2025-11-01T00:00:00.000Z"
     }
   ],
   "ideas": [

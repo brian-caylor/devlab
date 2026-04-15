@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <title>DEV LAB — Brian Caylor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { color-scheme: dark; }
+    html, body { background: #08080f; min-height: 100vh; }
+    #root { min-height: 100vh; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1e1e32; border-radius: 4px; }
+    input, textarea, button { font-family: 'DM Sans', sans-serif; }
+    input::placeholder, textarea::placeholder { color: #3a3a55; }
+    textarea { resize: vertical; }
+    a { color: inherit; text-decoration: none; }
+
+    .card { transition: transform .18s ease, border-color .18s ease; }
+    .card:hover { transform: translateY(-2px); border-color: #252538 !important; }
+    .pill { transition: all .14s ease; cursor: pointer; }
+    .idea-row { transition: background .15s; }
+    .idea-row:hover { background: rgba(255,255,255,0.035) !important; }
+    .icon-btn { transition: opacity .15s; opacity: .4; cursor: pointer; }
+    .icon-btn:hover { opacity: 1; }
+    .tab-btn { transition: all .15s; cursor: pointer; }
+    .promote-btn { transition: all .15s; cursor: pointer; }
+    .promote-btn:hover { background: rgba(41,182,246,0.15) !important; }
+    .chip-btn { transition: all .14s ease; cursor: pointer; }
+    .add-btn:hover { opacity: .85 !important; }
+
+    @keyframes pulse { 0%,100% { opacity:.25 } 50% { opacity:1 } }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }
+    .fade-in { animation: fadeUp .22s ease both; }
+    .pulsing { animation: pulse 1.5s infinite; }
+
+    @media (max-width: 640px) {
+      .projects-grid { grid-template-columns: 1fr !important; }
+      .header-row { flex-direction: column; gap: 14px; align-items: flex-start !important; }
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ── Constants ──────────────────────────────────────────────────────────────────
+const DATA_FILE = 'devlab-data.json';
+const CREDS_KEY = 'devlab-creds-v2';
+
+const STATUS = {
+  active:   { label: 'Active',   color: '#00e676', bg: 'rgba(0,230,118,0.10)' },
+  paused:   { label: 'Paused',   color: '#ffa726', bg: 'rgba(255,167,38,0.10)' },
+  released: { label: 'Released', color: '#29b6f6', bg: 'rgba(41,182,246,0.10)' },
+  idea:     { label: 'Idea',     color: '#ce93d8', bg: 'rgba(206,147,216,0.10)' },
+  archived: { label: 'Archived', color: '#546e7a', bg: 'rgba(84,110,122,0.10)' },
+};
+
+const MACHINES = ['Windows Desktop', 'Mac Mini M4', 'MacBook'];
+const MODELS   = ['Claude', 'ChatGPT/Sol', 'Gemini', 'Mixed', 'Other'];
+
+// ── Utilities ──────────────────────────────────────────────────────────────────
+const uid  = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+const now  = () => new Date().toISOString();
+const ago  = (iso) => {
+  if (!iso) return '';
+  const d = Math.floor((Date.now() - new Date(iso)) / 86400000);
+  return d === 0 ? 'Today' : d === 1 ? 'Yesterday' : `${d}d ago`;
+};
+
+// Safe base64 encode/decode (handles Unicode)
+function toBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  for (const b of bytes) binary += String.fromCharCode(b);
+  return btoa(binary);
+}
+function fromBase64(b64) {
+  const binary = atob(b64.replace(/\n/g, ''));
+  const bytes  = Uint8Array.from(binary, c => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+// ── GitHub API ─────────────────────────────────────────────────────────────────
+async function ghRequest(creds, method, path, body) {
+  const res = await fetch(`https://api.github.com/repos/${creds.owner}/${creds.repo}/contents/${path}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${creds.token}`,
+      Accept: 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json',
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `GitHub ${res.status}`);
+  }
+  return res.json();
+}
+
+async function loadFromGH(creds) {
+  const file = await ghRequest(creds, 'GET', DATA_FILE);
+  return {
+    data: JSON.parse(fromBase64(file.content)),
+    sha:  file.sha,
+  };
+}
+
+async function saveToGH(creds, data, sha) {
+  const body = {
+    message: `devlab: sync ${new Date().toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' })}`,
+    content: toBase64(JSON.stringify(data, null, 2)),
+  };
+  if (sha) body.sha = sha;
+  const result = await ghRequest(creds, 'PUT', DATA_FILE, body);
+  return result.content.sha;
+}
+
+// ── Local credentials ──────────────────────────────────────────────────────────
+const loadCreds = () => { try { return JSON.parse(localStorage.getItem(CREDS_KEY)); } catch { return null; } };
+const saveCreds = (c) => localStorage.setItem(CREDS_KEY, JSON.stringify(c));
+const dropCreds = () => localStorage.removeItem(CREDS_KEY);
+
+// ── Setup Screen ───────────────────────────────────────────────────────────────
+function Setup({ onSave }) {
+  const [owner,   setOwner]   = useState('Brian-Caylor');
+  const [repo,    setRepo]    = useState('devlab');
+  const [token,   setToken]   = useState('');
+  const [err,     setErr]     = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleConnect = async () => {
+    if (!token.trim()) { setErr('A Personal Access Token is required.'); return; }
+    setLoading(true); setErr('');
+    const creds = { owner: owner.trim(), repo: repo.trim(), token: token.trim() };
+    try {
+      await ghRequest(creds, 'GET', DATA_FILE);
+    } catch (e) {
+      if (!e.message.includes('404')) {
+        setErr(e.message.includes('401') ? 'Token invalid or expired — check your PAT.' : e.message);
+        setLoading(false); return;
+      }
+      // 404 = file not found yet, that's fine — we'll create it on first save
+    }
+    saveCreds(creds);
+    onSave(creds);
+    setLoading(false);
+  };
+
+  const inputStyle = {
+    width: '100%', background: '#0c0c16', border: '1px solid #1a1a2a',
+    borderRadius: 8, padding: '10px 14px', color: '#d8d8e8', fontSize: 14, outline: 'none',
+  };
+  const labelStyle = {
+    display: 'block', fontSize: 10, fontWeight: 600, color: '#4a4a6a',
+    letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6,
+  };
+
+  return (
+    <div style={{ minHeight:'100vh', background:'#08080f', display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
+      <div style={{ width:'100%', maxWidth:440, background:'#10101a', border:'1px solid #1e1e2e', borderRadius:16, padding:32 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:6 }}>
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:24, fontWeight:700, letterSpacing:'0.14em', color:'#fff' }}>DEV LAB</span>
+          <span style={{ fontSize:10, background:'rgba(0,230,118,0.10)', color:'#00e676', padding:'2px 8px', borderRadius:99, letterSpacing:'0.08em', fontWeight:600 }}>SETUP</span>
+        </div>
+        <p style={{ fontSize:13, color:'#4a4a6a', marginBottom:28, lineHeight:1.6 }}>
+          Connect a GitHub repo to store your projects and ideas. Every save is a real git commit — works anywhere with a browser.
+        </p>
+
+        <div style={{ marginBottom:14 }}>
+          <label style={labelStyle}>GitHub Repo Owner</label>
+          <input value={owner} onChange={e => setOwner(e.target.value)} placeholder="Brian-Caylor" style={inputStyle}/>
+        </div>
+        <div style={{ marginBottom:14 }}>
+          <label style={labelStyle}>Repo Name</label>
+          <input value={repo} onChange={e => setRepo(e.target.value)} placeholder="devlab" style={inputStyle}/>
+        </div>
+        <div style={{ marginBottom:24 }}>
+          <label style={labelStyle}>Personal Access Token (PAT)</label>
+          <input type="password" value={token} onChange={e => setToken(e.target.value)}
+            placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style={inputStyle}
+            onKeyDown={e => e.key === 'Enter' && handleConnect()}/>
+          <p style={{ fontSize:11, color:'#3a3a55', marginTop:7, lineHeight:1.5 }}>
+            Needs <code style={{color:'#5a5a9a', fontFamily:"'JetBrains Mono',monospace"}}>repo</code> scope. Stored only in your browser.{' '}
+            <a href={`https://github.com/settings/tokens/new?scopes=repo&description=DevLab`}
+              target="_blank" rel="noopener noreferrer" style={{ color:'#29b6f6' }}>
+              Create one →
+            </a>
+          </p>
+        </div>
+
+        {err && <div style={{ color:'#ef5350', fontSize:12, marginBottom:14, lineHeight:1.5 }}>{err}</div>}
+
+        <button onClick={handleConnect} disabled={loading} style={{
+          width:'100%', padding:12, background:'#00e676', border:'none', borderRadius:9,
+          color:'#000', fontSize:14, fontWeight:600, cursor: loading?'not-allowed':'pointer',
+          opacity: loading ? .65 : 1, transition:'opacity .15s',
+        }}>
+          {loading ? 'Connecting…' : 'Connect & Launch →'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Root App ───────────────────────────────────────────────────────────────────
+function App() {
+  const [creds,   setCreds]   = useState(loadCreds);
+  const [projects,setProjects]= useState([]);
+  const [ideas,   setIdeas]   = useState([]);
+  const [sha,     setSha]     = useState(null);
+  const [tab,     setTab]     = useState('projects');
+  const [filter,  setFilter]  = useState('all');
+  const [modal,   setModal]   = useState(null);
+  const [newIdea, setNewIdea] = useState('');
+  const [sync,    setSync]    = useState('loading'); // loading | idle | saving | error
+  const [syncMsg, setSyncMsg] = useState('');
+  const [ready,   setReady]   = useState(false);
+  const ideaRef    = useRef(null);
+  const saveTimer  = useRef(null);
+  const shaRef     = useRef(sha);
+  const projRef    = useRef(projects);
+  const ideaStateRef = useRef(ideas);
+  shaRef.current       = sha;
+  projRef.current      = projects;
+  ideaStateRef.current = ideas;
+
+  // ── Load from GitHub ──
+  useEffect(() => {
+    if (!creds) return;
+    (async () => {
+      setSync('loading');
+      try {
+        const { data, sha: fileSha } = await loadFromGH(creds);
+        setProjects(data.projects || []);
+        setIdeas(data.ideas || []);
+        setSha(fileSha);
+        shaRef.current = fileSha;
+        setSync('idle');
+      } catch (e) {
+        if (e.message.includes('404')) {
+          setSync('idle'); // First time, no file yet
+        } else {
+          setSync('error');
+          setSyncMsg('Could not load data: ' + e.message);
+        }
+      }
+      setReady(true);
+    })();
+  }, [creds]);
+
+  // ── Debounced save ──
+  const triggerSave = useCallback(() => {
+    if (!ready) return;
+    clearTimeout(saveTimer.current);
+    setSync('saving');
+    saveTimer.current = setTimeout(async () => {
+      try {
+        const newSha = await saveToGH(
+          creds,
+          { projects: projRef.current, ideas: ideaStateRef.current },
+          shaRef.current
+        );
+        setSha(newSha);
+        shaRef.current = newSha;
+        setSync('idle');
+        setSyncMsg('');
+      } catch (e) {
+        setSync('error');
+        setSyncMsg('Save failed: ' + e.message);
+      }
+    }, 1800);
+  }, [creds, ready]);
+
+  // ── Manual sync ──
+  const handleSync = async () => {
+    clearTimeout(saveTimer.current);
+    setSync('loading');
+    try {
+      const { data, sha: fileSha } = await loadFromGH(creds);
+      setProjects(data.projects || []);
+      setIdeas(data.ideas || []);
+      setSha(fileSha);
+      shaRef.current = fileSha;
+      setSync('idle');
+      setSyncMsg('');
+    } catch (e) {
+      setSync('error');
+      setSyncMsg('Sync failed: ' + e.message);
+    }
+  };
+
+  // ── State helpers ──
+  const mutateProjects = (fn) => {
+    setProjects(prev => { const next = fn(prev); projRef.current = next; triggerSave(); return next; });
+  };
+  const mutateIdeas = (fn) => {
+    setIdeas(prev => { const next = fn(prev); ideaStateRef.current = next; triggerSave(); return next; });
+  };
+
+  // ── Project ops ──
+  const saveProject = (data) => {
+    if (modal.mode === 'add') {
+      mutateProjects(p => [{ ...data, id: uid(), createdAt: now() }, ...p]);
+    } else {
+      mutateProjects(p => p.map(x => x.id === data.id ? data : x));
+    }
+    setModal(null);
+  };
+  const deleteProject = (id) => {
+    if (!window.confirm('Delete this project?')) return;
+    mutateProjects(p => p.filter(x => x.id !== id));
+  };
+
+  // ── Idea ops ──
+  const addIdea = () => {
+    if (!newIdea.trim()) return;
+    mutateIdeas(i => [{ id: uid(), text: newIdea.trim(), createdAt: now() }, ...i]);
+    setNewIdea('');
+    ideaRef.current?.focus();
+  };
+  const deleteIdea = (id) => mutateIdeas(i => i.filter(x => x.id !== id));
+  const promoteIdea = (idea) => {
+    deleteIdea(idea.id);
+    setModal({ mode: 'add', data: { name:'', description: idea.text, status:'idea', machines:[], repo:'', notes:'', aiModel:'Claude' } });
+    setTab('projects');
+  };
+
+  if (!creds) {
+    return <Setup onSave={(c) => { setCreds(c); }} />;
+  }
+
+  const filtered = projects.filter(p => filter === 'all' || p.status === filter);
+  const counts   = Object.fromEntries(Object.keys(STATUS).map(s => [s, projects.filter(p => p.status === s).length]));
+  const blank    = { name:'', description:'', status:'active', machines:[], repo:'', notes:'', aiModel:'Claude' };
+
+  const syncColor = { loading:'#3a3a55', saving:'#ffa726', idle:'#3a3a55', error:'#ef5350' }[sync];
+  const syncLabel = { loading:'Loading…', saving:'Saving…', idle:'Synced', error:'Error' }[sync];
+
+  return (
+    <div style={{ fontFamily:"'DM Sans',sans-serif", background:'#08080f', minHeight:'100vh', color:'#d8d8e8', maxWidth:980, margin:'0 auto', paddingBottom:80 }}>
+
+      {/* ── Header ── */}
+      <div style={{ padding:'24px 20px 0', display:'flex', alignItems:'flex-start', justifyContent:'space-between', flexWrap:'wrap', gap:16 }} className="header-row">
+        <div>
+          <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:5 }}>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#00e676" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+            </svg>
+            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:22, fontWeight:700, letterSpacing:'0.14em', color:'#fff' }}>DEV LAB</span>
+            <button onClick={handleSync} title={syncMsg || 'Click to force sync'} style={{ background:'transparent', border:'none', cursor:'pointer', display:'flex', alignItems:'center', gap:5, padding:0 }}>
+              <span style={{ fontSize:10, fontFamily:"'JetBrains Mono',monospace", color: syncColor, letterSpacing:'0.05em' }}>{syncLabel}</span>
+              {(sync === 'loading' || sync === 'saving') && (
+                <span style={{ width:6, height:6, borderRadius:'50%', background: syncColor, display:'inline-block' }} className="pulsing" />
+              )}
+            </button>
+          </div>
+          <div style={{ fontSize:11, color:'#3a3a55', fontFamily:"'JetBrains Mono',monospace" }}>
+            {projects.length} projects · {ideas.length} ideas · {creds.owner}/{creds.repo}
+          </div>
+        </div>
+
+        <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+          <div style={{ display:'flex', gap:3, background:'#10101a', padding:4, borderRadius:10 }}>
+            {[
+              { key:'projects', label:'Projects' },
+              { key:'ideas',    label:'Ideas', badge: ideas.length },
+            ].map(t => (
+              <button key={t.key} className="tab-btn"
+                style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 14px', borderRadius:7, border:'none', background: tab===t.key?'#1a1a2a':'transparent', color: tab===t.key?'#d8d8e8':'#3a3a55', fontSize:13, cursor:'pointer', fontWeight:500 }}
+                onClick={() => setTab(t.key)}>
+                {t.label}
+                {t.badge > 0 && <span style={{ background:'#ffa726', color:'#000', fontSize:10, fontWeight:700, padding:'1px 6px', borderRadius:99 }}>{t.badge}</span>}
+              </button>
+            ))}
+          </div>
+          <button className="icon-btn" onClick={() => { if(window.confirm('Disconnect from this repo? Your data stays in GitHub.')) { dropCreds(); setCreds(null); } }}
+            title="Disconnect / change repo"
+            style={{ padding:'9px 11px', background:'#10101a', border:'1px solid #1a1a2a', borderRadius:9, color:'#4a4a6a', fontSize:14, cursor:'pointer' }}>
+            ⚙
+          </button>
+        </div>
+      </div>
+
+      {/* ── Error Banner ── */}
+      {sync === 'error' && syncMsg && (
+        <div style={{ margin:'12px 20px 0', padding:'10px 16px', background:'rgba(239,83,80,0.08)', border:'1px solid rgba(239,83,80,0.25)', borderRadius:8, fontSize:12, color:'#ef5350', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+          <span>{syncMsg}</span>
+          <button onClick={handleSync} style={{ background:'transparent', border:'none', color:'#ef5350', fontSize:12, cursor:'pointer', fontWeight:600 }}>Retry →</button>
+        </div>
+      )}
+
+      {/* ── Projects Tab ── */}
+      {tab === 'projects' && (
+        <div style={{ padding:'22px 20px' }} className="fade-in">
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:18, flexWrap:'wrap', gap:10 }}>
+            <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+              <button className="pill"
+                style={{ padding:'5px 12px', borderRadius:99, border:`1px solid ${filter==='all'?'#d8d8e8':'#18182a'}`, background: filter==='all'?'#1a1a2a':'transparent', color: filter==='all'?'#d8d8e8':'#4a4a6a', fontSize:12, fontWeight:500, display:'flex', alignItems:'center', gap:5 }}
+                onClick={() => setFilter('all')}>
+                All <span style={{ opacity:.5 }}>{projects.length}</span>
+              </button>
+              {Object.entries(STATUS).map(([key, cfg]) =>
+                counts[key] > 0 && (
+                  <button key={key} className="pill"
+                    style={{ padding:'5px 12px', borderRadius:99, border:`1px solid ${filter===key?cfg.color:'#18182a'}`, background: filter===key?cfg.bg:'transparent', color: filter===key?cfg.color:'#4a4a6a', fontSize:12, fontWeight:500, display:'flex', alignItems:'center', gap:5 }}
+                    onClick={() => setFilter(key)}>
+                    {cfg.label} <span style={{ opacity:.5 }}>{counts[key]}</span>
+                  </button>
+                )
+              )}
+            </div>
+            <button className="add-btn" onClick={() => setModal({ mode:'add', data:{...blank} })}
+              style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 16px', background:'#00e676', color:'#000', border:'none', borderRadius:9, fontSize:13, fontWeight:600, cursor:'pointer', transition:'opacity .15s' }}>
+              + New Project
+            </button>
+          </div>
+
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(270px, 1fr))', gap:12 }} className="projects-grid">
+            {filtered.map(p => (
+              <ProjectCard key={p.id} project={p}
+                onEdit={() => setModal({ mode:'edit', data:{...p} })}
+                onDelete={() => deleteProject(p.id)} />
+            ))}
+            {filtered.length === 0 && !ready && (
+              <div style={{ color:'#3a3a55', fontSize:13, gridColumn:'1/-1', textAlign:'center', padding:'48px 0' }}>Loading your projects…</div>
+            )}
+            {filtered.length === 0 && ready && (
+              <div style={{ color:'#3a3a55', fontSize:13, gridColumn:'1/-1', textAlign:'center', padding:'48px 0' }}>No projects here. Start one.</div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Ideas Tab ── */}
+      {tab === 'ideas' && (
+        <div style={{ padding:'22px 20px' }} className="fade-in">
+          <div style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:18, marginBottom:14 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:6, fontSize:10, fontWeight:600, color:'#ffa726', letterSpacing:'0.09em', textTransform:'uppercase', marginBottom:12 }}>
+              ⚡ Quick Capture
+            </div>
+            <div style={{ display:'flex', gap:10 }}>
+              <textarea ref={ideaRef} value={newIdea}
+                onChange={e => setNewIdea(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) addIdea(); }}
+                placeholder="What's the next thing you want to build?  ⌘↵ to save"
+                style={{ flex:1, background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:8, padding:'10px 14px', color:'#d8d8e8', fontSize:14, outline:'none', lineHeight:1.5 }}
+                rows={3}/>
+              <button onClick={addIdea}
+                style={{ background:'#ffa726', border:'none', borderRadius:8, padding:'0 16px', color:'#000', cursor:'pointer', fontSize:18, display:'flex', alignItems:'center', opacity: newIdea.trim()?1:.35, transition:'opacity .15s' }}>
+                →
+              </button>
+            </div>
+          </div>
+
+          <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+            {ideas.length === 0 && ready && (
+              <div style={{ color:'#3a3a55', fontSize:13, textAlign:'center', padding:'48px 0' }}>
+                No ideas queued. Drop one above before it evaporates.
+              </div>
+            )}
+            {ideas.map(idea => (
+              <div key={idea.id} className="idea-row" style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:10, padding:'14px 16px' }}>
+                <div style={{ fontSize:14, color:'#b0b0cc', lineHeight:1.55, marginBottom:10 }}>{idea.text}</div>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:8 }}>
+                  <span style={{ fontSize:10, color:'#3a3a55', fontFamily:"'JetBrains Mono',monospace" }}>
+                    ⏱ {ago(idea.createdAt)}
+                  </span>
+                  <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                    <button className="promote-btn"
+                      style={{ display:'flex', alignItems:'center', gap:4, padding:'4px 10px', background:'rgba(41,182,246,0.08)', border:'1px solid rgba(41,182,246,0.18)', borderRadius:6, color:'#29b6f6', fontSize:12, cursor:'pointer' }}
+                      onClick={() => promoteIdea(idea)}>
+                      › To Project
+                    </button>
+                    <button className="icon-btn"
+                      style={{ display:'flex', alignItems:'center', padding:'4px 6px', background:'transparent', border:'none', color:'#ef5350', borderRadius:5, fontSize:15 }}
+                      onClick={() => deleteIdea(idea.id)}>✕</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal ── */}
+      {modal && (
+        <ProjectModal mode={modal.mode} data={modal.data}
+          onSave={saveProject}
+          onClose={() => setModal(null)}/>
+      )}
+    </div>
+  );
+}
+
+// ── Project Card ───────────────────────────────────────────────────────────────
+function ProjectCard({ project, onEdit, onDelete }) {
+  const cfg = STATUS[project.status] || STATUS.idea;
+  return (
+    <div className="card" style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:18, display:'flex', flexDirection:'column', gap:10 }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8 }}>
+        <div style={{ flex:1, minWidth:0 }}>
+          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:19, fontWeight:700, letterSpacing:'0.02em', color:'#fff', marginBottom:5, lineHeight:1.15, wordBreak:'break-word' }}>{project.name}</div>
+          <span style={{ display:'inline-block', fontSize:10, fontWeight:600, padding:'2px 8px', borderRadius:99, letterSpacing:'0.05em', textTransform:'uppercase', color:cfg.color, background:cfg.bg }}>
+            {cfg.label}
+          </span>
+        </div>
+        <div style={{ display:'flex', gap:2, flexShrink:0 }}>
+          <button className="icon-btn" style={{ display:'flex', alignItems:'center', padding:'5px 6px', background:'transparent', border:'none', color:'#5a5a7a', borderRadius:5, fontSize:14 }} onClick={onEdit}>✎</button>
+          <button className="icon-btn" style={{ display:'flex', alignItems:'center', padding:'5px 6px', background:'transparent', border:'none', color:'#ef5350', borderRadius:5, fontSize:14 }} onClick={onDelete}>⊗</button>
+        </div>
+      </div>
+
+      {project.description && (
+        <div style={{ fontSize:13, color:'#7070a0', lineHeight:1.6 }}>{project.description}</div>
+      )}
+      {project.notes && (
+        <div style={{ fontSize:11.5, color:'#505070', lineHeight:1.6, fontFamily:"'JetBrains Mono',monospace", padding:'8px 10px', background:'#0c0c16', borderRadius:6, borderLeft:'2px solid #1e1e32' }}>
+          {project.notes}
+        </div>
+      )}
+
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:6, marginTop:2 }}>
+        <div style={{ display:'flex', gap:4, flexWrap:'wrap' }}>
+          {project.machines?.map(m => (
+            <span key={m} style={{ fontSize:10, padding:'2px 7px', borderRadius:4, background:'#18182a', color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>
+              {m.replace(' Desktop','').replace(' M4','')}
+            </span>
+          ))}
+          {project.aiModel && (
+            <span style={{ fontSize:10, padding:'2px 7px', borderRadius:4, background:'rgba(0,230,118,0.07)', color:'#00a855', fontFamily:"'JetBrains Mono',monospace" }}>
+              {project.aiModel}
+            </span>
+          )}
+        </div>
+        <div style={{ display:'flex', alignItems:'center', gap:5, fontSize:10, color:'#3a3a55', fontFamily:"'JetBrains Mono',monospace" }}>
+          ⏱ {ago(project.lastUpdated)}
+          {project.repo && (
+            <a href={`https://${project.repo.replace(/^https?:\/\//, '')}`} target="_blank" rel="noopener noreferrer"
+              style={{ color:'#3a3a55', marginLeft:2, fontSize:12 }}>↗</a>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Project Modal ──────────────────────────────────────────────────────────────
+function ProjectModal({ mode, data, onSave, onClose }) {
+  const [form, setForm] = useState({ ...data });
+  const upd    = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
+  const toggle = (k, v) => setForm(f => ({ ...f, [k]: (f[k]||[]).includes(v) ? f[k].filter(x=>x!==v) : [...(f[k]||[]),v] }));
+  const pick   = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const inputStyle = { width:'100%', background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:8, padding:'10px 14px', color:'#d8d8e8', fontSize:14, outline:'none', lineHeight:1.5 };
+  const labelStyle = { display:'block', fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:7 };
+
+  return (
+    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', backdropFilter:'blur(6px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:200, padding:16 }}
+      onClick={e => e.target===e.currentTarget && onClose()}>
+      <div style={{ background:'#10101a', border:'1px solid #252538', borderRadius:16, width:'100%', maxWidth:520, maxHeight:'92vh', display:'flex', flexDirection:'column' }}>
+        <div style={{ padding:'20px 24px 16px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'1px solid #18182a' }}>
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:21, fontWeight:700, color:'#fff', letterSpacing:'0.05em' }}>
+            {mode==='add' ? 'New Project' : 'Edit Project'}
+          </span>
+          <button className="icon-btn" style={{ padding:'4px 6px', background:'transparent', border:'none', color:'#5a5a7a', borderRadius:5, fontSize:17, cursor:'pointer' }} onClick={onClose}>✕</button>
+        </div>
+
+        <div style={{ padding:'20px 24px', overflowY:'auto', display:'flex', flexDirection:'column', gap:18 }}>
+          <div>
+            <label style={labelStyle}>Name</label>
+            <input style={inputStyle} value={form.name||''} onChange={upd('name')} placeholder="Project name"/>
+          </div>
+          <div>
+            <label style={labelStyle}>Description</label>
+            <textarea style={inputStyle} value={form.description||''} onChange={upd('description')} placeholder="What does it do?" rows={3}/>
+          </div>
+          <div>
+            <label style={labelStyle}>Status</label>
+            <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
+              {Object.entries(STATUS).map(([key, cfg]) => {
+                const on = form.status === key;
+                return (
+                  <button key={key} className="chip-btn"
+                    style={{ padding:'5px 12px', borderRadius:7, border:`1px solid ${on?cfg.color:'#1e1e2e'}`, background:on?cfg.bg:'transparent', color:on?cfg.color:'#4a4a6a', fontSize:12, cursor:'pointer' }}
+                    onClick={() => pick('status', key)}>
+                    {cfg.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div>
+            <label style={labelStyle}>Machines</label>
+            <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
+              {MACHINES.map(m => {
+                const on = (form.machines||[]).includes(m);
+                return (
+                  <button key={m} className="chip-btn"
+                    style={{ padding:'5px 12px', borderRadius:7, border:`1px solid ${on?'#00e676':'#1e1e2e'}`, background:on?'rgba(0,230,118,0.10)':'transparent', color:on?'#00e676':'#4a4a6a', fontSize:12, cursor:'pointer' }}
+                    onClick={() => toggle('machines', m)}>
+                    {m}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div>
+            <label style={labelStyle}>AI Model Used</label>
+            <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
+              {MODELS.map(m => {
+                const on = form.aiModel === m;
+                return (
+                  <button key={m} className="chip-btn"
+                    style={{ padding:'5px 12px', borderRadius:7, border:`1px solid ${on?'#29b6f6':'#1e1e2e'}`, background:on?'rgba(41,182,246,0.10)':'transparent', color:on?'#29b6f6':'#4a4a6a', fontSize:12, cursor:'pointer' }}
+                    onClick={() => pick('aiModel', m)}>
+                    {m}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div>
+            <label style={labelStyle}>Repo / URL</label>
+            <input style={inputStyle} value={form.repo||''} onChange={upd('repo')} placeholder="github.com/Brian-Caylor/repo-name"/>
+          </div>
+          <div>
+            <label style={labelStyle}>Notes / Current State</label>
+            <textarea style={inputStyle} value={form.notes||''} onChange={upd('notes')} placeholder="Where things stand, what's next, what's blocked…" rows={3}/>
+          </div>
+        </div>
+
+        <div style={{ padding:'16px 24px', borderTop:'1px solid #18182a', display:'flex', justifyContent:'flex-end', gap:10 }}>
+          <button style={{ padding:'9px 18px', background:'transparent', border:'1px solid #1e1e2e', borderRadius:8, color:'#7070a0', fontSize:14, cursor:'pointer' }} onClick={onClose}>Cancel</button>
+          <button
+            style={{ padding:'9px 20px', background:'#00e676', border:'none', borderRadius:8, color:'#000', fontSize:14, fontWeight:600, cursor:'pointer', opacity: form.name?.trim()?1:.4, transition:'opacity .15s' }}
+            onClick={() => form.name?.trim() && onSave({ ...form, lastUpdated: now() })}>
+            {mode==='add' ? 'Add Project' : 'Save Changes'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Mount ──────────────────────────────────────────────────────────────────────
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

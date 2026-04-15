@@ -11,10 +11,10 @@
       "machines": [
         "Windows Desktop"
       ],
-      "lastUpdated": "2026-04-10T00:00:00.000Z",
+      "lastUpdated": "2026-04-15T16:26:28.812Z",
       "repo": "github.com/Brian-Caylor/grabgpt",
       "notes": "v1.0 shipped. Firefox port worth exploring.",
-      "aiModel": "Claude",
+      "aiModel": "Gemini",
       "createdAt": "2026-03-01T00:00:00.000Z"
     },
     {

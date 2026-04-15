@@ -108,6 +108,17 @@ const PRIORITY_ORDER = { critical: 0, high: 1, medium: 2, low: 3, none: 4 };
 const MACHINES = ['Windows Desktop', 'Mac Mini M4', 'MacBook'];
 const MODELS   = ['Claude', 'ChatGPT/Sol', 'Gemini', 'Mixed', 'Other'];
 
+const LABEL_COLORS = {
+  bug:      { color: '#ef5350', bg: 'rgba(239,83,80,0.10)' },
+  feature:  { color: '#00e676', bg: 'rgba(0,230,118,0.10)' },
+  refactor: { color: '#29b6f6', bg: 'rgba(41,182,246,0.10)' },
+  research: { color: '#ce93d8', bg: 'rgba(206,147,216,0.10)' },
+  blocked:  { color: '#ef5350', bg: 'rgba(239,83,80,0.10)' },
+  question: { color: '#ffa726', bg: 'rgba(255,167,38,0.10)' },
+};
+const DEFAULT_LABEL_COLOR = { color: '#4a4a6a', bg: 'rgba(74,74,106,0.10)' };
+const ANTHROPIC_KEY = 'devlab-anthropic-key';
+
 // ── Utilities ──────────────────────────────────────────────────────────────────
 const uid  = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 const now  = () => new Date().toISOString();
@@ -130,16 +141,23 @@ function fromBase64(b64) {
 }
 
 // ── Data normalization ────────────────────────────────────────────────────────
+const normalizeSubtask = (s, idx) => ({
+  id: s.id, title: s.title || '', status: s.status || 'todo',
+  order: s.order ?? idx, createdAt: s.createdAt || new Date().toISOString(),
+});
+
 const normalizeTask = (t, idx) => {
-  const nt = { description: '', priority: 'medium', dueDate: null, order: idx, completedAt: null, ...t };
+  const nt = { description: '', priority: 'medium', dueDate: null, order: idx, completedAt: null, labels: [], subtasks: [], githubLink: null, milestoneId: null, ...t };
   if (nt.order == null) nt.order = idx;
+  nt.subtasks = (nt.subtasks || []).map((s, i) => normalizeSubtask(s, i));
   return nt;
 };
 
 const normalizeProject = (p, idx) => {
-  const np = { priority: 'none', order: idx, tasks: [], ...p };
+  const np = { priority: 'none', order: idx, tasks: [], milestones: [], ...p };
   if (np.order == null) np.order = idx;
   np.tasks = (np.tasks || []).map((t, i) => normalizeTask(t, i));
+  np.milestones = np.milestones || [];
   return np;
 };
 
@@ -147,6 +165,27 @@ const normalizeData = (data) => ({
   projects: (data.projects || []).map((p, i) => normalizeProject(p, i)),
   ideas: data.ideas || [],
 });
+
+// ── Phase 2 utilities ─────────────────────────────────────────────────────────
+function relativeTime(iso) {
+  if (!iso) return '';
+  const seconds = Math.floor((Date.now() - new Date(iso)) / 1000);
+  if (seconds < 60) return 'just now';
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+  return `${Math.floor(seconds / 604800)}w ago`;
+}
+
+function parseRepo(repoField) {
+  if (!repoField) return null;
+  const clean = repoField.replace(/^https?:\/\//, '').replace(/^github\.com\//, '').replace(/\/$/, '');
+  const parts = clean.split('/');
+  if (parts.length < 2) return null;
+  return { owner: parts[0], repoName: parts[1] };
+}
+
+const loadAnthropicKey = () => { try { return localStorage.getItem(ANTHROPIC_KEY) || ''; } catch { return ''; } };
 
 // ── Markdown parser ───────────────────────────────────────────────────────────
 function renderMarkdown(text) {
@@ -320,6 +359,7 @@ function App() {
   const [ready,   setReady]   = useState(false);
   const [view,    setView]    = useState('dashboard');
   const [activeProjectId, setActiveProjectId] = useState(null);
+  const [openTaskId, setOpenTaskId] = useState(null);
   const scrollRef  = useRef(0);
   const ideaRef    = useRef(null);
   const saveTimer  = useRef(null);
@@ -587,6 +627,8 @@ function App() {
           onUpdateTask={updateTask}
           onDeleteTask={deleteTask}
           onReorderTasks={reorderTasks}
+          creds={creds}
+          openTaskId={openTaskId}
         />
       )}
 
@@ -843,7 +885,7 @@ function ProjectCard({ project, onOpen, onEdit, onDelete, onDragStart, onDragOve
 }
 
 // ── Project Detail View ───────────────────────────────────────────────────────
-function ProjectDetail({ project, onBack, onEdit, onUpdateProject, onAddTask, onUpdateTask, onDeleteTask, onReorderTasks }) {
+function ProjectDetail({ project, onBack, onEdit, onUpdateProject, onAddTask, onUpdateTask, onDeleteTask, onReorderTasks, creds, openTaskId }) {
   const cfg = STATUS[project.status] || STATUS.idea;
 
   return (
@@ -905,6 +947,7 @@ function ProjectDetail({ project, onBack, onEdit, onUpdateProject, onAddTask, on
           onUpdate={onUpdateTask}
           onDelete={onDeleteTask}
           onReorder={onReorderTasks}
+          openTaskId={openTaskId}
         />
         <NotesPanel
           key={project.id}
@@ -913,14 +956,24 @@ function ProjectDetail({ project, onBack, onEdit, onUpdateProject, onAddTask, on
           onSave={(notes) => onUpdateProject(project.id, { notes })}
         />
       </div>
+
+      {/* GitHub Activity */}
+      {project.repo && (
+        <div style={{ marginTop:20 }}>
+          <GitHubActivity project={project} creds={creds} />
+        </div>
+      )}
     </div>
   );
 }
 
 // ── Task List ──────────────────────────────────────────────────────────────────
-function TaskList({ projectId, tasks, onAdd, onUpdate, onDelete, onReorder }) {
+function TaskList({ projectId, tasks, onAdd, onUpdate, onDelete, onReorder, openTaskId }) {
   const [newTitle, setNewTitle] = useState('');
   const [expandedId, setExpandedId] = useState(null);
+
+  // Open a specific task from search / focus view
+  useEffect(() => { if (openTaskId) setExpandedId(openTaskId); }, [openTaskId]);
   const inputRef = useRef(null);
   const listRef = useRef(null);
   const dragRef = useRef({ dragIdx: -1, overIdx: -1 });
@@ -1215,7 +1268,116 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
                 {Object.entries(TASK_STATUS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
               </select>
             </div>
+            <div>
+              <label style={{ fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>GitHub Link</label>
+              <input value={task.githubLink || ''} onChange={e => onUpdate(projectId, task.id, { githubLink: e.target.value || null })}
+                placeholder="#123 or SHA or URL"
+                style={{ background:'#10101a', border:'1px solid #1a1a2a', borderRadius:6, padding:'6px 10px', color:'#d8d8e8', fontSize:12, outline:'none', fontFamily:"'JetBrains Mono',monospace", width:180 }}/>
+            </div>
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── GitHub Activity ───────────────────────────────────────────────────────────
+function GitHubActivity({ project, creds }) {
+  const [collapsed, setCollapsed] = useState(false);
+  const [commits, setCommits] = useState({ loading: true, data: [], error: null });
+  const [prs, setPrs] = useState({ loading: true, data: [], error: null });
+  const [issues, setIssues] = useState({ loading: true, data: [], error: null });
+
+  const repo = useMemo(() => parseRepo(project.repo), [project.repo]);
+
+  useEffect(() => {
+    if (!repo || !creds) return;
+    const headers = { Authorization: `Bearer ${creds.token}`, Accept: 'application/vnd.github.v3+json' };
+    const base = `https://api.github.com/repos/${repo.owner}/${repo.repoName}`;
+
+    fetch(`${base}/commits?per_page=5`, { headers })
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+      .then(data => setCommits({ loading: false, data, error: null }))
+      .catch(e => setCommits({ loading: false, data: [], error: String(e) }));
+
+    fetch(`${base}/pulls?state=open&per_page=10`, { headers })
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+      .then(data => setPrs({ loading: false, data, error: null }))
+      .catch(e => setPrs({ loading: false, data: [], error: String(e) }));
+
+    fetch(`${base}/issues?state=open&per_page=10`, { headers })
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+      .then(data => setIssues({ loading: false, data: data.filter(i => !i.pull_request), error: null }))
+      .catch(e => setIssues({ loading: false, data: [], error: String(e) }));
+  }, [project.id, repo, creds]);
+
+  if (!repo) return null;
+
+  const prCount = prs.data.length;
+  const issueCount = issues.data.length;
+  const lastCommit = commits.data[0] ? relativeTime(commits.data[0].commit?.author?.date) : '';
+  const skeleton = <div className="pulsing" style={{ height:14, width:'60%', background:'#18182a', borderRadius:4, margin:'6px 0' }} />;
+
+  const SubSection = ({ title, loading, error, children, emptyMsg }) => (
+    <div style={{ marginBottom:14 }}>
+      <div style={{ fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.06em', textTransform:'uppercase', marginBottom:8 }}>{title}</div>
+      {loading ? <>{skeleton}{skeleton}</> : error ? (
+        <div style={{ fontSize:12, color:'#4a4a6a', fontStyle:'italic' }}>Could not load {title.toLowerCase()}</div>
+      ) : children.length === 0 ? (
+        <div style={{ fontSize:12, color:'#3a3a55' }}>{emptyMsg}</div>
+      ) : children}
+    </div>
+  );
+
+  return (
+    <div style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:18, gridColumn:'1 / -1' }}>
+      <button onClick={() => setCollapsed(!collapsed)}
+        style={{ display:'flex', width:'100%', justifyContent:'space-between', alignItems:'center', background:'none', border:'none', cursor:'pointer', padding:0, color:'#d8d8e8' }}>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:16, fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase' }}>
+          {collapsed ? '▸' : '▾'} GitHub Activity
+        </span>
+        <span style={{ fontSize:10, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>
+          {!commits.loading && !prs.loading && !issues.loading ? `${prCount} PRs · ${issueCount} issues${lastCommit ? ` · last commit ${lastCommit}` : ''}` : 'Loading…'}
+        </span>
+      </button>
+
+      {!collapsed && (
+        <div style={{ marginTop:14 }}>
+          <SubSection title="Recent Commits" loading={commits.loading} error={commits.error} emptyMsg="No commits found">{
+            commits.data.map(c => (
+              <a key={c.sha} href={c.html_url} target="_blank" rel="noopener noreferrer"
+                style={{ display:'flex', alignItems:'baseline', gap:8, padding:'5px 0', fontSize:12, color:'#7070a0', textDecoration:'none' }}>
+                <span style={{ fontFamily:"'JetBrains Mono',monospace", color:'#29b6f6', fontSize:11, flexShrink:0 }}>{c.sha.slice(0,7)}</span>
+                <span style={{ flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{(c.commit?.message || '').split('\n')[0].slice(0,72)}</span>
+                <span style={{ color:'#3a3a55', flexShrink:0, fontSize:10, fontFamily:"'JetBrains Mono',monospace" }}>{relativeTime(c.commit?.author?.date)}</span>
+              </a>
+            ))
+          }</SubSection>
+
+          <SubSection title="Pull Requests" loading={prs.loading} error={prs.error} emptyMsg="No open PRs">{
+            prs.data.map(pr => (
+              <a key={pr.id} href={pr.html_url} target="_blank" rel="noopener noreferrer"
+                style={{ display:'flex', alignItems:'baseline', gap:8, padding:'5px 0', fontSize:12, color:'#7070a0', textDecoration:'none' }}>
+                <span style={{ fontFamily:"'JetBrains Mono',monospace", color:'#00e676', fontSize:11, flexShrink:0 }}>#{pr.number}</span>
+                <span style={{ flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{pr.title}</span>
+                <span style={{ color:'#3a3a55', flexShrink:0, fontSize:10, fontFamily:"'JetBrains Mono',monospace" }}>{relativeTime(pr.created_at)}</span>
+              </a>
+            ))
+          }</SubSection>
+
+          <SubSection title="Issues" loading={issues.loading} error={issues.error} emptyMsg="No open issues">{
+            issues.data.map(iss => (
+              <a key={iss.id} href={iss.html_url} target="_blank" rel="noopener noreferrer"
+                style={{ display:'flex', alignItems:'center', gap:8, padding:'5px 0', fontSize:12, color:'#7070a0', textDecoration:'none' }}>
+                <span style={{ fontFamily:"'JetBrains Mono',monospace", color:'#ffa726', fontSize:11, flexShrink:0 }}>#{iss.number}</span>
+                <span style={{ flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{iss.title}</span>
+                {iss.labels?.slice(0,2).map(l => (
+                  <span key={l.id} style={{ fontSize:9, padding:'1px 6px', borderRadius:99, background:`#${l.color}22`, color:`#${l.color}`, flexShrink:0 }}>{l.name}</span>
+                ))}
+                <span style={{ color:'#3a3a55', flexShrink:0, fontSize:10, fontFamily:"'JetBrains Mono',monospace" }}>{relativeTime(iss.created_at)}</span>
+              </a>
+            ))
+          }</SubSection>
         </div>
       )}
     </div>

@@ -5,15 +5,15 @@
       "order": 0,
       "tasks": [
         {
-          "id": "xjanwmawce9mo09l1h3",
-          "title": "Update to fix OpenAI's updated DOMs",
           "description": "",
-          "status": "done",
           "priority": "high",
           "dueDate": null,
           "order": 0,
-          "createdAt": "2026-04-15T16:28:04.407Z",
-          "completedAt": "2026-04-15T16:28:11.618Z"
+          "completedAt": "2026-04-15T16:28:11.618Z",
+          "id": "xjanwmawce9mo09l1h3",
+          "title": "Update to fix OpenAI's updated DOMs",
+          "status": "done",
+          "createdAt": "2026-04-15T16:28:04.407Z"
         }
       ],
       "id": "proj_grabgpt",
@@ -81,14 +81,25 @@
       "order": 3,
       "tasks": [
         {
+          "description": "",
+          "priority": "medium",
+          "dueDate": null,
+          "order": 0,
+          "completedAt": null,
           "id": "uvma26s2smmo09udth",
           "title": "Test task GBC",
+          "status": "todo",
+          "createdAt": "2026-04-15T16:35:20.309Z"
+        },
+        {
+          "id": "9zd07wg5tg4mo09ypbq",
+          "title": "Test 2 task",
           "description": "",
           "status": "todo",
           "priority": "medium",
           "dueDate": null,
-          "order": 0,
-          "createdAt": "2026-04-15T16:35:20.309Z",
+          "order": 1,
+          "createdAt": "2026-04-15T16:38:41.846Z",
           "completedAt": null
         }
       ],
@@ -99,7 +110,7 @@
       "machines": [
         "Windows Desktop"
       ],
-      "lastUpdated": "2026-04-15T16:35:20.309Z",
+      "lastUpdated": "2026-04-15T16:38:41.846Z",
       "repo": "",
       "notes": "CPU core done. Audio is the usual nightmare — left it there for now.",
       "aiModel": "ChatGPT/Sol",

@@ -17,12 +17,12 @@
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #1e1e32; border-radius: 4px; }
-    input, textarea, button { font-family: 'DM Sans', sans-serif; }
+    input, textarea, button, select { font-family: 'DM Sans', sans-serif; }
     input::placeholder, textarea::placeholder { color: #3a3a55; }
     textarea { resize: vertical; }
     a { color: inherit; text-decoration: none; }
 
-    .card { transition: transform .18s ease, border-color .18s ease; }
+    .card { transition: transform .18s ease, border-color .18s ease; cursor: pointer; }
     .card:hover { transform: translateY(-2px); border-color: #252538 !important; }
     .pill { transition: all .14s ease; cursor: pointer; }
     .idea-row { transition: background .15s; }
@@ -40,16 +40,40 @@
     .fade-in { animation: fadeUp .22s ease both; }
     .pulsing { animation: pulse 1.5s infinite; }
 
+    .task-row { transition: background .12s; }
+    .task-row:hover { background: rgba(255,255,255,0.025); }
+    .drag-handle { cursor: grab; opacity: .3; transition: opacity .15s; user-select: none; -webkit-user-select: none; touch-action: none; }
+    .drag-handle:hover { opacity: 1; }
+    .drag-over-top { box-shadow: 0 -2px 0 0 #00e676; }
+    .drag-over-bottom { box-shadow: 0 2px 0 0 #00e676; }
+
+    .md-preview h1 { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; margin: 14px 0 6px; color: #d8d8e8; }
+    .md-preview h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; margin: 12px 0 5px; color: #d8d8e8; }
+    .md-preview h3 { font-size: 15px; font-weight: 600; margin: 10px 0 4px; color: #d8d8e8; }
+    .md-preview p { margin: 4px 0; line-height: 1.65; color: #7070a0; font-size: 13.5px; }
+    .md-preview code { background: #0c0c16; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #b0b0cc; }
+    .md-preview pre { background: #0c0c16; padding: 14px; border-radius: 8px; overflow-x: auto; margin: 8px 0; border: 1px solid #18182a; }
+    .md-preview pre code { padding: 0; background: none; font-size: 12.5px; line-height: 1.6; }
+    .md-preview ul, .md-preview ol { padding-left: 20px; margin: 6px 0; }
+    .md-preview li { margin: 3px 0; color: #7070a0; font-size: 13.5px; line-height: 1.6; }
+    .md-preview a { color: #29b6f6; text-decoration: underline; }
+    .md-preview a:hover { color: #4fc3f7; }
+    .md-preview hr { border: none; border-top: 1px solid #18182a; margin: 14px 0; }
+    .md-preview strong { color: #d8d8e8; }
+    .md-preview em { font-style: italic; color: #9090b8; }
+    .md-preview br { display: block; margin: 4px 0; content: ''; }
+
     @media (max-width: 640px) {
       .projects-grid { grid-template-columns: 1fr !important; }
       .header-row { flex-direction: column; gap: 14px; align-items: flex-start !important; }
+      .detail-panels { grid-template-columns: 1fr !important; }
     }
   </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const { useState, useEffect, useRef, useCallback } = React;
+const { useState, useEffect, useRef, useCallback, useMemo } = React;
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 const DATA_FILE = 'devlab-data.json';
@@ -63,6 +87,24 @@ const STATUS = {
   archived: { label: 'Archived', color: '#546e7a', bg: 'rgba(84,110,122,0.10)' },
 };
 
+const TASK_STATUS = {
+  todo:        { label: 'Todo',        color: '#4a4a6a', bg: 'rgba(74,74,106,0.12)' },
+  in_progress: { label: 'In Progress', color: '#ffa726', bg: 'rgba(255,167,38,0.12)' },
+  blocked:     { label: 'Blocked',     color: '#ef5350', bg: 'rgba(239,83,80,0.12)' },
+  done:        { label: 'Done',        color: '#00e676', bg: 'rgba(0,230,118,0.12)' },
+};
+const TASK_STATUS_CYCLE = ['todo', 'in_progress', 'blocked', 'done'];
+
+const PRIORITY = {
+  critical: { label: 'Critical', color: '#ef5350', bg: 'rgba(239,83,80,0.10)' },
+  high:     { label: 'High',     color: '#ffa726', bg: 'rgba(255,167,38,0.10)' },
+  medium:   { label: 'Medium',   color: '#29b6f6', bg: 'rgba(41,182,246,0.10)' },
+  low:      { label: 'Low',      color: '#546e7a', bg: 'rgba(84,110,122,0.10)' },
+  none:     { label: 'None',     color: '#3a3a55', bg: 'transparent' },
+};
+const PRIORITY_CYCLE = ['none', 'low', 'medium', 'high', 'critical'];
+const PRIORITY_ORDER = { critical: 0, high: 1, medium: 2, low: 3, none: 4 };
+
 const MACHINES = ['Windows Desktop', 'Mac Mini M4', 'MacBook'];
 const MODELS   = ['Claude', 'ChatGPT/Sol', 'Gemini', 'Mixed', 'Other'];
 
@@ -75,7 +117,6 @@ const ago  = (iso) => {
   return d === 0 ? 'Today' : d === 1 ? 'Yesterday' : `${d}d ago`;
 };
 
-// Safe base64 encode/decode (handles Unicode)
 function toBase64(str) {
   const bytes = new TextEncoder().encode(str);
   let binary = '';
@@ -86,6 +127,59 @@ function fromBase64(b64) {
   const binary = atob(b64.replace(/\n/g, ''));
   const bytes  = Uint8Array.from(binary, c => c.charCodeAt(0));
   return new TextDecoder().decode(bytes);
+}
+
+// ── Data normalization ────────────────────────────────────────────────────────
+const normalizeTask = (t, idx) => {
+  const nt = { description: '', priority: 'medium', dueDate: null, order: idx, completedAt: null, ...t };
+  if (nt.order == null) nt.order = idx;
+  return nt;
+};
+
+const normalizeProject = (p, idx) => {
+  const np = { priority: 'none', order: idx, tasks: [], ...p };
+  if (np.order == null) np.order = idx;
+  np.tasks = (np.tasks || []).map((t, i) => normalizeTask(t, i));
+  return np;
+};
+
+const normalizeData = (data) => ({
+  projects: (data.projects || []).map((p, i) => normalizeProject(p, i)),
+  ideas: data.ideas || [],
+});
+
+// ── Markdown parser ───────────────────────────────────────────────────────────
+function renderMarkdown(text) {
+  if (!text) return '';
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const inl = s => esc(s)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  let html = '', inCode = false, inList = false, codeBlock = '';
+  for (const line of text.split('\n')) {
+    if (line.startsWith('```')) {
+      if (inCode) { html += '<pre><code>' + esc(codeBlock.trimEnd()) + '</code></pre>'; codeBlock = ''; }
+      inCode = !inCode;
+      continue;
+    }
+    if (inCode) { codeBlock += line + '\n'; continue; }
+    const isList = /^[-*] /.test(line) || /^\d+\.\s/.test(line);
+    if (inList && !isList) { html += '</ul>'; inList = false; }
+    if (isList && !inList) { html += '<ul>'; inList = true; }
+    if (line.startsWith('### ')) html += '<h3>' + inl(line.slice(4)) + '</h3>';
+    else if (line.startsWith('## ')) html += '<h2>' + inl(line.slice(3)) + '</h2>';
+    else if (line.startsWith('# ')) html += '<h1>' + inl(line.slice(2)) + '</h1>';
+    else if (/^-{3,}$/.test(line.trim())) html += '<hr/>';
+    else if (/^[-*] /.test(line)) html += '<li>' + inl(line.slice(2)) + '</li>';
+    else if (/^\d+\.\s/.test(line)) html += '<li>' + inl(line.replace(/^\d+\.\s/, '')) + '</li>';
+    else if (!line.trim()) html += '<br/>';
+    else html += '<p>' + inl(line) + '</p>';
+  }
+  if (inList) html += '</ul>';
+  if (inCode) html += '<pre><code>' + esc(codeBlock.trimEnd()) + '</code></pre>';
+  return html;
 }
 
 // ── GitHub API ─────────────────────────────────────────────────────────────────
@@ -148,7 +242,6 @@ function Setup({ onSave }) {
         setErr(e.message.includes('401') ? 'Token invalid or expired — check your PAT.' : e.message);
         setLoading(false); return;
       }
-      // 404 = file not found yet, that's fine — we'll create it on first save
     }
     saveCreds(creds);
     onSave(creds);
@@ -219,11 +312,15 @@ function App() {
   const [sha,     setSha]     = useState(null);
   const [tab,     setTab]     = useState('projects');
   const [filter,  setFilter]  = useState('all');
+  const [sortMode,setSortMode]= useState('updated');
   const [modal,   setModal]   = useState(null);
   const [newIdea, setNewIdea] = useState('');
-  const [sync,    setSync]    = useState('loading'); // loading | idle | saving | error
+  const [sync,    setSync]    = useState('loading');
   const [syncMsg, setSyncMsg] = useState('');
   const [ready,   setReady]   = useState(false);
+  const [view,    setView]    = useState('dashboard');
+  const [activeProjectId, setActiveProjectId] = useState(null);
+  const scrollRef  = useRef(0);
   const ideaRef    = useRef(null);
   const saveTimer  = useRef(null);
   const shaRef     = useRef(sha);
@@ -240,14 +337,15 @@ function App() {
       setSync('loading');
       try {
         const { data, sha: fileSha } = await loadFromGH(creds);
-        setProjects(data.projects || []);
-        setIdeas(data.ideas || []);
+        const nd = normalizeData(data);
+        setProjects(nd.projects);
+        setIdeas(nd.ideas);
         setSha(fileSha);
         shaRef.current = fileSha;
         setSync('idle');
       } catch (e) {
         if (e.message.includes('404')) {
-          setSync('idle'); // First time, no file yet
+          setSync('idle');
         } else {
           setSync('error');
           setSyncMsg('Could not load data: ' + e.message);
@@ -286,8 +384,9 @@ function App() {
     setSync('loading');
     try {
       const { data, sha: fileSha } = await loadFromGH(creds);
-      setProjects(data.projects || []);
-      setIdeas(data.ideas || []);
+      const nd = normalizeData(data);
+      setProjects(nd.projects);
+      setIdeas(nd.ideas);
       setSha(fileSha);
       shaRef.current = fileSha;
       setSync('idle');
@@ -309,16 +408,58 @@ function App() {
   // ── Project ops ──
   const saveProject = (data) => {
     if (modal.mode === 'add') {
-      mutateProjects(p => [{ ...data, id: uid(), createdAt: now() }, ...p]);
+      mutateProjects(p => [{ ...data, id: uid(), createdAt: now(), tasks: [], order: 0 }, ...p.map(x => ({...x, order: x.order + 1}))]);
     } else {
-      mutateProjects(p => p.map(x => x.id === data.id ? data : x));
+      mutateProjects(p => p.map(x => x.id === data.id ? { ...x, ...data } : x));
     }
     setModal(null);
   };
   const deleteProject = (id) => {
     if (!window.confirm('Delete this project?')) return;
     mutateProjects(p => p.filter(x => x.id !== id));
+    if (activeProjectId === id) { setView('dashboard'); setActiveProjectId(null); }
   };
+
+  // ── Project mutation (for detail view) ──
+  const updateProject = useCallback((id, changes) => {
+    mutateProjects(ps => ps.map(p => p.id === id ? { ...p, ...changes, lastUpdated: now() } : p));
+  }, [triggerSave]);
+
+  // ── Task ops ──
+  const addTask = useCallback((projectId, title) => {
+    mutateProjects(ps => ps.map(p => {
+      if (p.id !== projectId) return p;
+      const newTask = { id: uid(), title, description: '', status: 'todo', priority: 'medium', dueDate: null, order: p.tasks.length, createdAt: now(), completedAt: null };
+      return { ...p, tasks: [...p.tasks, newTask], lastUpdated: now() };
+    }));
+  }, [triggerSave]);
+
+  const updateTask = useCallback((projectId, taskId, updates) => {
+    mutateProjects(ps => ps.map(p => {
+      if (p.id !== projectId) return p;
+      return { ...p, tasks: p.tasks.map(t => t.id === taskId ? { ...t, ...updates } : t), lastUpdated: now() };
+    }));
+  }, [triggerSave]);
+
+  const deleteTask = useCallback((projectId, taskId) => {
+    if (!window.confirm('Delete this task?')) return;
+    mutateProjects(ps => ps.map(p => {
+      if (p.id !== projectId) return p;
+      return { ...p, tasks: p.tasks.filter(t => t.id !== taskId), lastUpdated: now() };
+    }));
+  }, [triggerSave]);
+
+  const reorderTasks = useCallback((projectId, reorderedTasks) => {
+    mutateProjects(ps => ps.map(p => {
+      if (p.id !== projectId) return p;
+      return { ...p, tasks: reorderedTasks, lastUpdated: now() };
+    }));
+  }, [triggerSave]);
+
+  const reorderProjects = useCallback((reordered) => {
+    mutateProjects(() => reordered);
+    setSortMode('custom');
+  }, [triggerSave]);
 
   // ── Idea ops ──
   const addIdea = () => {
@@ -330,17 +471,51 @@ function App() {
   const deleteIdea = (id) => mutateIdeas(i => i.filter(x => x.id !== id));
   const promoteIdea = (idea) => {
     deleteIdea(idea.id);
-    setModal({ mode: 'add', data: { name:'', description: idea.text, status:'idea', machines:[], repo:'', notes:'', aiModel:'Claude' } });
+    setModal({ mode: 'add', data: { name:'', description: idea.text, status:'idea', machines:[], repo:'', notes:'', aiModel:'Claude', priority:'none' } });
     setTab('projects');
+    if (view !== 'dashboard') { setView('dashboard'); setActiveProjectId(null); }
   };
+
+  // ── Navigation ──
+  const openProject = useCallback((id) => {
+    scrollRef.current = window.scrollY;
+    setActiveProjectId(id);
+    setView('project');
+    window.scrollTo(0, 0);
+  }, []);
+
+  const goBack = useCallback(() => {
+    setView('dashboard');
+    setActiveProjectId(null);
+    requestAnimationFrame(() => window.scrollTo(0, scrollRef.current));
+  }, []);
 
   if (!creds) {
     return <Setup onSave={(c) => { setCreds(c); }} />;
   }
 
+  // ── Derived data ──
   const filtered = projects.filter(p => filter === 'all' || p.status === filter);
+  const sorted = useMemo(() => {
+    const arr = [...filtered];
+    if (sortMode === 'priority') {
+      arr.sort((a, b) => {
+        const pa = PRIORITY_ORDER[a.priority || 'none'] ?? 4;
+        const pb = PRIORITY_ORDER[b.priority || 'none'] ?? 4;
+        if (pa !== pb) return pa - pb;
+        return new Date(b.lastUpdated || 0) - new Date(a.lastUpdated || 0);
+      });
+    } else if (sortMode === 'custom') {
+      arr.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    } else {
+      arr.sort((a, b) => new Date(b.lastUpdated || 0) - new Date(a.lastUpdated || 0));
+    }
+    return arr;
+  }, [filtered, sortMode]);
+
   const counts   = Object.fromEntries(Object.keys(STATUS).map(s => [s, projects.filter(p => p.status === s).length]));
-  const blank    = { name:'', description:'', status:'active', machines:[], repo:'', notes:'', aiModel:'Claude' };
+  const blank    = { name:'', description:'', status:'active', machines:[], repo:'', notes:'', aiModel:'Claude', priority:'none' };
+  const activeProject = projects.find(p => p.id === activeProjectId);
 
   const syncColor = { loading:'#3a3a55', saving:'#ffa726', idle:'#3a3a55', error:'#ef5350' }[sync];
   const syncLabel = { loading:'Loading…', saving:'Saving…', idle:'Synced', error:'Error' }[sync];
@@ -375,8 +550,8 @@ function App() {
               { key:'ideas',    label:'Ideas', badge: ideas.length },
             ].map(t => (
               <button key={t.key} className="tab-btn"
-                style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 14px', borderRadius:7, border:'none', background: tab===t.key?'#1a1a2a':'transparent', color: tab===t.key?'#d8d8e8':'#3a3a55', fontSize:13, cursor:'pointer', fontWeight:500 }}
-                onClick={() => setTab(t.key)}>
+                style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 14px', borderRadius:7, border:'none', background: tab===t.key && view==='dashboard'?'#1a1a2a':'transparent', color: tab===t.key && view==='dashboard'?'#d8d8e8':'#3a3a55', fontSize:13, cursor:'pointer', fontWeight:500 }}
+                onClick={() => { setTab(t.key); if (view !== 'dashboard') { setView('dashboard'); setActiveProjectId(null); } }}>
                 {t.label}
                 {t.badge > 0 && <span style={{ background:'#ffa726', color:'#000', fontSize:10, fontWeight:700, padding:'1px 6px', borderRadius:99 }}>{t.badge}</span>}
               </button>
@@ -398,11 +573,25 @@ function App() {
         </div>
       )}
 
-      {/* ── Projects Tab ── */}
-      {tab === 'projects' && (
+      {/* ── Detail View ── */}
+      {view === 'project' && activeProject && (
+        <ProjectDetail
+          project={activeProject}
+          onBack={goBack}
+          onEdit={() => setModal({ mode:'edit', data:{...activeProject} })}
+          onUpdateProject={updateProject}
+          onAddTask={addTask}
+          onUpdateTask={updateTask}
+          onDeleteTask={deleteTask}
+          onReorderTasks={reorderTasks}
+        />
+      )}
+
+      {/* ── Dashboard: Projects Tab ── */}
+      {view === 'dashboard' && tab === 'projects' && (
         <div style={{ padding:'22px 20px' }} className="fade-in">
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:18, flexWrap:'wrap', gap:10 }}>
-            <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+            <div style={{ display:'flex', gap:6, flexWrap:'wrap', alignItems:'center' }}>
               <button className="pill"
                 style={{ padding:'5px 12px', borderRadius:99, border:`1px solid ${filter==='all'?'#d8d8e8':'#18182a'}`, background: filter==='all'?'#1a1a2a':'transparent', color: filter==='all'?'#d8d8e8':'#4a4a6a', fontSize:12, fontWeight:500, display:'flex', alignItems:'center', gap:5 }}
                 onClick={() => setFilter('all')}>
@@ -417,6 +606,12 @@ function App() {
                   </button>
                 )
               )}
+              <select value={sortMode} onChange={e => setSortMode(e.target.value)}
+                style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:7, padding:'5px 10px', color:'#4a4a6a', fontSize:11, outline:'none', cursor:'pointer' }}>
+                <option value="updated">↕ Last Updated</option>
+                <option value="priority">↕ Priority</option>
+                <option value="custom">↕ Custom Order</option>
+              </select>
             </div>
             <button className="add-btn" onClick={() => setModal({ mode:'add', data:{...blank} })}
               style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 16px', background:'#00e676', color:'#000', border:'none', borderRadius:9, fontSize:13, fontWeight:600, cursor:'pointer', transition:'opacity .15s' }}>
@@ -424,24 +619,25 @@ function App() {
             </button>
           </div>
 
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(270px, 1fr))', gap:12 }} className="projects-grid">
-            {filtered.map(p => (
-              <ProjectCard key={p.id} project={p}
-                onEdit={() => setModal({ mode:'edit', data:{...p} })}
-                onDelete={() => deleteProject(p.id)} />
-            ))}
-            {filtered.length === 0 && !ready && (
-              <div style={{ color:'#3a3a55', fontSize:13, gridColumn:'1/-1', textAlign:'center', padding:'48px 0' }}>Loading your projects…</div>
-            )}
-            {filtered.length === 0 && ready && (
-              <div style={{ color:'#3a3a55', fontSize:13, gridColumn:'1/-1', textAlign:'center', padding:'48px 0' }}>No projects here. Start one.</div>
-            )}
-          </div>
+          <ProjectGrid
+            projects={sorted}
+            sortMode={sortMode}
+            onOpen={openProject}
+            onEdit={(p) => setModal({ mode:'edit', data:{...p} })}
+            onDelete={deleteProject}
+            onReorder={reorderProjects}
+          />
+          {sorted.length === 0 && !ready && (
+            <div style={{ color:'#3a3a55', fontSize:13, textAlign:'center', padding:'48px 0' }}>Loading your projects…</div>
+          )}
+          {sorted.length === 0 && ready && (
+            <div style={{ color:'#3a3a55', fontSize:13, textAlign:'center', padding:'48px 0' }}>No projects here. Start one.</div>
+          )}
         </div>
       )}
 
-      {/* ── Ideas Tab ── */}
-      {tab === 'ideas' && (
+      {/* ── Dashboard: Ideas Tab ── */}
+      {view === 'dashboard' && tab === 'ideas' && (
         <div style={{ padding:'22px 20px' }} className="fade-in">
           <div style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:18, marginBottom:14 }}>
             <div style={{ display:'flex', alignItems:'center', gap:6, fontSize:10, fontWeight:600, color:'#ffa726', letterSpacing:'0.09em', textTransform:'uppercase', marginBottom:12 }}>
@@ -501,19 +697,89 @@ function App() {
   );
 }
 
-// ── Project Card ───────────────────────────────────────────────────────────────
-function ProjectCard({ project, onEdit, onDelete }) {
-  const cfg = STATUS[project.status] || STATUS.idea;
+// ── Project Grid (dashboard with DnD) ─────────────────────────────────────────
+function ProjectGrid({ projects, sortMode, onOpen, onEdit, onDelete, onReorder }) {
+  const dragRef = useRef({ dragIdx: -1, overIdx: -1 });
+  const touchRef = useRef({ dragIdx: -1, startY: 0, el: null, rects: [] });
+
+  const handleDragStart = (e, idx) => {
+    dragRef.current.dragIdx = idx;
+    e.dataTransfer.effectAllowed = 'move';
+    e.currentTarget.style.opacity = '0.4';
+  };
+  const handleDragOver = (e, idx) => {
+    e.preventDefault();
+    dragRef.current.overIdx = idx;
+  };
+  const handleDrop = (e, idx) => {
+    e.preventDefault();
+    const { dragIdx } = dragRef.current;
+    if (dragIdx < 0 || dragIdx === idx) return;
+    const arr = [...projects];
+    const [moved] = arr.splice(dragIdx, 1);
+    arr.splice(idx, 0, moved);
+    arr.forEach((p, i) => p.order = i);
+    onReorder(arr);
+  };
+  const handleDragEnd = (e) => {
+    e.currentTarget.style.opacity = '1';
+    dragRef.current = { dragIdx: -1, overIdx: -1 };
+  };
+
   return (
-    <div className="card" style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:18, display:'flex', flexDirection:'column', gap:10 }}>
+    <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(270px, 1fr))', gap:12 }} className="projects-grid">
+      {projects.map((p, i) => (
+        <ProjectCard key={p.id} project={p}
+          showDragHandle={sortMode === 'custom'}
+          onOpen={() => onOpen(p.id)}
+          onEdit={(e) => { e.stopPropagation(); onEdit(p); }}
+          onDelete={(e) => { e.stopPropagation(); onDelete(p.id); }}
+          onDragStart={(e) => handleDragStart(e, i)}
+          onDragOver={(e) => handleDragOver(e, i)}
+          onDrop={(e) => handleDrop(e, i)}
+          onDragEnd={handleDragEnd}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ── Project Card ───────────────────────────────────────────────────────────────
+function ProjectCard({ project, showDragHandle, onOpen, onEdit, onDelete, onDragStart, onDragOver, onDrop, onDragEnd }) {
+  const cfg = STATUS[project.status] || STATUS.idea;
+  const pri = PRIORITY[project.priority] || PRIORITY.none;
+  const tasks = project.tasks || [];
+  const doneCount = tasks.filter(t => t.status === 'done').length;
+  const hasTasks = tasks.length > 0;
+  const pct = hasTasks ? Math.round((doneCount / tasks.length) * 100) : 0;
+
+  return (
+    <div className="card"
+      onClick={onOpen}
+      draggable={showDragHandle}
+      onDragStart={showDragHandle ? onDragStart : undefined}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      onDragEnd={showDragHandle ? onDragEnd : undefined}
+      style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:18, display:'flex', flexDirection:'column', gap:10, overflow:'hidden' }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8 }}>
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:19, fontWeight:700, letterSpacing:'0.02em', color:'#fff', marginBottom:5, lineHeight:1.15, wordBreak:'break-word' }}>{project.name}</div>
-          <span style={{ display:'inline-block', fontSize:10, fontWeight:600, padding:'2px 8px', borderRadius:99, letterSpacing:'0.05em', textTransform:'uppercase', color:cfg.color, background:cfg.bg }}>
-            {cfg.label}
-          </span>
+          <div style={{ display:'flex', gap:5, flexWrap:'wrap', alignItems:'center' }}>
+            <span style={{ display:'inline-block', fontSize:10, fontWeight:600, padding:'2px 8px', borderRadius:99, letterSpacing:'0.05em', textTransform:'uppercase', color:cfg.color, background:cfg.bg }}>
+              {cfg.label}
+            </span>
+            {project.priority && project.priority !== 'none' && (
+              <span style={{ display:'inline-block', fontSize:10, fontWeight:600, padding:'2px 8px', borderRadius:99, letterSpacing:'0.05em', textTransform:'uppercase', color:pri.color, background:pri.bg }}>
+                {pri.label}
+              </span>
+            )}
+          </div>
         </div>
         <div style={{ display:'flex', gap:2, flexShrink:0 }}>
+          {showDragHandle && (
+            <span className="drag-handle" style={{ display:'flex', alignItems:'center', padding:'5px 4px', fontSize:14, color:'#5a5a7a' }}>⠿</span>
+          )}
           <button className="icon-btn" style={{ display:'flex', alignItems:'center', padding:'5px 6px', background:'transparent', border:'none', color:'#5a5a7a', borderRadius:5, fontSize:14 }} onClick={onEdit}>✎</button>
           <button className="icon-btn" style={{ display:'flex', alignItems:'center', padding:'5px 6px', background:'transparent', border:'none', color:'#ef5350', borderRadius:5, fontSize:14 }} onClick={onDelete}>⊗</button>
         </div>
@@ -523,8 +789,14 @@ function ProjectCard({ project, onEdit, onDelete }) {
         <div style={{ fontSize:13, color:'#7070a0', lineHeight:1.6 }}>{project.description}</div>
       )}
       {project.notes && (
-        <div style={{ fontSize:11.5, color:'#505070', lineHeight:1.6, fontFamily:"'JetBrains Mono',monospace", padding:'8px 10px', background:'#0c0c16', borderRadius:6, borderLeft:'2px solid #1e1e32' }}>
+        <div style={{ fontSize:11.5, color:'#505070', lineHeight:1.6, fontFamily:"'JetBrains Mono',monospace", padding:'8px 10px', background:'#0c0c16', borderRadius:6, borderLeft:'2px solid #1e1e32', overflow:'hidden', maxHeight:60, WebkitLineClamp:2, display:'-webkit-box', WebkitBoxOrient:'vertical' }}>
           {project.notes}
+        </div>
+      )}
+
+      {hasTasks && (
+        <div style={{ display:'flex', alignItems:'center', gap:8, fontSize:11, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>
+          <span>{doneCount} / {tasks.length}</span>
         </div>
       )}
 
@@ -545,17 +817,474 @@ function ProjectCard({ project, onEdit, onDelete }) {
           ⏱ {ago(project.lastUpdated)}
           {project.repo && (
             <a href={`https://${project.repo.replace(/^https?:\/\//, '')}`} target="_blank" rel="noopener noreferrer"
-              style={{ color:'#3a3a55', marginLeft:2, fontSize:12 }}>↗</a>
+              style={{ color:'#3a3a55', marginLeft:2, fontSize:12 }}
+              onClick={e => e.stopPropagation()}>↗</a>
           )}
         </div>
       </div>
+
+      {/* Progress bar */}
+      {hasTasks && (
+        <div style={{ margin:'4px -18px -18px', height:4, background:'#18182a', borderRadius:'0 0 11px 11px', overflow:'hidden' }}>
+          <div style={{ height:'100%', width:`${pct}%`, background: pct === 100 ? '#00e676' : '#ffa726', transition:'width 0.3s ease' }} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Project Detail View ───────────────────────────────────────────────────────
+function ProjectDetail({ project, onBack, onEdit, onUpdateProject, onAddTask, onUpdateTask, onDeleteTask, onReorderTasks }) {
+  const cfg = STATUS[project.status] || STATUS.idea;
+
+  return (
+    <div style={{ padding:'22px 20px' }} className="fade-in">
+      {/* Header */}
+      <div style={{ marginBottom:24 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:14 }}>
+          <button onClick={onBack}
+            style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:8, padding:'7px 12px', color:'#7070a0', fontSize:13, cursor:'pointer', display:'flex', alignItems:'center', gap:5, transition:'border-color .15s' }}
+            onMouseOver={e => e.currentTarget.style.borderColor='#252538'}
+            onMouseOut={e => e.currentTarget.style.borderColor='#18182a'}>
+            ← Back
+          </button>
+          <div style={{ flex:1 }}>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:26, fontWeight:700, letterSpacing:'0.02em', color:'#fff', lineHeight:1.15 }}>{project.name}</div>
+          </div>
+          <button onClick={onEdit}
+            style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:8, padding:'7px 14px', color:'#7070a0', fontSize:13, cursor:'pointer', transition:'border-color .15s' }}
+            onMouseOver={e => e.currentTarget.style.borderColor='#252538'}
+            onMouseOut={e => e.currentTarget.style.borderColor='#18182a'}>
+            ✎ Edit
+          </button>
+        </div>
+
+        <div style={{ display:'flex', flexWrap:'wrap', gap:6, alignItems:'center' }}>
+          <span style={{ fontSize:10, fontWeight:600, padding:'3px 10px', borderRadius:99, letterSpacing:'0.06em', textTransform:'uppercase', color:cfg.color, background:cfg.bg }}>
+            {cfg.label}
+          </span>
+          {project.priority && project.priority !== 'none' && (
+            <span style={{ fontSize:10, fontWeight:600, padding:'3px 10px', borderRadius:99, letterSpacing:'0.06em', textTransform:'uppercase', color:PRIORITY[project.priority].color, background:PRIORITY[project.priority].bg }}>
+              {PRIORITY[project.priority].label}
+            </span>
+          )}
+          {project.machines?.map(m => (
+            <span key={m} style={{ fontSize:10, padding:'3px 8px', borderRadius:5, background:'#18182a', color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>
+              {m}
+            </span>
+          ))}
+          {project.aiModel && (
+            <span style={{ fontSize:10, padding:'3px 8px', borderRadius:5, background:'rgba(0,230,118,0.07)', color:'#00a855', fontFamily:"'JetBrains Mono',monospace" }}>
+              {project.aiModel}
+            </span>
+          )}
+          {project.repo && (
+            <a href={`https://${project.repo.replace(/^https?:\/\//, '')}`} target="_blank" rel="noopener noreferrer"
+              style={{ fontSize:10, padding:'3px 8px', borderRadius:5, background:'rgba(41,182,246,0.07)', color:'#29b6f6', fontFamily:"'JetBrains Mono',monospace" }}>
+              {project.repo.replace(/^https?:\/\//, '').replace('github.com/', '')} ↗
+            </a>
+          )}
+        </div>
+      </div>
+
+      {/* Two-panel layout */}
+      <div className="detail-panels" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20, alignItems:'start' }}>
+        <TaskList
+          projectId={project.id}
+          tasks={project.tasks || []}
+          onAdd={onAddTask}
+          onUpdate={onUpdateTask}
+          onDelete={onDeleteTask}
+          onReorder={onReorderTasks}
+        />
+        <NotesPanel
+          key={project.id}
+          projectId={project.id}
+          initialNotes={project.notes || ''}
+          onSave={(notes) => onUpdateProject(project.id, { notes })}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ── Task List ──────────────────────────────────────────────────────────────────
+function TaskList({ projectId, tasks, onAdd, onUpdate, onDelete, onReorder }) {
+  const [newTitle, setNewTitle] = useState('');
+  const [expandedId, setExpandedId] = useState(null);
+  const inputRef = useRef(null);
+  const listRef = useRef(null);
+  const dragRef = useRef({ dragIdx: -1, overIdx: -1 });
+  const touchRef = useRef({ idx: -1, startY: 0, curY: 0, el: null, listEl: null, rects: [], moved: false });
+
+  // Sort: active tasks by order, done tasks at bottom by order
+  const sortedTasks = useMemo(() => {
+    const active = tasks.filter(t => t.status !== 'done').sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    const done = tasks.filter(t => t.status === 'done').sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    return [...active, ...done];
+  }, [tasks]);
+
+  const doneCount = tasks.filter(t => t.status === 'done').length;
+
+  const handleAdd = () => {
+    if (!newTitle.trim()) return;
+    onAdd(projectId, newTitle.trim());
+    setNewTitle('');
+    inputRef.current?.focus();
+  };
+
+  // ── Desktop DnD ──
+  const handleDragStart = (e, idx) => {
+    dragRef.current.dragIdx = idx;
+    e.dataTransfer.effectAllowed = 'move';
+    e.currentTarget.style.opacity = '0.4';
+  };
+  const handleDragOver = (e, idx) => {
+    e.preventDefault();
+    dragRef.current.overIdx = idx;
+  };
+  const handleDrop = (e, idx) => {
+    e.preventDefault();
+    const { dragIdx } = dragRef.current;
+    if (dragIdx < 0 || dragIdx === idx) return;
+    const arr = [...sortedTasks];
+    const [moved] = arr.splice(dragIdx, 1);
+    arr.splice(idx, 0, moved);
+    arr.forEach((t, i) => t.order = i);
+    onReorder(projectId, arr);
+  };
+  const handleDragEnd = (e) => {
+    e.currentTarget.style.opacity = '1';
+    dragRef.current = { dragIdx: -1, overIdx: -1 };
+  };
+
+  // ── Mobile touch DnD ──
+  const handleTouchStart = (e, idx) => {
+    const touch = e.touches[0];
+    const row = e.currentTarget.closest('.task-row');
+    const list = listRef.current;
+    const rows = list ? Array.from(list.querySelectorAll('.task-row')) : [];
+    const rects = rows.map(r => r.getBoundingClientRect());
+    touchRef.current = { idx, startY: touch.clientY, curY: touch.clientY, el: row, listEl: list, rects, moved: false };
+    row.style.opacity = '0.5';
+    row.style.position = 'relative';
+    row.style.zIndex = '50';
+  };
+  const handleTouchMove = (e, idx) => {
+    e.preventDefault();
+    const t = touchRef.current;
+    if (t.idx < 0) return;
+    t.moved = true;
+    const touch = e.touches[0];
+    const dy = touch.clientY - t.startY;
+    t.curY = touch.clientY;
+    t.el.style.transform = `translateY(${dy}px)`;
+  };
+  const handleTouchEnd = (e) => {
+    const t = touchRef.current;
+    if (t.idx < 0 || !t.moved) {
+      if (t.el) { t.el.style.opacity = ''; t.el.style.position = ''; t.el.style.zIndex = ''; t.el.style.transform = ''; }
+      touchRef.current = { idx: -1, startY: 0, curY: 0, el: null, listEl: null, rects: [], moved: false };
+      return;
+    }
+    // Determine drop index from final touch Y
+    let dropIdx = t.idx;
+    for (let i = 0; i < t.rects.length; i++) {
+      const r = t.rects[i];
+      if (t.curY >= r.top && t.curY < r.bottom) { dropIdx = i; break; }
+    }
+    t.el.style.opacity = '';
+    t.el.style.position = '';
+    t.el.style.zIndex = '';
+    t.el.style.transform = '';
+    if (dropIdx !== t.idx) {
+      const arr = [...sortedTasks];
+      const [moved] = arr.splice(t.idx, 1);
+      arr.splice(dropIdx, 0, moved);
+      arr.forEach((task, i) => task.order = i);
+      onReorder(projectId, arr);
+    }
+    touchRef.current = { idx: -1, startY: 0, curY: 0, el: null, listEl: null, rects: [], moved: false };
+  };
+
+  return (
+    <div style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:18 }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:16, fontWeight:700, letterSpacing:'0.06em', color:'#fff', textTransform:'uppercase' }}>Tasks</span>
+        <span style={{ fontSize:11, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>
+          {doneCount} / {tasks.length} done
+        </span>
+      </div>
+
+      {/* Quick-add */}
+      <div style={{ display:'flex', gap:8, marginBottom:16 }}>
+        <input ref={inputRef} value={newTitle} onChange={e => setNewTitle(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') { setNewTitle(''); inputRef.current?.blur(); } }}
+          placeholder="Add a task… press Enter to save"
+          style={{ flex:1, background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:8, padding:'9px 12px', color:'#d8d8e8', fontSize:13, outline:'none' }}/>
+      </div>
+
+      {/* Task rows */}
+      <div ref={listRef} style={{ display:'flex', flexDirection:'column', gap:2 }}>
+        {sortedTasks.map((task, idx) => (
+          <TaskRow key={task.id} task={task} idx={idx}
+            expanded={expandedId === task.id}
+            onToggleExpand={() => setExpandedId(expandedId === task.id ? null : task.id)}
+            projectId={projectId}
+            onUpdate={onUpdate}
+            onDelete={onDelete}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            onDragEnd={handleDragEnd}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          />
+        ))}
+        {tasks.length === 0 && (
+          <div style={{ color:'#3a3a55', fontSize:13, textAlign:'center', padding:'24px 0' }}>No tasks yet. Add one above.</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Task Row ───────────────────────────────────────────────────────────────────
+function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onDelete, onDragStart, onDragOver, onDrop, onDragEnd, onTouchStart, onTouchMove, onTouchEnd }) {
+  const isDone = task.status === 'done';
+  const ts = TASK_STATUS[task.status] || TASK_STATUS.todo;
+  const pr = PRIORITY[task.priority] || PRIORITY.medium;
+
+  const [desc, setDesc] = useState(task.description || '');
+  const [dueDate, setDueDate] = useState(task.dueDate || '');
+
+  // Sync from props when task changes externally
+  useEffect(() => { setDesc(task.description || ''); }, [task.description]);
+  useEffect(() => { setDueDate(task.dueDate || ''); }, [task.dueDate]);
+
+  const toggleDone = (e) => {
+    e.stopPropagation();
+    if (isDone) {
+      onUpdate(projectId, task.id, { status: 'todo', completedAt: null });
+    } else {
+      onUpdate(projectId, task.id, { status: 'done', completedAt: now() });
+    }
+  };
+
+  const cycleStatus = (e) => {
+    e.stopPropagation();
+    const i = TASK_STATUS_CYCLE.indexOf(task.status);
+    const next = TASK_STATUS_CYCLE[(i + 1) % TASK_STATUS_CYCLE.length];
+    const updates = { status: next };
+    if (next === 'done') updates.completedAt = now();
+    else updates.completedAt = null;
+    onUpdate(projectId, task.id, updates);
+  };
+
+  const cyclePriority = (e) => {
+    e.stopPropagation();
+    const i = PRIORITY_CYCLE.indexOf(task.priority || 'medium');
+    const next = PRIORITY_CYCLE[(i + 1) % PRIORITY_CYCLE.length];
+    onUpdate(projectId, task.id, { priority: next });
+  };
+
+  const saveDesc = () => {
+    if (desc !== (task.description || '')) onUpdate(projectId, task.id, { description: desc });
+  };
+  const saveDueDate = (val) => {
+    setDueDate(val);
+    onUpdate(projectId, task.id, { dueDate: val || null });
+  };
+
+  const formatDue = (d) => {
+    if (!d) return '';
+    const date = new Date(d + 'T00:00:00');
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  return (
+    <div>
+      <div className="task-row"
+        draggable="true"
+        onDragStart={(e) => {
+          if (!e.target.closest('.drag-handle')) { e.preventDefault(); return; }
+          onDragStart(e, idx);
+        }}
+        onDragOver={(e) => onDragOver(e, idx)}
+        onDrop={(e) => onDrop(e, idx)}
+        onDragEnd={onDragEnd}
+        style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 10px', borderRadius:8, opacity: isDone ? 0.45 : 1 }}>
+
+        {/* Drag handle */}
+        <span className="drag-handle"
+          onTouchStart={(e) => onTouchStart(e, idx)}
+          onTouchMove={(e) => onTouchMove(e, idx)}
+          onTouchEnd={onTouchEnd}
+          style={{ fontSize:14, color:'#3a3a55', lineHeight:1, padding:'2px 2px' }}>≡</span>
+
+        {/* Checkbox */}
+        <button onClick={toggleDone}
+          style={{ width:18, height:18, borderRadius:4, border:`1.5px solid ${isDone ? '#00e676' : '#2a2a40'}`, background: isDone ? 'rgba(0,230,118,0.15)' : 'transparent', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, padding:0 }}>
+          {isDone && <span style={{ color:'#00e676', fontSize:11, lineHeight:1 }}>✓</span>}
+        </button>
+
+        {/* Priority badge */}
+        {task.priority && task.priority !== 'none' && (
+          <button onClick={cyclePriority}
+            style={{ fontSize:9, fontWeight:600, padding:'2px 6px', borderRadius:99, letterSpacing:'0.04em', textTransform:'uppercase', color:pr.color, background:pr.bg, border:'none', cursor:'pointer', flexShrink:0, lineHeight:1.3 }}>
+            {pr.label}
+          </button>
+        )}
+        {(!task.priority || task.priority === 'none') && (
+          <button onClick={cyclePriority}
+            style={{ fontSize:9, padding:'2px 6px', borderRadius:99, color:'#3a3a55', background:'transparent', border:'1px solid #1a1a2a', cursor:'pointer', flexShrink:0, lineHeight:1.3 }}>
+            pri
+          </button>
+        )}
+
+        {/* Title */}
+        <span onClick={onToggleExpand}
+          style={{ flex:1, fontSize:13, color: isDone ? '#4a4a6a' : '#d8d8e8', textDecoration: isDone ? 'line-through' : 'none', cursor:'pointer', minWidth:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+          {task.title}
+        </span>
+
+        {/* Status badge */}
+        <button onClick={cycleStatus}
+          style={{ fontSize:9, fontWeight:600, padding:'2px 7px', borderRadius:99, letterSpacing:'0.04em', textTransform:'uppercase', color:ts.color, background:ts.bg, border:'none', cursor:'pointer', flexShrink:0, lineHeight:1.3 }}>
+          {ts.label}
+        </button>
+
+        {/* Due date (compact) */}
+        {task.dueDate && (
+          <span style={{ fontSize:10, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace", flexShrink:0 }}>
+            {formatDue(task.dueDate)}
+          </span>
+        )}
+
+        {/* Delete */}
+        <button className="icon-btn" onClick={(e) => { e.stopPropagation(); onDelete(projectId, task.id); }}
+          style={{ background:'transparent', border:'none', color:'#ef5350', fontSize:13, padding:'2px 4px', borderRadius:4, cursor:'pointer', flexShrink:0 }}>✕</button>
+      </div>
+
+      {/* Expanded panel */}
+      {expanded && (
+        <div style={{ marginLeft:36, padding:'10px 14px', background:'#0c0c16', borderRadius:8, border:'1px solid #1a1a2a', marginTop:2, marginBottom:4, display:'flex', flexDirection:'column', gap:10 }}>
+          <div>
+            <label style={{ fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Description</label>
+            <textarea value={desc} onChange={e => setDesc(e.target.value)} onBlur={saveDesc}
+              placeholder="Add details…"
+              style={{ width:'100%', background:'#10101a', border:'1px solid #1a1a2a', borderRadius:6, padding:'8px 10px', color:'#d8d8e8', fontSize:13, outline:'none', lineHeight:1.5, fontFamily:"'DM Sans',sans-serif" }}
+              rows={3}/>
+          </div>
+          <div style={{ display:'flex', gap:14, flexWrap:'wrap', alignItems:'center' }}>
+            <div>
+              <label style={{ fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Due Date</label>
+              <input type="date" value={dueDate} onChange={e => saveDueDate(e.target.value)}
+                style={{ background:'#10101a', border:'1px solid #1a1a2a', borderRadius:6, padding:'6px 10px', color:'#d8d8e8', fontSize:12, outline:'none', fontFamily:"'JetBrains Mono',monospace" }}/>
+            </div>
+            <div>
+              <label style={{ fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Status</label>
+              <select value={task.status} onChange={e => {
+                const updates = { status: e.target.value };
+                if (e.target.value === 'done') updates.completedAt = now();
+                else updates.completedAt = null;
+                onUpdate(projectId, task.id, updates);
+              }}
+                style={{ background:'#10101a', border:'1px solid #1a1a2a', borderRadius:6, padding:'6px 10px', color:'#d8d8e8', fontSize:12, outline:'none' }}>
+                {Object.entries(TASK_STATUS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Notes Panel ───────────────────────────────────────────────────────────────
+function NotesPanel({ projectId, initialNotes, onSave }) {
+  const [text, setText] = useState(initialNotes);
+  const [mode, setMode] = useState('preview');
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const saveTimerRef = useRef(null);
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 640;
+
+  const doSave = useCallback((val) => {
+    onSave(val);
+  }, [onSave]);
+
+  const handleChange = (e) => {
+    const val = e.target.value;
+    setText(val);
+    clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => doSave(val), 2000);
+  };
+
+  const handleBlur = () => {
+    clearTimeout(saveTimerRef.current);
+    doSave(text);
+  };
+
+  const switchMode = (m) => {
+    if (mode === 'edit' && m === 'preview') { clearTimeout(saveTimerRef.current); doSave(text); }
+    setMode(m);
+  };
+
+  // Mobile collapsed
+  if (isMobile && !mobileOpen) {
+    return (
+      <button onClick={() => setMobileOpen(true)}
+        style={{ width:'100%', background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:'14px 18px', color:'#7070a0', fontSize:13, cursor:'pointer', textAlign:'left', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:16, fontWeight:700, letterSpacing:'0.06em', color:'#fff', textTransform:'uppercase' }}>Notes</span>
+        <span style={{ fontSize:12, color:'#4a4a6a' }}>▾ Expand</span>
+      </button>
+    );
+  }
+
+  return (
+    <div style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:18 }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:16, fontWeight:700, letterSpacing:'0.06em', color:'#fff', textTransform:'uppercase' }}>Notes</span>
+        <div style={{ display:'flex', gap:2 }}>
+          {isMobile && (
+            <button onClick={() => setMobileOpen(false)}
+              style={{ padding:'4px 10px', borderRadius:6, border:'1px solid #1a1a2a', background:'transparent', color:'#4a4a6a', fontSize:11, cursor:'pointer', marginRight:6 }}>
+              ▴ Collapse
+            </button>
+          )}
+          <button onClick={() => switchMode('edit')}
+            style={{ padding:'4px 12px', borderRadius:6, border:`1px solid ${mode==='edit'?'#29b6f6':'#1a1a2a'}`, background: mode==='edit'?'rgba(41,182,246,0.10)':'transparent', color: mode==='edit'?'#29b6f6':'#4a4a6a', fontSize:11, cursor:'pointer', fontWeight:500 }}>
+            Edit
+          </button>
+          <button onClick={() => switchMode('preview')}
+            style={{ padding:'4px 12px', borderRadius:6, border:`1px solid ${mode==='preview'?'#29b6f6':'#1a1a2a'}`, background: mode==='preview'?'rgba(41,182,246,0.10)':'transparent', color: mode==='preview'?'#29b6f6':'#4a4a6a', fontSize:11, cursor:'pointer', fontWeight:500 }}>
+            Preview
+          </button>
+        </div>
+      </div>
+
+      {mode === 'edit' ? (
+        <textarea value={text} onChange={handleChange} onBlur={handleBlur}
+          placeholder="Write your notes here… supports **markdown**"
+          style={{ width:'100%', minHeight:240, background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:8, padding:'12px 14px', color:'#d8d8e8', fontSize:13, outline:'none', lineHeight:1.65, fontFamily:"'JetBrains Mono',monospace", resize:'vertical' }}/>
+      ) : (
+        <div className="md-preview"
+          style={{ minHeight:100, padding:'4px 0', fontSize:13.5, lineHeight:1.65 }}>
+          {text ? (
+            <div dangerouslySetInnerHTML={{ __html: renderMarkdown(text) }} />
+          ) : (
+            <div style={{ color:'#3a3a55', fontSize:13, fontStyle:'italic' }}>No notes yet. Switch to Edit to start writing.</div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
 // ── Project Modal ──────────────────────────────────────────────────────────────
 function ProjectModal({ mode, data, onSave, onClose }) {
-  const [form, setForm] = useState({ ...data });
+  const [form, setForm] = useState({ priority: 'none', ...data });
   const upd    = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
   const toggle = (k, v) => setForm(f => ({ ...f, [k]: (f[k]||[]).includes(v) ? f[k].filter(x=>x!==v) : [...(f[k]||[]),v] }));
   const pick   = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -592,6 +1321,21 @@ function ProjectModal({ mode, data, onSave, onClose }) {
                   <button key={key} className="chip-btn"
                     style={{ padding:'5px 12px', borderRadius:7, border:`1px solid ${on?cfg.color:'#1e1e2e'}`, background:on?cfg.bg:'transparent', color:on?cfg.color:'#4a4a6a', fontSize:12, cursor:'pointer' }}
                     onClick={() => pick('status', key)}>
+                    {cfg.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div>
+            <label style={labelStyle}>Priority</label>
+            <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
+              {Object.entries(PRIORITY).map(([key, cfg]) => {
+                const on = (form.priority || 'none') === key;
+                return (
+                  <button key={key} className="chip-btn"
+                    style={{ padding:'5px 12px', borderRadius:7, border:`1px solid ${on ? (key === 'none' ? '#3a3a55' : cfg.color) : '#1e1e2e'}`, background:on ? (key === 'none' ? 'rgba(58,58,85,0.15)' : cfg.bg) : 'transparent', color:on ? (key === 'none' ? '#7070a0' : cfg.color) : '#4a4a6a', fontSize:12, cursor:'pointer' }}
+                    onClick={() => pick('priority', key)}>
                     {cfg.label}
                   </button>
                 );

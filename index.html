@@ -361,6 +361,7 @@ function App() {
   const [activeProjectId, setActiveProjectId] = useState(null);
   const [openTaskId, setOpenTaskId] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const scrollRef  = useRef(0);
   const ideaRef    = useRef(null);
   const saveTimer  = useRef(null);
@@ -617,8 +618,8 @@ function App() {
             style={{ padding:'9px 11px', background:'#10101a', border:'1px solid #1a1a2a', borderRadius:9, color:'#4a4a6a', fontSize:14, cursor:'pointer' }}>
             🔍
           </button>
-          <button className="icon-btn" onClick={() => { if(window.confirm('Disconnect from this repo? Your data stays in GitHub.')) { dropCreds(); setCreds(null); } }}
-            title="Disconnect / change repo"
+          <button className="icon-btn" onClick={() => setShowSettings(true)}
+            title="Settings"
             style={{ padding:'9px 11px', background:'#10101a', border:'1px solid #1a1a2a', borderRadius:9, color:'#4a4a6a', fontSize:14, cursor:'pointer' }}>
             ⚙
           </button>
@@ -778,6 +779,10 @@ function App() {
           onOpenProject={openProject}
           onOpenIdeas={() => { setTab('ideas'); if (view !== 'dashboard') { setView('dashboard'); setActiveProjectId(null); } }}
         />
+      )}
+
+      {showSettings && (
+        <SettingsModal onClose={() => setShowSettings(false)} onDisconnect={() => { dropCreds(); setCreds(null); }} />
       )}
 
       {modal && (
@@ -979,6 +984,7 @@ function ProjectDetail({ project, onBack, onEdit, onUpdateProject, onAddTask, on
       {/* Two-panel layout */}
       <div className="detail-panels" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20, alignItems:'start' }}>
         <TaskList
+          project={project}
           projectId={project.id}
           tasks={project.tasks || []}
           onAdd={onAddTask}
@@ -1006,9 +1012,10 @@ function ProjectDetail({ project, onBack, onEdit, onUpdateProject, onAddTask, on
 }
 
 // ── Task List ──────────────────────────────────────────────────────────────────
-function TaskList({ projectId, tasks, onAdd, onUpdate, onDelete, onReorder, openTaskId }) {
+function TaskList({ project, projectId, tasks, onAdd, onUpdate, onDelete, onReorder, openTaskId }) {
   const [newTitle, setNewTitle] = useState('');
   const [expandedId, setExpandedId] = useState(null);
+  const [showAI, setShowAI] = useState(false);
 
   // Open a specific task from search / focus view
   useEffect(() => { if (openTaskId) setExpandedId(openTaskId); }, [openTaskId]);
@@ -1118,12 +1125,23 @@ function TaskList({ projectId, tasks, onAdd, onUpdate, onDelete, onReorder, open
       </div>
 
       {/* Quick-add */}
-      <div style={{ display:'flex', gap:8, marginBottom:16 }}>
+      <div style={{ display:'flex', gap:8, marginBottom:10 }}>
         <input ref={inputRef} value={newTitle} onChange={e => setNewTitle(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') { setNewTitle(''); inputRef.current?.blur(); } }}
           placeholder="Add a task… press Enter to save"
           style={{ flex:1, background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:8, padding:'9px 12px', color:'#d8d8e8', fontSize:13, outline:'none' }}/>
+        {loadAnthropicKey() && !showAI && (
+          <button onClick={() => setShowAI(true)}
+            style={{ padding:'6px 12px', background:'rgba(206,147,216,0.08)', border:'1px solid rgba(206,147,216,0.18)', borderRadius:8, color:'#ce93d8', fontSize:11, cursor:'pointer', flexShrink:0, whiteSpace:'nowrap' }}>
+            ✨ Suggest
+          </button>
+        )}
       </div>
+
+      {showAI && project && (
+        <AISuggestions project={project} onClose={() => setShowAI(false)}
+          onAddTasks={(titles) => titles.forEach(t => onAdd(projectId, t))} />
+      )}
 
       {/* Task rows */}
       <div ref={listRef} style={{ display:'flex', flexDirection:'column', gap:2 }}>
@@ -2209,6 +2227,124 @@ function ProjectModal({ mode, data, onSave, onClose }) {
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ── Settings Modal ────────────────────────────────────────────────────────────
+function SettingsModal({ onClose, onDisconnect }) {
+  const [aiKey, setAiKey] = useState(loadAnthropicKey());
+  const [saved, setSaved] = useState(false);
+  const inputStyle = { width:'100%', background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:8, padding:'10px 14px', color:'#d8d8e8', fontSize:14, outline:'none' };
+  const labelStyle = { display:'block', fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:6 };
+
+  const saveKey = () => {
+    localStorage.setItem(ANTHROPIC_KEY, aiKey.trim());
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1500);
+  };
+
+  return (
+    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', backdropFilter:'blur(6px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:200, padding:16 }}
+      onClick={e => e.target===e.currentTarget && onClose()}>
+      <div style={{ background:'#10101a', border:'1px solid #252538', borderRadius:16, width:'100%', maxWidth:440, padding:24 }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:21, fontWeight:700, color:'#fff', letterSpacing:'0.05em' }}>Settings</span>
+          <button className="icon-btn" style={{ padding:'4px 6px', background:'transparent', border:'none', color:'#5a5a7a', borderRadius:5, fontSize:17, cursor:'pointer' }} onClick={onClose}>✕</button>
+        </div>
+
+        <div style={{ marginBottom:20 }}>
+          <label style={labelStyle}>Anthropic API Key (optional — for AI features)</label>
+          <input type="password" value={aiKey} onChange={e => setAiKey(e.target.value)} placeholder="sk-ant-…" style={inputStyle}/>
+          <p style={{ fontSize:11, color:'#3a3a55', marginTop:6, lineHeight:1.5 }}>
+            Enables AI task suggestions and digest narrative.{' '}
+            <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer" style={{ color:'#29b6f6' }}>Get a key →</a>
+          </p>
+          <button onClick={saveKey} style={{ marginTop:8, padding:'7px 16px', background: saved?'rgba(0,230,118,0.15)':'#1a1a2a', border:'1px solid #252538', borderRadius:8, color: saved?'#00e676':'#7070a0', fontSize:12, fontWeight:500, cursor:'pointer' }}>
+            {saved ? '✓ Saved' : 'Save Key'}
+          </button>
+        </div>
+
+        <div style={{ borderTop:'1px solid #18182a', paddingTop:16 }}>
+          <button onClick={() => { if(window.confirm('Disconnect from this repo? Your data stays in GitHub.')) { onDisconnect(); onClose(); } }}
+            style={{ padding:'8px 16px', background:'transparent', border:'1px solid rgba(239,83,80,0.25)', borderRadius:8, color:'#ef5350', fontSize:12, cursor:'pointer' }}>
+            Disconnect Repo
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── AI Suggestions Panel ──────────────────────────────────────────────────────
+function AISuggestions({ project, onAddTasks, onClose }) {
+  const [suggestions, setSuggestions] = useState([]);
+  const [checked, setChecked] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchSuggestions = useCallback(async () => {
+    setLoading(true); setError(null);
+    const key = loadAnthropicKey();
+    if (!key) { setError('No API key set.'); setLoading(false); return; }
+    const doneTasks = (project.tasks||[]).filter(t => t.status === 'done');
+    const openTasks = (project.tasks||[]).filter(t => t.status !== 'done');
+    const prompt = `You are helping a developer manage their personal project.\n\nProject: ${project.name}\nDescription: ${project.description || 'None'}\nStatus: ${project.status}\nNotes: ${project.notes || 'None'}\n\nOpen tasks (${openTasks.length}):\n${openTasks.map(t => `- [${t.priority}] ${t.title}`).join('\n') || 'None'}\n\nCompleted tasks (${doneTasks.length}):\n${doneTasks.slice(-5).map(t => `- ${t.title}`).join('\n') || 'None'}\n\nSuggest 4-5 specific, actionable next tasks. Each should be completable in one session, concrete, and not duplicate open tasks.\n\nRespond ONLY with a valid JSON array of strings. No explanation, no markdown.`;
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' },
+        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 800, messages: [{ role: 'user', content: prompt }] }),
+      });
+      if (!res.ok) { setError(res.status === 401 ? 'API key not accepted. Check your key in settings.' : 'Could not reach Claude API.'); setLoading(false); return; }
+      const data = await res.json();
+      const text = data.content[0].text.trim();
+      const parsed = JSON.parse(text);
+      setSuggestions(parsed);
+      setChecked(parsed.map(() => true));
+    } catch (e) {
+      setError('Unexpected response format. Try regenerating.');
+    }
+    setLoading(false);
+  }, [project]);
+
+  useEffect(() => { fetchSuggestions(); }, []);
+
+  const checkedCount = checked.filter(Boolean).length;
+
+  return (
+    <div style={{ background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:10, padding:14, marginBottom:12 }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
+        <span style={{ fontSize:12, fontWeight:600, color:'#ce93d8' }}>✨ AI Suggestions</span>
+        <button onClick={onClose} className="icon-btn" style={{ background:'transparent', border:'none', color:'#5a5a7a', fontSize:13, cursor:'pointer', padding:'2px 4px' }}>✕</button>
+      </div>
+      {loading && <div className="pulsing" style={{ fontSize:12, color:'#7070a0', padding:'12px 0' }}>✨ Thinking…</div>}
+      {error && <div style={{ fontSize:12, color:'#ef5350', padding:'8px 0' }}>{error}</div>}
+      {!loading && !error && suggestions.length > 0 && (
+        <>
+          <div style={{ display:'flex', flexDirection:'column', gap:4, marginBottom:10 }}>
+            {suggestions.map((s, i) => (
+              <label key={i} style={{ display:'flex', alignItems:'center', gap:8, padding:'5px 6px', borderRadius:6, cursor:'pointer', fontSize:13, color: checked[i] ? '#d8d8e8' : '#4a4a6a' }}>
+                <input type="checkbox" checked={checked[i]} onChange={() => setChecked(c => c.map((v, j) => j === i ? !v : v))}
+                  style={{ accentColor:'#00e676' }}/>
+                {s}
+              </label>
+            ))}
+          </div>
+          <div style={{ display:'flex', gap:8 }}>
+            <button onClick={() => { onAddTasks(suggestions.filter((_, i) => checked[i])); onClose(); }}
+              disabled={checkedCount === 0}
+              style={{ padding:'7px 14px', background: checkedCount ? '#00e676' : '#1a1a2a', border:'none', borderRadius:8, color: checkedCount ? '#000' : '#4a4a6a', fontSize:12, fontWeight:600, cursor: checkedCount ? 'pointer' : 'default' }}>
+              Add {checkedCount} selected
+            </button>
+            <button onClick={fetchSuggestions}
+              style={{ padding:'7px 14px', background:'transparent', border:'1px solid #1e1e2e', borderRadius:8, color:'#7070a0', fontSize:12, cursor:'pointer' }}>
+              Regenerate
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }

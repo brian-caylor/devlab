@@ -1022,6 +1022,11 @@ function TaskList({ project, projectId, tasks, onAdd, onUpdate, onDelete, onReor
   const [newTitle, setNewTitle] = useState('');
   const [expandedId, setExpandedId] = useState(null);
   const [showAI, setShowAI] = useState(false);
+  const [viewMode, setViewMode] = useState(() => {
+    try { return localStorage.getItem(`devlab-board-${projectId}`) || 'list'; } catch { return 'list'; }
+  });
+
+  const switchView = (m) => { setViewMode(m); try { localStorage.setItem(`devlab-board-${projectId}`, m); } catch {} };
 
   // Open a specific task from search / focus view
   useEffect(() => { if (openTaskId) setExpandedId(openTaskId); }, [openTaskId]);
@@ -1124,10 +1129,14 @@ function TaskList({ project, projectId, tasks, onAdd, onUpdate, onDelete, onReor
   return (
     <div style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:18 }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
-        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:16, fontWeight:700, letterSpacing:'0.06em', color:'#fff', textTransform:'uppercase' }}>Tasks</span>
-        <span style={{ fontSize:11, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>
-          {doneCount} / {tasks.length} done
-        </span>
+        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:16, fontWeight:700, letterSpacing:'0.06em', color:'#fff', textTransform:'uppercase' }}>Tasks</span>
+          <span style={{ fontSize:11, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>{doneCount} / {tasks.length}</span>
+        </div>
+        <div style={{ display:'flex', gap:2 }}>
+          <button onClick={() => switchView('list')} style={{ padding:'3px 8px', borderRadius:5, border:`1px solid ${viewMode==='list'?'#29b6f6':'#1a1a2a'}`, background: viewMode==='list'?'rgba(41,182,246,0.10)':'transparent', color: viewMode==='list'?'#29b6f6':'#4a4a6a', fontSize:10, cursor:'pointer' }}>≡ List</button>
+          <button onClick={() => switchView('board')} style={{ padding:'3px 8px', borderRadius:5, border:`1px solid ${viewMode==='board'?'#29b6f6':'#1a1a2a'}`, background: viewMode==='board'?'rgba(41,182,246,0.10)':'transparent', color: viewMode==='board'?'#29b6f6':'#4a4a6a', fontSize:10, cursor:'pointer' }}>⊞ Board</button>
+        </div>
       </div>
 
       {/* Quick-add */}
@@ -1149,28 +1158,36 @@ function TaskList({ project, projectId, tasks, onAdd, onUpdate, onDelete, onReor
           onAddTasks={(titles) => titles.forEach(t => onAdd(projectId, t))} />
       )}
 
-      {/* Task rows */}
-      <div ref={listRef} style={{ display:'flex', flexDirection:'column', gap:2 }}>
-        {sortedTasks.map((task, idx) => (
-          <TaskRow key={task.id} task={task} idx={idx}
-            expanded={expandedId === task.id}
-            onToggleExpand={() => setExpandedId(expandedId === task.id ? null : task.id)}
-            projectId={projectId}
-            onUpdate={onUpdate}
-            onDelete={onDelete}
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-            onDragEnd={handleDragEnd}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-          />
-        ))}
-        {tasks.length === 0 && (
-          <div style={{ color:'#3a3a55', fontSize:13, textAlign:'center', padding:'24px 0' }}>No tasks yet. Add one above.</div>
-        )}
-      </div>
+      {/* Task rows — List view */}
+      {viewMode === 'list' && (
+        <div ref={listRef} style={{ display:'flex', flexDirection:'column', gap:2 }}>
+          {sortedTasks.map((task, idx) => (
+            <TaskRow key={task.id} task={task} idx={idx}
+              expanded={expandedId === task.id}
+              onToggleExpand={() => setExpandedId(expandedId === task.id ? null : task.id)}
+              projectId={projectId}
+              onUpdate={onUpdate}
+              onDelete={onDelete}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              onDragEnd={handleDragEnd}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            />
+          ))}
+          {tasks.length === 0 && (
+            <div style={{ color:'#3a3a55', fontSize:13, textAlign:'center', padding:'24px 0' }}>No tasks yet. Add one above.</div>
+          )}
+        </div>
+      )}
+
+      {/* Kanban board view */}
+      {viewMode === 'board' && (
+        <KanbanBoard tasks={tasks} projectId={projectId} onUpdate={onUpdate}
+          expandedId={expandedId} setExpandedId={setExpandedId} onDelete={onDelete} />
+      )}
     </div>
   );
 }
@@ -1395,6 +1412,77 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
           <SubtaskPanel task={task} projectId={projectId} onUpdate={onUpdate} />
         </div>
       )}
+    </div>
+  );
+}
+
+// ── Kanban Board ──────────────────────────────────────────────────────────────
+function KanbanBoard({ tasks, projectId, onUpdate, expandedId, setExpandedId, onDelete }) {
+  const columns = ['todo', 'in_progress', 'blocked', 'done'];
+  const dragRef = useRef({ taskId: null, fromCol: null });
+
+  const handleDragStart = (e, taskId, col) => {
+    dragRef.current = { taskId, fromCol: col };
+    e.dataTransfer.effectAllowed = 'move';
+    e.currentTarget.style.opacity = '0.4';
+  };
+  const handleDragEnd = (e) => { e.currentTarget.style.opacity = '1'; };
+  const handleDragOver = (e) => { e.preventDefault(); };
+  const handleDrop = (e, targetCol) => {
+    e.preventDefault();
+    const { taskId } = dragRef.current;
+    if (!taskId) return;
+    const updates = { status: targetCol };
+    if (targetCol === 'done') updates.completedAt = now();
+    else updates.completedAt = null;
+    onUpdate(projectId, taskId, updates);
+    dragRef.current = { taskId: null, fromCol: null };
+  };
+
+  return (
+    <div style={{ display:'flex', gap:10, overflowX:'auto', paddingBottom:8 }}>
+      {columns.map(col => {
+        const cfg = TASK_STATUS[col];
+        const colTasks = tasks.filter(t => t.status === col).sort((a,b) => (a.order??0)-(b.order??0));
+        return (
+          <div key={col}
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, col)}
+            style={{ minWidth:180, flex:1, background:'#0c0c16', borderRadius:10, padding:10, border:'1px solid #18182a', flexShrink:0 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:10 }}>
+              <span style={{ fontSize:10, fontWeight:700, color:cfg.color, letterSpacing:'0.06em', textTransform:'uppercase' }}>{cfg.label}</span>
+              <span style={{ fontSize:10, color:'#3a3a55', fontFamily:"'JetBrains Mono',monospace" }}>{colTasks.length}</span>
+            </div>
+            <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+              {colTasks.map(task => {
+                const pr = PRIORITY[task.priority] || PRIORITY.medium;
+                return (
+                  <div key={task.id} draggable
+                    onDragStart={(e) => handleDragStart(e, task.id, col)}
+                    onDragEnd={handleDragEnd}
+                    onClick={() => setExpandedId(expandedId === task.id ? null : task.id)}
+                    style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:8, padding:'10px 10px', cursor:'pointer', transition:'border-color .15s' }}
+                    onMouseOver={e => e.currentTarget.style.borderColor='#252538'}
+                    onMouseOut={e => e.currentTarget.style.borderColor='#18182a'}>
+                    {task.priority && task.priority !== 'none' && (
+                      <span style={{ fontSize:9, fontWeight:600, padding:'1px 6px', borderRadius:99, color:pr.color, background:pr.bg, textTransform:'uppercase', display:'inline-block', marginBottom:4 }}>{pr.label}</span>
+                    )}
+                    <div style={{ fontSize:12, color:'#d8d8e8', lineHeight:1.4, marginBottom:4 }}>{task.title}</div>
+                    <div style={{ display:'flex', gap:3, flexWrap:'wrap', alignItems:'center' }}>
+                      {(task.labels||[]).slice(0,2).map(l => {
+                        const lc = LABEL_COLORS[l] || DEFAULT_LABEL_COLOR;
+                        return <span key={l} style={{ fontSize:8, padding:'1px 5px', borderRadius:99, color:lc.color, background:lc.bg }}>{l}</span>;
+                      })}
+                      {task.dueDate && <span style={{ fontSize:9, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>{new Date(task.dueDate+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>}
+                      {(task.subtasks||[]).length > 0 && <span style={{ fontSize:9, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>{(task.subtasks||[]).filter(s=>s.status==='done').length}/{(task.subtasks||[]).length} ◦</span>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

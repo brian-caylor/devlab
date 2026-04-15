@@ -85,10 +85,10 @@
           "priority": "medium",
           "dueDate": null,
           "order": 0,
-          "completedAt": null,
+          "completedAt": "2026-04-15T16:39:09.341Z",
           "id": "uvma26s2smmo09udth",
           "title": "Test task GBC",
-          "status": "todo",
+          "status": "done",
           "createdAt": "2026-04-15T16:35:20.309Z"
         },
         {
@@ -110,7 +110,7 @@
       "machines": [
         "Windows Desktop"
       ],
-      "lastUpdated": "2026-04-15T16:38:55.806Z",
+      "lastUpdated": "2026-04-15T16:39:09.342Z",
       "repo": "",
       "notes": "CPU core done. Audio is the usual nightmare — left it there for now.",
       "aiModel": "ChatGPT/Sol",

@@ -94,10 +94,10 @@
         {
           "id": "9zd07wg5tg4mo09ypbq",
           "title": "Test 2 task",
-          "description": "",
+          "description": "second testing",
           "status": "todo",
           "priority": "medium",
-          "dueDate": null,
+          "dueDate": "2026-04-16",
           "order": 1,
           "createdAt": "2026-04-15T16:38:41.846Z",
           "completedAt": null
@@ -110,7 +110,7 @@
       "machines": [
         "Windows Desktop"
       ],
-      "lastUpdated": "2026-04-15T16:38:41.846Z",
+      "lastUpdated": "2026-04-15T16:38:50.637Z",
       "repo": "",
       "notes": "CPU core done. Audio is the usual nightmare — left it there for now.",
       "aiModel": "ChatGPT/Sol",

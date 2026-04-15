@@ -22,15 +22,15 @@
       "order": 1,
       "tasks": [
         {
-          "id": "xzqkkc7tafmo09h434",
-          "title": "do more user testing for persistent data memory",
           "description": "",
-          "status": "todo",
           "priority": "medium",
           "dueDate": null,
           "order": 0,
-          "createdAt": "2026-04-15T16:25:01.168Z",
-          "completedAt": null
+          "completedAt": null,
+          "id": "xzqkkc7tafmo09h434",
+          "title": "do more user testing for persistent data memory",
+          "status": "todo",
+          "createdAt": "2026-04-15T16:25:01.168Z"
         }
       ],
       "id": "proj_dgcharacter",
@@ -105,12 +105,12 @@
       "id": "proj_promptvault",
       "name": "PromptVault",
       "description": "Electron + Gemini app for organizing, tagging, and replaying saved AI prompts.",
-      "status": "active",
+      "status": "released",
       "machines": [
         "Windows Desktop",
         "MacBook"
       ],
-      "lastUpdated": "2026-04-07T00:00:00.000Z",
+      "lastUpdated": "2026-04-15T16:25:58.030Z",
       "repo": "",
       "notes": "Core flow done. Add tagging, search, and prompt chaining.",
       "aiModel": "Gemini",

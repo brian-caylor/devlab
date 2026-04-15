@@ -8,12 +8,12 @@
           "id": "xjanwmawce9mo09l1h3",
           "title": "Update to fix OpenAI's updated DOMs",
           "description": "",
-          "status": "todo",
+          "status": "done",
           "priority": "high",
           "dueDate": null,
           "order": 0,
           "createdAt": "2026-04-15T16:28:04.407Z",
-          "completedAt": null
+          "completedAt": "2026-04-15T16:28:11.618Z"
         }
       ],
       "id": "proj_grabgpt",
@@ -23,7 +23,7 @@
       "machines": [
         "Windows Desktop"
       ],
-      "lastUpdated": "2026-04-15T16:28:06.471Z",
+      "lastUpdated": "2026-04-15T16:28:11.618Z",
       "repo": "github.com/Brian-Caylor/grabgpt",
       "notes": "v1.0 shipped. Firefox port worth exploring.",
       "aiModel": "Gemini",

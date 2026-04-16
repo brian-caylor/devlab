@@ -59,14 +59,14 @@
           "priority": "medium",
           "dueDate": "2026-04-16",
           "order": 1,
-          "completedAt": null,
+          "completedAt": "2026-04-16T06:45:59.324Z",
           "labels": [],
           "subtasks": [],
           "githubLink": null,
           "milestoneId": null,
           "id": "9zd07wg5tg4mo09ypbq",
           "title": "Test 2 task",
-          "status": "in_progress",
+          "status": "done",
           "createdAt": "2026-04-15T16:38:41.846Z"
         }
       ],
@@ -79,7 +79,7 @@
       "machines": [
         "Windows Desktop"
       ],
-      "lastUpdated": "2026-04-15T16:39:09.342Z",
+      "lastUpdated": "2026-04-16T06:45:59.324Z",
       "repo": "",
       "notes": "CPU core done. Audio is the usual nightmare — left it there for now.",
       "aiModel": "ChatGPT/Sol",
@@ -217,9 +217,24 @@
       "createdAt": "2025-11-01T00:00:00.000Z"
     },
     {
-      "priority": "none",
+      "priority": "high",
       "order": 8,
-      "tasks": [],
+      "tasks": [
+        {
+          "id": "mh1bswwh31pmo1479ae",
+          "title": "Test \"Hey Siri, DevLab Idea\" to ensure it runs the shortcut and works",
+          "description": "",
+          "status": "todo",
+          "priority": "medium",
+          "dueDate": "2026-04-16",
+          "order": 0,
+          "createdAt": "2026-04-16T06:45:09.446Z",
+          "completedAt": null,
+          "labels": [
+            "feature"
+          ]
+        }
+      ],
       "milestones": [],
       "hidden": false,
       "id": "cs0lxejhz1gmo123jau",
@@ -227,11 +242,11 @@
       "description": "a way to manage multiple projects across multiple computers and models",
       "status": "active",
       "machines": [],
-      "aiModel": "",
+      "aiModel": "Claude",
       "repo": "github.com/brian-caylor/devlab",
       "notes": "",
       "createdAt": "2026-04-15T05:26:27Z",
-      "lastUpdated": "2026-04-16T05:44:20Z"
+      "lastUpdated": "2026-04-16T06:47:14.246Z"
     },
     {
       "priority": "none",
@@ -422,6 +437,16 @@
     }
   ],
   "ideas": [
+    {
+      "id": "obgvsn2tpzkmo144soz",
+      "text": "an app that provides daily riddles",
+      "createdAt": "2026-04-16T06:43:14.627Z"
+    },
+    {
+      "id": "wa0h0hea5sfmo13j3ic",
+      "text": "Test idea from Siri shortcut — if you see this, it works!",
+      "createdAt": "2026-04-16T06:26:22.212Z"
+    },
     {
       "id": "idea_tabsummarizer",
       "text": "Browser extension that auto-summarizes any open tab using Claude API — one-click summary sidebar",

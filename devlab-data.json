@@ -111,7 +111,7 @@
       "tasks": [
         {
           "description": "",
-          "priority": "low",
+          "priority": "medium",
           "dueDate": null,
           "order": 0,
           "completedAt": null,
@@ -135,7 +135,7 @@
         "Windows Desktop",
         "Mac Mini M4"
       ],
-      "lastUpdated": "2026-04-16T21:28:21.808Z",
+      "lastUpdated": "2026-04-16T21:28:24.345Z",
       "repo": "",
       "notes": "PDF import working. Next: character sharing and export to printable sheet.",
       "aiModel": "Claude",

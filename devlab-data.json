@@ -236,6 +236,17 @@
           "title": "Test \"Hey Siri, DevLab Idea\" to ensure it runs the shortcut and works",
           "status": "todo",
           "createdAt": "2026-04-16T06:45:09.446Z"
+        },
+        {
+          "id": "73dc9gjxvxlmo14lvbx",
+          "title": "Consider allowing the ReadMe.md files to be visible from DevLab projects",
+          "description": "",
+          "status": "todo",
+          "priority": "medium",
+          "dueDate": null,
+          "order": 1,
+          "createdAt": "2026-04-16T06:56:31.197Z",
+          "completedAt": null
         }
       ],
       "milestones": [],
@@ -249,7 +260,7 @@
       "repo": "github.com/brian-caylor/devlab",
       "notes": "",
       "createdAt": "2026-04-15T05:26:27Z",
-      "lastUpdated": "2026-04-16T06:47:14.246Z"
+      "lastUpdated": "2026-04-16T06:56:31.197Z"
     },
     {
       "priority": "none",

@@ -2323,16 +2323,17 @@ function GlobalTaskList({ projects, onUpdate, onDelete, onOpenProject }) {
   const [sortBy, setSortBy] = useState('priority');
   const [expandedId, setExpandedId] = useState(null);
 
-  // Flatten all tasks with project context
+  // Flatten all tasks — exclude archived projects entirely
   const allTasks = useMemo(() =>
-    projects.flatMap(p => (p.tasks || []).map(t => ({ ...t, projectId: p.id, projectName: p.name }))),
+    projects.filter(p => p.status !== 'archived').flatMap(p => (p.tasks || []).map(t => ({ ...t, projectId: p.id, projectName: p.name }))),
     [projects]
   );
 
-  // Filter
+  // Filter — "all" means active tasks (not done)
   const filtered = useMemo(() => {
     let list = allTasks;
-    if (statusFilter !== 'all') list = list.filter(t => t.status === statusFilter);
+    if (statusFilter === 'all') list = list.filter(t => t.status !== 'done');
+    else list = list.filter(t => t.status === statusFilter);
     if (priorityFilter !== 'all') list = list.filter(t => t.priority === priorityFilter);
     if (projectFilter !== 'all') list = list.filter(t => t.projectId === projectFilter);
     return list;
@@ -2363,12 +2364,12 @@ function GlobalTaskList({ projects, onUpdate, onDelete, onOpenProject }) {
     return arr;
   }, [filtered, sortBy]);
 
-  // Counts for status pills
+  // Counts for status pills — "all" counts non-done only
   const statusCounts = useMemo(() => {
     let base = allTasks;
     if (priorityFilter !== 'all') base = base.filter(t => t.priority === priorityFilter);
     if (projectFilter !== 'all') base = base.filter(t => t.projectId === projectFilter);
-    const c = { all: base.length };
+    const c = { all: base.filter(t => t.status !== 'done').length };
     TASK_STATUS_CYCLE.forEach(s => { c[s] = base.filter(t => t.status === s).length; });
     return c;
   }, [allTasks, priorityFilter, projectFilter]);
@@ -2401,7 +2402,7 @@ function GlobalTaskList({ projects, onUpdate, onDelete, onOpenProject }) {
           <button className="pill"
             style={{ padding:'5px 12px', borderRadius:99, border:`1px solid ${statusFilter==='all'?'#d8d8e8':'#18182a'}`, background: statusFilter==='all'?'#1a1a2a':'transparent', color: statusFilter==='all'?'#d8d8e8':'#4a4a6a', fontSize:12, fontWeight:500, display:'flex', alignItems:'center', gap:5 }}
             onClick={() => setStatusFilter('all')}>
-            All <span style={{ opacity:.5 }}>{statusCounts.all}</span>
+            Active <span style={{ opacity:.5 }}>{statusCounts.all}</span>
           </button>
           {TASK_STATUS_CYCLE.map(key => {
             const cfg = TASK_STATUS[key];

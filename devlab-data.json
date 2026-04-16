@@ -246,7 +246,10 @@
           "dueDate": null,
           "order": 1,
           "createdAt": "2026-04-16T06:56:31.197Z",
-          "completedAt": null
+          "completedAt": null,
+          "labels": [
+            "feature"
+          ]
         },
         {
           "id": "qu853zngg88mo14nwpg",
@@ -274,7 +277,7 @@
       "repo": "github.com/brian-caylor/devlab",
       "notes": "",
       "createdAt": "2026-04-15T05:26:27Z",
-      "lastUpdated": "2026-04-16T06:58:34.242Z"
+      "lastUpdated": "2026-04-16T06:58:40.377Z"
     },
     {
       "priority": "none",

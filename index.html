@@ -18,9 +18,10 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #1e1e32; border-radius: 4px; }
     input, textarea, button, select { font-family: 'DM Sans', sans-serif; }
-    input::placeholder, textarea::placeholder { color: #3a3a55; }
+    input::placeholder, textarea::placeholder { color: #6a6a88; }
     textarea { resize: vertical; }
     a { color: inherit; text-decoration: none; }
+    input:focus, textarea:focus, select:focus, button:focus-visible { outline: 1px solid #29b6f6; outline-offset: 1px; }
 
     .card { transition: transform .18s ease, border-color .18s ease; cursor: pointer; }
     .card:hover { transform: translateY(-2px); border-color: #252538 !important; }
@@ -88,7 +89,7 @@ const STATUS = {
 };
 
 const TASK_STATUS = {
-  todo:        { label: 'Todo',        color: '#4a4a6a', bg: 'rgba(74,74,106,0.12)' },
+  todo:        { label: 'Todo',        color: '#9090b8', bg: 'rgba(74,74,106,0.12)' },
   in_progress: { label: 'In Progress', color: '#ffa726', bg: 'rgba(255,167,38,0.12)' },
   blocked:     { label: 'Blocked',     color: '#ef5350', bg: 'rgba(239,83,80,0.12)' },
   done:        { label: 'Done',        color: '#00e676', bg: 'rgba(0,230,118,0.12)' },
@@ -347,7 +348,7 @@ function LandingPage({ onSave }) {
   };
 
   const inputStyle = { width:'100%', background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:8, padding:'10px 14px', color:'#d8d8e8', fontSize:14, outline:'none' };
-  const labelStyle = { display:'block', fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:6 };
+  const labelStyle = { display:'block', fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:6 };
   const features = [
     { icon: '◈', title: 'Git-backed data', desc: 'Every save is a real commit. Your data lives in your repo — no vendor lock-in.' },
     { icon: '✓', title: 'Tasks & Kanban', desc: 'Tasks with priorities, due dates, labels, sub-tasks, and a drag-and-drop Kanban board per project.' },
@@ -417,7 +418,7 @@ function LandingPage({ onSave }) {
         {/* Hidden connect form — for owner setup */}
         {showConnect && (
           <div style={{ maxWidth:400, margin:'32px auto 0', background:'#10101a', border:'1px solid #1e1e2e', borderRadius:12, padding:24 }}>
-            <div style={{ fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:16 }}>Connect Your Instance</div>
+            <div style={{ fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:16 }}>Connect Your Instance</div>
             <div style={{ marginBottom:12 }}>
               <label style={labelStyle}>GitHub Owner</label>
               <input value={owner} onChange={e => setOwner(e.target.value)} placeholder="your-github-username" style={inputStyle}/>
@@ -706,7 +707,7 @@ function App() {
   const blank    = { name:'', description:'', status:'active', machines:[], repo:'', notes:'', aiModel:'Claude', priority:'none' };
   const activeProject = projects.find(p => p.id === activeProjectId);
 
-  const syncColor = { loading:'#3a3a55', saving:'#ffa726', idle:'#3a3a55', error:'#ef5350' }[sync];
+  const syncColor = { loading:'#3a3a55', saving:'#ffa726', idle:'#7a9a7a', error:'#ef5350' }[sync];
   const syncLabel = { loading:'Loading…', saving:'Saving…', idle:'Synced', error:'Error' }[sync];
 
   return (
@@ -1479,7 +1480,7 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
       {expanded && (
         <div style={{ marginLeft:36, padding:'10px 14px', background:'#0c0c16', borderRadius:8, border:'1px solid #1a1a2a', marginTop:2, marginBottom:4, display:'flex', flexDirection:'column', gap:10 }}>
           <div>
-            <label style={{ fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Description</label>
+            <label style={{ fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Description</label>
             <textarea value={desc} onChange={e => setDesc(e.target.value)} onBlur={saveDesc}
               placeholder="Add details…"
               style={{ width:'100%', background:'#10101a', border:'1px solid #1a1a2a', borderRadius:6, padding:'8px 10px', color:'#d8d8e8', fontSize:13, outline:'none', lineHeight:1.5, fontFamily:"'DM Sans',sans-serif" }}
@@ -1487,12 +1488,12 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
           </div>
           <div style={{ display:'flex', gap:14, flexWrap:'wrap', alignItems:'center' }}>
             <div>
-              <label style={{ fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Due Date</label>
+              <label style={{ fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Due Date</label>
               <input type="date" value={dueDate} onChange={e => saveDueDate(e.target.value)}
                 style={{ background:'#10101a', border:'1px solid #1a1a2a', borderRadius:6, padding:'6px 10px', color:'#d8d8e8', fontSize:12, outline:'none', fontFamily:"'JetBrains Mono',monospace" }}/>
             </div>
             <div>
-              <label style={{ fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Status</label>
+              <label style={{ fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Status</label>
               <select value={task.status} onChange={e => {
                 const updates = { status: e.target.value };
                 if (e.target.value === 'done') updates.completedAt = now();
@@ -1505,7 +1506,7 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
             </div>
             {(milestones || []).length > 0 && (
               <div>
-                <label style={{ fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Milestone</label>
+                <label style={{ fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Milestone</label>
                 <select value={task.milestoneId || ''} onChange={e => onUpdate(projectId, task.id, { milestoneId: e.target.value || null })}
                   style={{ background:'#10101a', border:'1px solid #1a1a2a', borderRadius:6, padding:'6px 10px', color:'#d8d8e8', fontSize:12, outline:'none' }}>
                   <option value="">None</option>
@@ -1514,7 +1515,7 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
               </div>
             )}
             <div>
-              <label style={{ fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>GitHub Link</label>
+              <label style={{ fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>GitHub Link</label>
               <input value={task.githubLink || ''} onChange={e => onUpdate(projectId, task.id, { githubLink: e.target.value || null })}
                 placeholder="#123 or SHA or URL"
                 style={{ background:'#10101a', border:'1px solid #1a1a2a', borderRadius:6, padding:'6px 10px', color:'#d8d8e8', fontSize:12, outline:'none', fontFamily:"'JetBrains Mono',monospace", width:180 }}/>
@@ -1522,7 +1523,7 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
           </div>
           {/* Labels */}
           <div>
-            <label style={{ fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:6 }}>Labels</label>
+            <label style={{ fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:6 }}>Labels</label>
             <div style={{ display:'flex', flexWrap:'wrap', gap:4, marginBottom:6 }}>
               {Object.keys(LABEL_COLORS).map(l => {
                 const on = (task.labels || []).includes(l);
@@ -1729,7 +1730,7 @@ function SubtaskPanel({ task, projectId, onUpdate }) {
 
   return (
     <div>
-      <label style={{ fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:6 }}>
+      <label style={{ fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:6 }}>
         Subtasks {subtasks.length > 0 && `(${doneCount} / ${subtasks.length} done)`}
       </label>
       <div style={{ display:'flex', flexDirection:'column', gap:2, marginBottom:6 }}>
@@ -1826,7 +1827,7 @@ function SearchOverlay({ projects, ideas, onClose, onOpenProject, onOpenIdeas })
   };
 
   const SectionLabel = ({ label }) => (
-    <div style={{ fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.06em', textTransform:'uppercase', padding:'10px 12px 4px' }}>{label}</div>
+    <div style={{ fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.06em', textTransform:'uppercase', padding:'10px 12px 4px' }}>{label}</div>
   );
 
   return (
@@ -2241,7 +2242,7 @@ function GitHubActivity({ project, creds }) {
 
   const SubSection = ({ title, loading, error, children, emptyMsg }) => (
     <div style={{ marginBottom:14 }}>
-      <div style={{ fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.06em', textTransform:'uppercase', marginBottom:8 }}>{title}</div>
+      <div style={{ fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.06em', textTransform:'uppercase', marginBottom:8 }}>{title}</div>
       {loading ? <>{skeleton}{skeleton}</> : error ? (
         <div style={{ fontSize:12, color:'#4a4a6a', fontStyle:'italic' }}>Could not load {title.toLowerCase()}</div>
       ) : children.length === 0 ? (
@@ -2560,7 +2561,7 @@ function ProjectModal({ mode, data, onSave, onClose }) {
   const pick   = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   const inputStyle = { width:'100%', background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:8, padding:'10px 14px', color:'#d8d8e8', fontSize:14, outline:'none', lineHeight:1.5 };
-  const labelStyle = { display:'block', fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:7 };
+  const labelStyle = { display:'block', fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:7 };
 
   return (
     <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', backdropFilter:'blur(6px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:200, padding:16 }}
@@ -2670,7 +2671,7 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibl
   const [aiKey, setAiKey] = useState(loadAnthropicKey());
   const [saved, setSaved] = useState(false);
   const inputStyle = { width:'100%', background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:8, padding:'10px 14px', color:'#d8d8e8', fontSize:14, outline:'none' };
-  const labelStyle = { display:'block', fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:6 };
+  const labelStyle = { display:'block', fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:6 };
 
   const saveKey = () => {
     localStorage.setItem(ANTHROPIC_KEY, aiKey.trim());
@@ -2700,7 +2701,7 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibl
         </div>
 
         <div style={{ borderTop:'1px solid #18182a', paddingTop:16, marginBottom:16 }}>
-          <label style={{ display:'block', fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:10 }}>Navigation Tabs</label>
+          <label style={{ display:'block', fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:10 }}>Navigation Tabs</label>
           <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
             {OPTIONAL_TABS.map(tabKey => {
               const on = visibleTabs.includes(tabKey);
@@ -2723,7 +2724,7 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibl
 
         {hiddenProjects.length > 0 && (
           <div style={{ borderTop:'1px solid #18182a', paddingTop:16, marginBottom:16 }}>
-            <label style={{ display:'block', fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:8 }}>Hidden Projects ({hiddenProjects.length})</label>
+            <label style={{ display:'block', fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:8 }}>Hidden Projects ({hiddenProjects.length})</label>
             <div style={{ display:'flex', flexDirection:'column', gap:4, maxHeight:160, overflowY:'auto' }}>
               {hiddenProjects.map(p => (
                 <div key={p.id} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'6px 10px', background:'#0c0c16', borderRadius:6, border:'1px solid #1a1a2a' }}>

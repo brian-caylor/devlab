@@ -154,7 +154,7 @@ const normalizeTask = (t, idx) => {
 };
 
 const normalizeProject = (p, idx) => {
-  const np = { priority: 'none', order: idx, tasks: [], milestones: [], ...p };
+  const np = { priority: 'none', order: idx, tasks: [], milestones: [], hidden: false, ...p };
   if (np.order == null) np.order = idx;
   np.tasks = (np.tasks || []).map((t, i) => normalizeTask(t, i));
   np.milestones = (np.milestones || []).map(m => ({ ...m, taskIds: [] }));
@@ -547,6 +547,12 @@ function App() {
     mutateProjects(p => p.filter(x => x.id !== id));
     if (activeProjectId === id) { setView('dashboard'); setActiveProjectId(null); }
   };
+  const hideProject = (id) => {
+    mutateProjects(ps => ps.map(p => p.id === id ? { ...p, hidden: true } : p));
+  };
+  const unhideProject = (id) => {
+    mutateProjects(ps => ps.map(p => p.id === id ? { ...p, hidden: false } : p));
+  };
 
   // ── Project mutation (for detail view) ──
   const updateProject = useCallback((id, changes) => {
@@ -626,7 +632,8 @@ function App() {
   }
 
   // ── Derived data ──
-  const filtered = projects.filter(p => filter === 'all' || p.status === filter);
+  const visibleProjects = useMemo(() => projects.filter(p => !p.hidden), [projects]);
+  const filtered = visibleProjects.filter(p => filter === 'all' || p.status === filter);
   const sorted = useMemo(() => {
     const arr = [...filtered];
     if (sortMode === 'priority') {
@@ -644,7 +651,7 @@ function App() {
     return arr;
   }, [filtered, sortMode]);
 
-  const counts   = Object.fromEntries(Object.keys(STATUS).map(s => [s, projects.filter(p => p.status === s).length]));
+  const counts   = Object.fromEntries(Object.keys(STATUS).map(s => [s, visibleProjects.filter(p => p.status === s).length]));
   const blank    = { name:'', description:'', status:'active', machines:[], repo:'', notes:'', aiModel:'Claude', priority:'none' };
   const activeProject = projects.find(p => p.id === activeProjectId);
 
@@ -670,7 +677,7 @@ function App() {
             </button>
           </div>
           <div style={{ fontSize:11, color:'#3a3a55', fontFamily:"'JetBrains Mono',monospace" }}>
-            {projects.length} projects · {ideas.length} ideas · {creds.owner}/{creds.repo}
+            {visibleProjects.length} projects · {ideas.length} ideas · {creds.owner}/{creds.repo}
           </div>
         </div>
 
@@ -678,7 +685,7 @@ function App() {
           <div style={{ display:'flex', gap:3, background:'#10101a', padding:4, borderRadius:10 }}>
             {[
               { key:'projects', label:'Projects' },
-              { key:'tasks',    label:'Tasks', badge: projects.reduce((n, p) => n + (p.tasks || []).filter(t => t.status !== 'done').length, 0) },
+              { key:'tasks',    label:'Tasks', badge: visibleProjects.reduce((n, p) => n + (p.tasks || []).filter(t => t.status !== 'done').length, 0) },
               { key:'focus',    label:'Focus' },
               { key:'labels',   label:'Labels' },
               { key:'digest',   label:'Digest' },
@@ -765,6 +772,7 @@ function App() {
             onOpen={openProject}
             onEdit={(p) => setModal({ mode:'edit', data:{...p} })}
             onDelete={deleteProject}
+            onHide={hideProject}
             onReorder={reorderProjects}
           />
           {sorted.length === 0 && !ready && (
@@ -778,23 +786,23 @@ function App() {
 
       {/* ── Dashboard: Digest Tab ── */}
       {view === 'dashboard' && tab === 'digest' && (
-        <DigestView projects={projects} ideas={ideas} />
+        <DigestView projects={visibleProjects} ideas={ideas} />
       )}
 
       {/* ── Dashboard: Labels Tab ── */}
       {view === 'dashboard' && tab === 'labels' && (
-        <LabelsView projects={projects} onOpenProject={openProject} />
+        <LabelsView projects={visibleProjects} onOpenProject={openProject} />
       )}
 
       {/* ── Dashboard: Focus Tab ── */}
       {view === 'dashboard' && tab === 'focus' && (
-        <FocusView projects={projects} onOpenProject={openProject} />
+        <FocusView projects={visibleProjects} onOpenProject={openProject} />
       )}
 
       {/* ── Dashboard: Tasks Tab ── */}
       {view === 'dashboard' && tab === 'tasks' && (
         <GlobalTaskList
-          projects={projects}
+          projects={visibleProjects}
           onUpdate={updateTask}
           onDelete={deleteTask}
           onOpenProject={openProject}
@@ -856,7 +864,7 @@ function App() {
       {/* ── Search Overlay ── */}
       {showSearch && (
         <SearchOverlay
-          projects={projects}
+          projects={visibleProjects}
           ideas={ideas}
           onClose={() => setShowSearch(false)}
           onOpenProject={openProject}
@@ -865,7 +873,8 @@ function App() {
       )}
 
       {showSettings && (
-        <SettingsModal onClose={() => setShowSettings(false)} onDisconnect={() => { dropCreds(); setCreds(null); }} />
+        <SettingsModal onClose={() => setShowSettings(false)} onDisconnect={() => { dropCreds(); setCreds(null); }}
+          hiddenProjects={projects.filter(p => p.hidden)} onUnhide={unhideProject} />
       )}
 
       {modal && (
@@ -878,7 +887,7 @@ function App() {
 }
 
 // ── Project Grid (dashboard with DnD) ─────────────────────────────────────────
-function ProjectGrid({ projects, onOpen, onEdit, onDelete, onReorder }) {
+function ProjectGrid({ projects, onOpen, onEdit, onDelete, onHide, onReorder }) {
   const dragRef = useRef({ dragIdx: -1, overIdx: -1 });
   const touchRef = useRef({ dragIdx: -1, startY: 0, el: null, rects: [] });
 
@@ -913,6 +922,7 @@ function ProjectGrid({ projects, onOpen, onEdit, onDelete, onReorder }) {
           onOpen={() => onOpen(p.id)}
           onEdit={(e) => { e.stopPropagation(); onEdit(p); }}
           onDelete={(e) => { e.stopPropagation(); onDelete(p.id); }}
+          onHide={(e) => { e.stopPropagation(); onHide(p.id); }}
           onDragStart={(e) => handleDragStart(e, i)}
           onDragOver={(e) => handleDragOver(e, i)}
           onDrop={(e) => handleDrop(e, i)}
@@ -924,7 +934,7 @@ function ProjectGrid({ projects, onOpen, onEdit, onDelete, onReorder }) {
 }
 
 // ── Project Card ───────────────────────────────────────────────────────────────
-function ProjectCard({ project, onOpen, onEdit, onDelete, onDragStart, onDragOver, onDrop, onDragEnd }) {
+function ProjectCard({ project, onOpen, onEdit, onDelete, onHide, onDragStart, onDragOver, onDrop, onDragEnd }) {
   const cfg = STATUS[project.status] || STATUS.idea;
   const pri = PRIORITY[project.priority] || PRIORITY.none;
   const tasks = project.tasks || [];
@@ -958,6 +968,7 @@ function ProjectCard({ project, onOpen, onEdit, onDelete, onDragStart, onDragOve
         <div style={{ display:'flex', gap:2, flexShrink:0 }}>
           <span className="drag-handle" style={{ display:'flex', alignItems:'center', padding:'5px 4px', fontSize:14, color:'#5a5a7a' }}>⠿</span>
           <button className="icon-btn" style={{ display:'flex', alignItems:'center', padding:'5px 6px', background:'transparent', border:'none', color:'#5a5a7a', borderRadius:5, fontSize:14 }} onClick={onEdit}>✎</button>
+          <button className="icon-btn" title="Hide project" style={{ display:'flex', alignItems:'center', padding:'5px 6px', background:'transparent', border:'none', color:'#5a5a7a', borderRadius:5, fontSize:13 }} onClick={onHide}>👁</button>
           <button className="icon-btn" style={{ display:'flex', alignItems:'center', padding:'5px 6px', background:'transparent', border:'none', color:'#ef5350', borderRadius:5, fontSize:14 }} onClick={onDelete}>⊗</button>
         </div>
       </div>
@@ -2610,7 +2621,7 @@ function ProjectModal({ mode, data, onSave, onClose }) {
 }
 
 // ── Settings Modal ────────────────────────────────────────────────────────────
-function SettingsModal({ onClose, onDisconnect }) {
+function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide }) {
   const [aiKey, setAiKey] = useState(loadAnthropicKey());
   const [saved, setSaved] = useState(false);
   const inputStyle = { width:'100%', background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:8, padding:'10px 14px', color:'#d8d8e8', fontSize:14, outline:'none' };
@@ -2642,6 +2653,23 @@ function SettingsModal({ onClose, onDisconnect }) {
             {saved ? '✓ Saved' : 'Save Key'}
           </button>
         </div>
+
+        {hiddenProjects.length > 0 && (
+          <div style={{ borderTop:'1px solid #18182a', paddingTop:16, marginBottom:16 }}>
+            <label style={{ display:'block', fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:8 }}>Hidden Projects ({hiddenProjects.length})</label>
+            <div style={{ display:'flex', flexDirection:'column', gap:4, maxHeight:160, overflowY:'auto' }}>
+              {hiddenProjects.map(p => (
+                <div key={p.id} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'6px 10px', background:'#0c0c16', borderRadius:6, border:'1px solid #1a1a2a' }}>
+                  <span style={{ fontSize:12, color:'#7070a0' }}>{p.name}</span>
+                  <button onClick={() => onUnhide(p.id)}
+                    style={{ fontSize:10, padding:'3px 10px', background:'rgba(41,182,246,0.08)', border:'1px solid rgba(41,182,246,0.18)', borderRadius:6, color:'#29b6f6', cursor:'pointer' }}>
+                    Unhide
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div style={{ borderTop:'1px solid #18182a', paddingTop:16 }}>
           <button onClick={() => { if(window.confirm('Disconnect from this repo? Your data stays in GitHub.')) { onDisconnect(); onClose(); } }}

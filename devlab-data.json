@@ -257,7 +257,10 @@
           "dueDate": "2026-04-16",
           "order": 2,
           "createdAt": "2026-04-16T06:58:06.292Z",
-          "completedAt": null
+          "completedAt": null,
+          "labels": [
+            "bug"
+          ]
         }
       ],
       "milestones": [],
@@ -271,7 +274,7 @@
       "repo": "github.com/brian-caylor/devlab",
       "notes": "",
       "createdAt": "2026-04-15T05:26:27Z",
-      "lastUpdated": "2026-04-16T06:58:16.158Z"
+      "lastUpdated": "2026-04-16T06:58:34.242Z"
     },
     {
       "priority": "none",

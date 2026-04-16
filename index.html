@@ -238,6 +238,12 @@ function parseRepo(repoField) {
 
 const loadAnthropicKey = () => { try { return localStorage.getItem(ANTHROPIC_KEY) || ''; } catch { return ''; } };
 
+const OPTIONAL_TABS = ['focus', 'labels', 'digest'];
+const TAB_LABELS = { focus: 'Focus', labels: 'Labels', digest: 'Digest' };
+const VISIBLE_TABS_KEY = 'devlab-visible-tabs';
+const loadVisibleTabs = () => { try { return JSON.parse(localStorage.getItem(VISIBLE_TABS_KEY)) || OPTIONAL_TABS; } catch { return OPTIONAL_TABS; } };
+const saveVisibleTabs = (tabs) => { try { localStorage.setItem(VISIBLE_TABS_KEY, JSON.stringify(tabs)); } catch {} };
+
 // ── Markdown parser ───────────────────────────────────────────────────────────
 function renderMarkdown(text) {
   if (!text) return '';
@@ -413,6 +419,7 @@ function App() {
   const [openTaskId, setOpenTaskId] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [visibleTabs, setVisibleTabs] = useState(loadVisibleTabs);
   const scrollRef  = useRef(0);
   const ideaRef    = useRef(null);
   const saveTimer  = useRef(null);
@@ -686,11 +693,11 @@ function App() {
             {[
               { key:'projects', label:'Projects' },
               { key:'tasks',    label:'Tasks', badge: visibleProjects.reduce((n, p) => n + (p.tasks || []).filter(t => t.status !== 'done').length, 0) },
-              { key:'focus',    label:'Focus' },
-              { key:'labels',   label:'Labels' },
-              { key:'digest',   label:'Digest' },
+              visibleTabs.includes('focus')  && { key:'focus',  label:'Focus' },
+              visibleTabs.includes('labels') && { key:'labels', label:'Labels' },
+              visibleTabs.includes('digest') && { key:'digest', label:'Digest' },
               { key:'ideas',    label:'Ideas', badge: ideas.length },
-            ].map(t => (
+            ].filter(Boolean).map(t => (
               <button key={t.key} className="tab-btn"
                 style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 14px', borderRadius:7, border:'none', background: tab===t.key && view==='dashboard'?'#1a1a2a':'transparent', color: tab===t.key && view==='dashboard'?'#d8d8e8':'#3a3a55', fontSize:13, cursor:'pointer', fontWeight:500 }}
                 onClick={() => { setTab(t.key); if (view !== 'dashboard') { setView('dashboard'); setActiveProjectId(null); } }}>
@@ -874,7 +881,8 @@ function App() {
 
       {showSettings && (
         <SettingsModal onClose={() => setShowSettings(false)} onDisconnect={() => { dropCreds(); setCreds(null); }}
-          hiddenProjects={projects.filter(p => p.hidden)} onUnhide={unhideProject} />
+          hiddenProjects={projects.filter(p => p.hidden)} onUnhide={unhideProject}
+          visibleTabs={visibleTabs} onSetVisibleTabs={(tabs) => { setVisibleTabs(tabs); saveVisibleTabs(tabs); }} />
       )}
 
       {modal && (
@@ -2621,7 +2629,7 @@ function ProjectModal({ mode, data, onSave, onClose }) {
 }
 
 // ── Settings Modal ────────────────────────────────────────────────────────────
-function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide }) {
+function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibleTabs, onSetVisibleTabs }) {
   const [aiKey, setAiKey] = useState(loadAnthropicKey());
   const [saved, setSaved] = useState(false);
   const inputStyle = { width:'100%', background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:8, padding:'10px 14px', color:'#d8d8e8', fontSize:14, outline:'none' };
@@ -2652,6 +2660,28 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide }) {
           <button onClick={saveKey} style={{ marginTop:8, padding:'7px 16px', background: saved?'rgba(0,230,118,0.15)':'#1a1a2a', border:'1px solid #252538', borderRadius:8, color: saved?'#00e676':'#7070a0', fontSize:12, fontWeight:500, cursor:'pointer' }}>
             {saved ? '✓ Saved' : 'Save Key'}
           </button>
+        </div>
+
+        <div style={{ borderTop:'1px solid #18182a', paddingTop:16, marginBottom:16 }}>
+          <label style={{ display:'block', fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:10 }}>Navigation Tabs</label>
+          <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+            {OPTIONAL_TABS.map(tabKey => {
+              const on = visibleTabs.includes(tabKey);
+              return (
+                <div key={tabKey} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'6px 10px', background:'#0c0c16', borderRadius:6, border:'1px solid #1a1a2a' }}>
+                  <span style={{ fontSize:12, color: on ? '#d8d8e8' : '#4a4a6a' }}>{TAB_LABELS[tabKey]}</span>
+                  <button onClick={() => {
+                    const next = on ? visibleTabs.filter(t => t !== tabKey) : [...visibleTabs, tabKey];
+                    onSetVisibleTabs(next);
+                  }}
+                    style={{ fontSize:10, padding:'3px 12px', borderRadius:6, border:`1px solid ${on ? 'rgba(0,230,118,0.25)' : '#1a1a2a'}`, background: on ? 'rgba(0,230,118,0.08)' : 'transparent', color: on ? '#00e676' : '#4a4a6a', cursor:'pointer', fontWeight:500 }}>
+                    {on ? 'Visible' : 'Hidden'}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+          <p style={{ fontSize:10, color:'#3a3a55', marginTop:6 }}>Projects, Tasks, and Ideas are always shown.</p>
         </div>
 
         {hiddenProjects.length > 0 && (

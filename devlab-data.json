@@ -423,6 +423,11 @@
   ],
   "ideas": [
     {
+      "id": "wa0h0hea5sfmo13j3ic",
+      "text": "Test idea from Siri shortcut — if you see this, it works!",
+      "createdAt": "2026-04-16T06:26:22.212Z"
+    },
+    {
       "id": "idea_tabsummarizer",
       "text": "Browser extension that auto-summarizes any open tab using Claude API — one-click summary sidebar",
       "createdAt": "2026-04-13T00:00:00.000Z"

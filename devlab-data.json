@@ -483,11 +483,6 @@
       "id": "idea_tabsummarizer",
       "text": "Browser extension that auto-summarizes any open tab using Claude API — one-click summary sidebar",
       "createdAt": "2026-04-13T00:00:00.000Z"
-    },
-    {
-      "id": "idea_strongviz",
-      "text": "Strong app data visualizer — chart PRs, volume trends, rest times over time from exported CSV",
-      "createdAt": "2026-04-11T00:00:00.000Z"
     }
   ],
   "_syncedRepos": [

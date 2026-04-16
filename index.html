@@ -666,10 +666,10 @@ function App() {
   const syncLabel = { loading:'Loading…', saving:'Saving…', idle:'Synced', error:'Error' }[sync];
 
   return (
-    <div style={{ fontFamily:"'DM Sans',sans-serif", background:'#08080f', minHeight:'100vh', color:'#d8d8e8', maxWidth:980, margin:'0 auto', paddingBottom:80 }}>
+    <div style={{ fontFamily:"'DM Sans',sans-serif", background:'#08080f', minHeight:'100vh', color:'#d8d8e8', maxWidth:1400, margin:'0 auto', padding:'0 clamp(20px, 3vw, 48px)', paddingBottom:80 }}>
 
       {/* ── Header ── */}
-      <div style={{ padding:'24px 20px 0', display:'flex', alignItems:'flex-start', justifyContent:'space-between', flexWrap:'wrap', gap:16 }} className="header-row">
+      <div style={{ padding:'24px 0 0', display:'flex', alignItems:'flex-start', justifyContent:'space-between', flexWrap:'wrap', gap:16 }} className="header-row">
         <div>
           <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:5 }}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#00e676" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -720,7 +720,7 @@ function App() {
 
       {/* ── Error Banner ── */}
       {sync === 'error' && syncMsg && (
-        <div style={{ margin:'12px 20px 0', padding:'10px 16px', background:'rgba(239,83,80,0.08)', border:'1px solid rgba(239,83,80,0.25)', borderRadius:8, fontSize:12, color:'#ef5350', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+        <div style={{ margin:'12px 0 0', padding:'10px 16px', background:'rgba(239,83,80,0.08)', border:'1px solid rgba(239,83,80,0.25)', borderRadius:8, fontSize:12, color:'#ef5350', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
           <span>{syncMsg}</span>
           <button onClick={handleSync} style={{ background:'transparent', border:'none', color:'#ef5350', fontSize:12, cursor:'pointer', fontWeight:600 }}>Retry →</button>
         </div>
@@ -744,7 +744,7 @@ function App() {
 
       {/* ── Dashboard: Projects Tab ── */}
       {view === 'dashboard' && tab === 'projects' && (
-        <div style={{ padding:'22px 20px' }} className="fade-in">
+        <div style={{ padding:'22px 0' }} className="fade-in">
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:18, flexWrap:'wrap', gap:10 }}>
             <div style={{ display:'flex', gap:6, flexWrap:'wrap', alignItems:'center' }}>
               <button className="pill"
@@ -818,7 +818,7 @@ function App() {
 
       {/* ── Dashboard: Ideas Tab ── */}
       {view === 'dashboard' && tab === 'ideas' && (
-        <div style={{ padding:'22px 20px' }} className="fade-in">
+        <div style={{ padding:'22px 0' }} className="fade-in">
           <div style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:18, marginBottom:14 }}>
             <div style={{ display:'flex', alignItems:'center', gap:6, fontSize:10, fontWeight:600, color:'#ffa726', letterSpacing:'0.09em', textTransform:'uppercase', marginBottom:12 }}>
               ⚡ Quick Capture
@@ -924,7 +924,7 @@ function ProjectGrid({ projects, onOpen, onEdit, onDelete, onHide, onReorder }) 
   };
 
   return (
-    <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(270px, 1fr))', gap:12 }} className="projects-grid">
+    <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))', gap:14 }} className="projects-grid">
       {projects.map((p, i) => (
         <ProjectCard key={p.id} project={p}
           onOpen={() => onOpen(p.id)}
@@ -1034,7 +1034,7 @@ function ProjectDetail({ project, onBack, onEdit, onUpdateProject, onAddTask, on
   const cfg = STATUS[project.status] || STATUS.idea;
 
   return (
-    <div style={{ padding:'22px 20px' }} className="fade-in">
+    <div style={{ padding:'22px 0' }} className="fade-in">
       {/* Header */}
       <div style={{ marginBottom:24 }}>
         <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:14 }}>
@@ -1087,7 +1087,7 @@ function ProjectDetail({ project, onBack, onEdit, onUpdateProject, onAddTask, on
       <MilestonesPanel project={project} onUpdateProject={onUpdateProject} />
 
       {/* Two-panel layout */}
-      <div className="detail-panels" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20, alignItems:'start' }}>
+      <div className="detail-panels" style={{ display:'grid', gridTemplateColumns:'3fr 2fr', gap:24, alignItems:'start' }}>
         <TaskList
           project={project}
           projectId={project.id}
@@ -1933,7 +1933,7 @@ function DigestView({ projects, ideas }) {
   };
 
   return (
-    <div style={{ padding:'22px 20px' }} className="fade-in">
+    <div style={{ padding:'22px 0' }} className="fade-in">
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16, flexWrap:'wrap', gap:8 }}>
         <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:20, fontWeight:700, letterSpacing:'0.05em', color:'#fff' }}>Weekly Digest</span>
         <div style={{ display:'flex', gap:6 }}>
@@ -2001,12 +2001,12 @@ function LabelsView({ projects, onOpenProject }) {
   }, [tasksForLabel]);
 
   if (sortedLabels.length === 0) {
-    return <div style={{ padding:'22px 20px' }} className="fade-in"><div style={{ textAlign:'center', padding:'60px 20px', color:'#3a3a55', fontSize:14 }}>No labels in use. Add labels to tasks from the project detail view.</div></div>;
+    return <div style={{ padding:'22px 0' }} className="fade-in"><div style={{ textAlign:'center', padding:'60px 20px', color:'#3a3a55', fontSize:14 }}>No labels in use. Add labels to tasks from the project detail view.</div></div>;
   }
 
   return (
-    <div style={{ padding:'22px 20px' }} className="fade-in">
-      <div style={{ display:'grid', gridTemplateColumns:'200px 1fr', gap:16, alignItems:'start' }} className="detail-panels">
+    <div style={{ padding:'22px 0' }} className="fade-in">
+      <div style={{ display:'grid', gridTemplateColumns:'220px 1fr', gap:20, alignItems:'start' }} className="detail-panels">
         {/* Label list */}
         <div style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:14 }}>
           <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:14, fontWeight:700, letterSpacing:'0.06em', color:'#fff', textTransform:'uppercase', marginBottom:10 }}>Labels ({sortedLabels.length})</div>
@@ -2128,7 +2128,7 @@ function FocusView({ projects, onOpenProject }) {
   );
 
   return (
-    <div style={{ padding:'22px 20px' }} className="fade-in">
+    <div style={{ padding:'22px 0' }} className="fade-in">
       {allEmpty ? (
         <div style={{ textAlign:'center', padding:'60px 20px', color:'#3a3a55', fontSize:14 }}>Nothing urgent. Go build something.</div>
       ) : (
@@ -2347,7 +2347,7 @@ function GlobalTaskList({ projects, onUpdate, onDelete, onOpenProject }) {
   const noop = () => {};
 
   return (
-    <div style={{ padding:'22px 20px' }} className="fade-in">
+    <div style={{ padding:'22px 0' }} className="fade-in">
       {/* Filter bar */}
       <div style={{ display:'flex', flexWrap:'wrap', gap:8, marginBottom:18, alignItems:'center' }}>
         {/* Status pills */}

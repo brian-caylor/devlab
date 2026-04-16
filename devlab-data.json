@@ -135,7 +135,7 @@
         "Windows Desktop",
         "Mac Mini M4"
       ],
-      "lastUpdated": "2026-04-15T16:25:01.168Z",
+      "lastUpdated": "2026-04-16T21:28:24.345Z",
       "repo": "",
       "notes": "PDF import working. Next: character sharing and export to printable sheet.",
       "aiModel": "Claude",
@@ -239,7 +239,7 @@
         },
         {
           "description": "",
-          "priority": "low",
+          "priority": "medium",
           "dueDate": null,
           "order": 1,
           "completedAt": null,
@@ -283,7 +283,7 @@
       "repo": "github.com/brian-caylor/devlab",
       "notes": "",
       "createdAt": "2026-04-15T05:26:27Z",
-      "lastUpdated": "2026-04-16T21:15:23.616Z"
+      "lastUpdated": "2026-04-16T21:28:20.024Z"
     },
     {
       "priority": "none",

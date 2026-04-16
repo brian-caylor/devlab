@@ -475,11 +475,6 @@
   ],
   "ideas": [
     {
-      "id": "obgvsn2tpzkmo144soz",
-      "text": "an app that provides daily riddles",
-      "createdAt": "2026-04-16T06:43:14.627Z"
-    },
-    {
       "id": "idea_tabsummarizer",
       "text": "Browser extension that auto-summarizes any open tab using Claude API — one-click summary sidebar",
       "createdAt": "2026-04-13T00:00:00.000Z"

@@ -661,8 +661,6 @@ function App() {
   const promoteIdea = (idea) => {
     deleteIdea(idea.id);
     setModal({ mode: 'add', data: { name:'', description: idea.text, status:'idea', machines:[], repo:'', notes:'', aiModel:'Claude', priority:'none' } });
-    setTab('projects');
-    if (view !== 'dashboard') { setView('dashboard'); setActiveProjectId(null); }
   };
 
   // ── Navigation ──

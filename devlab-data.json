@@ -259,7 +259,7 @@
           "priority": "high",
           "dueDate": "2026-04-16",
           "order": 2,
-          "completedAt": null,
+          "completedAt": "2026-04-16T21:15:23.616Z",
           "labels": [
             "bug"
           ],
@@ -268,7 +268,7 @@
           "milestoneId": null,
           "id": "qu853zngg88mo14nwpg",
           "title": "Need to be able to clear/hide completed tasks from Tasks window",
-          "status": "todo",
+          "status": "done",
           "createdAt": "2026-04-16T06:58:06.292Z"
         }
       ],
@@ -283,7 +283,7 @@
       "repo": "github.com/brian-caylor/devlab",
       "notes": "",
       "createdAt": "2026-04-15T05:26:27Z",
-      "lastUpdated": "2026-04-16T21:02:19.739Z"
+      "lastUpdated": "2026-04-16T21:15:23.616Z"
     },
     {
       "priority": "none",
@@ -480,24 +480,9 @@
       "createdAt": "2026-04-16T06:43:14.627Z"
     },
     {
-      "id": "wa0h0hea5sfmo13j3ic",
-      "text": "Test idea from Siri shortcut — if you see this, it works!",
-      "createdAt": "2026-04-16T06:26:22.212Z"
-    },
-    {
       "id": "idea_tabsummarizer",
       "text": "Browser extension that auto-summarizes any open tab using Claude API — one-click summary sidebar",
       "createdAt": "2026-04-13T00:00:00.000Z"
-    },
-    {
-      "id": "idea_strongviz",
-      "text": "Strong app data visualizer — chart PRs, volume trends, rest times over time from exported CSV",
-      "createdAt": "2026-04-11T00:00:00.000Z"
-    },
-    {
-      "id": "idea_danidash",
-      "text": "Dani Calder control dashboard — content queue viewer, persona state tracker, platform stats, cost monitor",
-      "createdAt": "2026-04-10T00:00:00.000Z"
     }
   ],
   "_syncedRepos": [

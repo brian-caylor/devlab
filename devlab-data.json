@@ -225,7 +225,7 @@
           "priority": "medium",
           "dueDate": "2026-04-16",
           "order": 0,
-          "completedAt": null,
+          "completedAt": "2026-04-16T21:01:57.381Z",
           "labels": [
             "feature"
           ],
@@ -234,7 +234,7 @@
           "milestoneId": null,
           "id": "mh1bswwh31pmo1479ae",
           "title": "Test \"Hey Siri, DevLab Idea\" to ensure it runs the shortcut and works",
-          "status": "todo",
+          "status": "done",
           "createdAt": "2026-04-16T06:45:09.446Z"
         },
         {
@@ -283,7 +283,7 @@
       "repo": "github.com/brian-caylor/devlab",
       "notes": "",
       "createdAt": "2026-04-15T05:26:27Z",
-      "lastUpdated": "2026-04-16T06:58:40.377Z"
+      "lastUpdated": "2026-04-16T21:01:57.385Z"
     },
     {
       "priority": "none",

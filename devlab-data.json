@@ -488,11 +488,6 @@
       "id": "idea_strongviz",
       "text": "Strong app data visualizer — chart PRs, volume trends, rest times over time from exported CSV",
       "createdAt": "2026-04-11T00:00:00.000Z"
-    },
-    {
-      "id": "idea_danidash",
-      "text": "Dani Calder control dashboard — content queue viewer, persona state tracker, platform stats, cost monitor",
-      "createdAt": "2026-04-10T00:00:00.000Z"
     }
   ],
   "_syncedRepos": [

@@ -1433,19 +1433,18 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
           </button>
         )}
 
-        {/* Title */}
-        <span onClick={onToggleExpand}
-          style={{ flex:1, fontSize:13, color: isDone ? '#4a4a6a' : '#d8d8e8', textDecoration: isDone ? 'line-through' : 'none', cursor:'pointer', minWidth:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-          {task.title}
-        </span>
-
-        {/* Project label (global tasks view) — immediately after title */}
-        {projectLabel && (
-          <button onClick={(e) => { e.stopPropagation(); onOpenProject && onOpenProject(); }}
-            style={{ fontSize:9, fontWeight:500, padding:'2px 8px', borderRadius:5, background:'#18182a', color:'#7070a0', border:'none', cursor:'pointer', flexShrink:0, lineHeight:1.3, maxWidth:120, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-            {projectLabel}
-          </button>
-        )}
+        {/* Title + Project label grouped together */}
+        <div onClick={onToggleExpand} style={{ flex:1, display:'flex', alignItems:'center', gap:6, minWidth:0, cursor:'pointer' }}>
+          <span style={{ fontSize:13, color: isDone ? '#4a4a6a' : '#d8d8e8', textDecoration: isDone ? 'line-through' : 'none', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+            {task.title}
+          </span>
+          {projectLabel && (
+            <button onClick={(e) => { e.stopPropagation(); onOpenProject && onOpenProject(); }}
+              style={{ fontSize:9, fontWeight:500, padding:'2px 8px', borderRadius:5, background:'#18182a', color:'#7070a0', border:'none', cursor:'pointer', flexShrink:0, lineHeight:1.3, maxWidth:120, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+              {projectLabel}
+            </button>
+          )}
+        </div>
 
         {/* Label chips */}
         {(task.labels || []).length > 0 && (

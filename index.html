@@ -1419,19 +1419,12 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
           {isDone && <span style={{ color:'#00e676', fontSize:11, lineHeight:1 }}>✓</span>}
         </button>
 
-        {/* Priority badge */}
-        {task.priority && task.priority !== 'none' && (
-          <button onClick={cyclePriority}
-            style={{ fontSize:9, fontWeight:600, padding:'2px 6px', borderRadius:99, letterSpacing:'0.04em', textTransform:'uppercase', color:pr.color, background:pr.bg, border:'none', cursor:'pointer', flexShrink:0, lineHeight:1.3 }}>
-            {pr.label}
-          </button>
-        )}
-        {(!task.priority || task.priority === 'none') && (
-          <button onClick={cyclePriority}
-            style={{ fontSize:9, padding:'2px 6px', borderRadius:99, color:'#3a3a55', background:'transparent', border:'1px solid #1a1a2a', cursor:'pointer', flexShrink:0, lineHeight:1.3 }}>
-            pri
-          </button>
-        )}
+        {/* Priority selector */}
+        <select value={task.priority || 'none'} onClick={e => e.stopPropagation()}
+          onChange={e => { e.stopPropagation(); onUpdate(projectId, task.id, { priority: e.target.value }); }}
+          style={{ fontSize:9, fontWeight:600, padding:'2px 4px', borderRadius:99, letterSpacing:'0.04em', textTransform:'uppercase', color:pr.color, background:pr.bg, border: (task.priority && task.priority !== 'none') ? 'none' : '1px solid #1a1a2a', cursor:'pointer', flexShrink:0, lineHeight:1.3, outline:'none', appearance:'none', WebkitAppearance:'none', paddingRight:12, backgroundImage:`url("data:image/svg+xml,%3Csvg width='8' height='5' viewBox='0 0 8 5' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L4 4L7 1' stroke='%234a4a6a' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E")`, backgroundRepeat:'no-repeat', backgroundPosition:'right 3px center' }}>
+          {PRIORITY_CYCLE.map(p => <option key={p} value={p} style={{ background:'#10101a', color: PRIORITY[p]?.color || '#3a3a55' }}>{PRIORITY[p]?.label || 'None'}</option>)}
+        </select>
 
         {/* Title + Project label grouped together */}
         <div onClick={onToggleExpand} style={{ flex:1, display:'flex', alignItems:'center', gap:6, minWidth:0, cursor:'pointer' }}>

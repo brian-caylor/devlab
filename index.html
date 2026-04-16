@@ -319,15 +319,17 @@ const loadCreds = () => { try { return JSON.parse(localStorage.getItem(CREDS_KEY
 const saveCreds = (c) => localStorage.setItem(CREDS_KEY, JSON.stringify(c));
 const dropCreds = () => localStorage.removeItem(CREDS_KEY);
 
-// ── Setup Screen ───────────────────────────────────────────────────────────────
-function Setup({ onSave }) {
-  const [owner,   setOwner]   = useState('Brian-Caylor');
-  const [repo,    setRepo]    = useState('devlab');
-  const [token,   setToken]   = useState('');
-  const [err,     setErr]     = useState('');
+// ── Landing Page ──────────────────────────────────────────────────────────────
+function LandingPage({ onSave }) {
+  const [showConnect, setShowConnect] = useState(() => window.location.search.includes('connect'));
+  const [owner, setOwner] = useState('');
+  const [repo, setRepo] = useState('');
+  const [token, setToken] = useState('');
+  const [err, setErr] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleConnect = async () => {
+    if (!owner.trim() || !repo.trim()) { setErr('Owner and repo are required.'); return; }
     if (!token.trim()) { setErr('A Personal Access Token is required.'); return; }
     setLoading(true); setErr('');
     const creds = { owner: owner.trim(), repo: repo.trim(), token: token.trim() };
@@ -335,7 +337,7 @@ function Setup({ onSave }) {
       await ghRequest(creds, 'GET', DATA_FILE);
     } catch (e) {
       if (!e.message.includes('404')) {
-        setErr(e.message.includes('401') ? 'Token invalid or expired — check your PAT.' : e.message);
+        setErr(e.message.includes('401') ? 'Token invalid or expired.' : e.message);
         setLoading(false); return;
       }
     }
@@ -344,57 +346,101 @@ function Setup({ onSave }) {
     setLoading(false);
   };
 
-  const inputStyle = {
-    width: '100%', background: '#0c0c16', border: '1px solid #1a1a2a',
-    borderRadius: 8, padding: '10px 14px', color: '#d8d8e8', fontSize: 14, outline: 'none',
-  };
-  const labelStyle = {
-    display: 'block', fontSize: 10, fontWeight: 600, color: '#4a4a6a',
-    letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6,
-  };
+  const inputStyle = { width:'100%', background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:8, padding:'10px 14px', color:'#d8d8e8', fontSize:14, outline:'none' };
+  const labelStyle = { display:'block', fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:6 };
+  const features = [
+    { icon: '◈', title: 'Git-backed data', desc: 'Every save is a real commit. Your data lives in your repo — no vendor lock-in.' },
+    { icon: '✓', title: 'Tasks & Kanban', desc: 'Tasks with priorities, due dates, labels, sub-tasks, and a drag-and-drop Kanban board per project.' },
+    { icon: '⚡', title: 'GitHub integration', desc: 'See recent commits, open PRs, and issues directly inside each project.' },
+    { icon: '✨', title: 'AI-powered', desc: 'Claude suggests your next tasks and writes weekly digest summaries.' },
+    { icon: '🔍', title: 'Global search', desc: 'Cmd+K to instantly find any project, task, or idea across everything.' },
+    { icon: '🗣', title: 'Siri quick-capture', desc: '"Hey Siri, DevLab Idea" — capture ideas from your phone, watch, or Mac.' },
+  ];
 
   return (
-    <div style={{ minHeight:'100vh', background:'#08080f', display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
-      <div style={{ width:'100%', maxWidth:440, background:'#10101a', border:'1px solid #1e1e2e', borderRadius:16, padding:32 }}>
-        <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:6 }}>
-          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:24, fontWeight:700, letterSpacing:'0.14em', color:'#fff' }}>DEV LAB</span>
-          <span style={{ fontSize:10, background:'rgba(0,230,118,0.10)', color:'#00e676', padding:'2px 8px', borderRadius:99, letterSpacing:'0.08em', fontWeight:600 }}>SETUP</span>
-        </div>
-        <p style={{ fontSize:13, color:'#4a4a6a', marginBottom:28, lineHeight:1.6 }}>
-          Connect a GitHub repo to store your projects and ideas. Every save is a real git commit — works anywhere with a browser.
-        </p>
-
-        <div style={{ marginBottom:14 }}>
-          <label style={labelStyle}>GitHub Repo Owner</label>
-          <input value={owner} onChange={e => setOwner(e.target.value)} placeholder="Brian-Caylor" style={inputStyle}/>
-        </div>
-        <div style={{ marginBottom:14 }}>
-          <label style={labelStyle}>Repo Name</label>
-          <input value={repo} onChange={e => setRepo(e.target.value)} placeholder="devlab" style={inputStyle}/>
-        </div>
-        <div style={{ marginBottom:24 }}>
-          <label style={labelStyle}>Personal Access Token (PAT)</label>
-          <input type="password" value={token} onChange={e => setToken(e.target.value)}
-            placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style={inputStyle}
-            onKeyDown={e => e.key === 'Enter' && handleConnect()}/>
-          <p style={{ fontSize:11, color:'#3a3a55', marginTop:7, lineHeight:1.5 }}>
-            Needs <code style={{color:'#5a5a9a', fontFamily:"'JetBrains Mono',monospace"}}>repo</code> scope. Stored only in your browser.{' '}
-            <a href={`https://github.com/settings/tokens/new?scopes=repo&description=DevLab`}
-              target="_blank" rel="noopener noreferrer" style={{ color:'#29b6f6' }}>
-              Create one →
-            </a>
+    <div style={{ minHeight:'100vh', background:'#08080f', color:'#d8d8e8', fontFamily:"'DM Sans',sans-serif" }}>
+      <div style={{ maxWidth:800, margin:'0 auto', padding:'80px 24px 60px' }}>
+        {/* Hero */}
+        <div style={{ textAlign:'center', marginBottom:60 }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:12, marginBottom:16 }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00e676" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+            </svg>
+            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:36, fontWeight:700, letterSpacing:'0.14em', color:'#fff' }}>DEV LAB</span>
+          </div>
+          <p style={{ fontSize:18, color:'#7070a0', lineHeight:1.7, maxWidth:540, margin:'0 auto 12px' }}>
+            A personal project management tool for solo developers. Track projects, tasks, ideas, and milestones — all backed by Git.
+          </p>
+          <p style={{ fontSize:13, color:'#4a4a6a', lineHeight:1.6 }}>
+            Single-file React app. No build step. No database. Just a GitHub repo and a browser.
           </p>
         </div>
 
-        {err && <div style={{ color:'#ef5350', fontSize:12, marginBottom:14, lineHeight:1.5 }}>{err}</div>}
+        {/* Features grid */}
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(220px, 1fr))', gap:16, marginBottom:48 }}>
+          {features.map(f => (
+            <div key={f.title} style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:'20px 18px' }}>
+              <div style={{ fontSize:18, marginBottom:8 }}>{f.icon}</div>
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:15, fontWeight:700, color:'#fff', letterSpacing:'0.03em', marginBottom:6 }}>{f.title}</div>
+              <div style={{ fontSize:12.5, color:'#7070a0', lineHeight:1.6 }}>{f.desc}</div>
+            </div>
+          ))}
+        </div>
 
-        <button onClick={handleConnect} disabled={loading} style={{
-          width:'100%', padding:12, background:'#00e676', border:'none', borderRadius:9,
-          color:'#000', fontSize:14, fontWeight:600, cursor: loading?'not-allowed':'pointer',
-          opacity: loading ? .65 : 1, transition:'opacity .15s',
-        }}>
-          {loading ? 'Connecting…' : 'Connect & Launch →'}
-        </button>
+        {/* CTA */}
+        <div style={{ textAlign:'center', marginBottom:48 }}>
+          <a href="https://github.com/Brian-Caylor/devlab" target="_blank" rel="noopener noreferrer"
+            style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'14px 28px', background:'#00e676', color:'#000', borderRadius:10, fontSize:15, fontWeight:600, textDecoration:'none', transition:'opacity .15s' }}
+            onMouseOver={e => e.currentTarget.style.opacity='0.85'}
+            onMouseOut={e => e.currentTarget.style.opacity='1'}>
+            Clone on GitHub →
+          </a>
+          <p style={{ fontSize:12, color:'#3a3a55', marginTop:14, lineHeight:1.6 }}>
+            Clone the repo, deploy to Netlify, connect your GitHub PAT — running in under 10 minutes.
+          </p>
+        </div>
+
+        {/* Tech footer */}
+        <div style={{ textAlign:'center', borderTop:'1px solid #18182a', paddingTop:24 }}>
+          <div style={{ display:'flex', justifyContent:'center', gap:16, flexWrap:'wrap', marginBottom:12 }}>
+            {['React 18', 'GitHub API', 'Netlify', 'Claude API', 'Zero dependencies'].map(t => (
+              <span key={t} style={{ fontSize:10, padding:'3px 10px', borderRadius:5, background:'#18182a', color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>{t}</span>
+            ))}
+          </div>
+          <p style={{ fontSize:11, color:'#3a3a55' }}>
+            Built by <a href="https://github.com/Brian-Caylor" target="_blank" rel="noopener noreferrer" style={{ color:'#29b6f6', textDecoration:'none' }}>Brian Caylor</a>
+            {' · '}
+            <span onClick={() => setShowConnect(!showConnect)} style={{ color:'#3a3a55', cursor:'pointer' }}>connect</span>
+          </p>
+        </div>
+
+        {/* Hidden connect form — for owner setup */}
+        {showConnect && (
+          <div style={{ maxWidth:400, margin:'32px auto 0', background:'#10101a', border:'1px solid #1e1e2e', borderRadius:12, padding:24 }}>
+            <div style={{ fontSize:10, fontWeight:600, color:'#4a4a6a', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:16 }}>Connect Your Instance</div>
+            <div style={{ marginBottom:12 }}>
+              <label style={labelStyle}>GitHub Owner</label>
+              <input value={owner} onChange={e => setOwner(e.target.value)} placeholder="your-github-username" style={inputStyle}/>
+            </div>
+            <div style={{ marginBottom:12 }}>
+              <label style={labelStyle}>Repo Name</label>
+              <input value={repo} onChange={e => setRepo(e.target.value)} placeholder="your-repo-name" style={inputStyle}/>
+            </div>
+            <div style={{ marginBottom:16 }}>
+              <label style={labelStyle}>Personal Access Token</label>
+              <input type="password" value={token} onChange={e => setToken(e.target.value)} placeholder="ghp_…" style={inputStyle}
+                onKeyDown={e => e.key === 'Enter' && handleConnect()}/>
+            </div>
+            {err && <div style={{ color:'#ef5350', fontSize:12, marginBottom:12 }}>{err}</div>}
+            <button onClick={handleConnect} disabled={loading} style={{
+              width:'100%', padding:11, background:'#00e676', border:'none', borderRadius:8,
+              color:'#000', fontSize:13, fontWeight:600, cursor: loading?'not-allowed':'pointer',
+              opacity: loading?.65:1, transition:'opacity .15s',
+            }}>
+              {loading ? 'Connecting…' : 'Connect & Launch →'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -635,7 +681,7 @@ function App() {
   }, []);
 
   if (!creds) {
-    return <Setup onSave={(c) => { setCreds(c); }} />;
+    return <LandingPage onSave={(c) => setCreds(c)} />;
   }
 
   // ── Derived data ──

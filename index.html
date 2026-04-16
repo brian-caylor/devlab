@@ -171,7 +171,51 @@ const normalizeProject = (p, idx) => {
 const normalizeData = (data) => ({
   projects: (data.projects || []).map((p, i) => normalizeProject(p, i)),
   ideas: data.ideas || [],
+  _syncedRepos: data._syncedRepos || [],
 });
+
+// ── GitHub repo auto-sync ─────────────────────────────────────────────────────
+function repoSlug(repoField) {
+  if (!repoField) return null;
+  return repoField.replace(/^https?:\/\//, '').replace(/^github\.com\//, '').replace(/\/$/, '').toLowerCase();
+}
+
+async function syncGitHubRepos(creds, existingProjects, syncedRepos) {
+  try {
+    const res = await fetch('https://api.github.com/user/repos?type=owner&sort=pushed&per_page=100', {
+      headers: { Authorization: `Bearer ${creds.token}`, Accept: 'application/vnd.github.v3+json' },
+    });
+    if (!res.ok) return null;
+    const repos = await res.json();
+
+    const existingSlugs = new Set(existingProjects.map(p => repoSlug(p.repo)).filter(Boolean));
+    const syncedSet = new Set(syncedRepos.map(s => s.toLowerCase()));
+    const newProjects = [];
+    const allSlugs = [...syncedRepos];
+    const now14 = Date.now() - 14 * 86400000;
+    const now90 = Date.now() - 90 * 86400000;
+
+    for (const r of repos) {
+      if (r.fork || r.archived) continue;
+      const slug = `${r.owner.login}/${r.name}`.toLowerCase();
+      if (!syncedSet.has(slug)) allSlugs.push(slug);
+      if (existingSlugs.has(slug) || syncedSet.has(slug)) continue;
+
+      const pushed = new Date(r.pushed_at || 0).getTime();
+      const status = pushed > now14 ? 'active' : pushed > now90 ? 'paused' : 'archived';
+
+      newProjects.push(normalizeProject({
+        id: uid(), name: r.name, description: r.description || '',
+        status, priority: 'none', machines: [], aiModel: '',
+        repo: `github.com/${r.full_name}`, notes: '',
+        createdAt: r.created_at, lastUpdated: r.pushed_at || r.created_at,
+        tasks: [], milestones: [],
+      }, existingProjects.length + newProjects.length));
+    }
+
+    return { newProjects, _syncedRepos: allSlugs };
+  } catch { return null; }
+}
 
 // ── Phase 2 utilities ─────────────────────────────────────────────────────────
 function relativeTime(iso) {
@@ -375,6 +419,7 @@ function App() {
   const shaRef     = useRef(sha);
   const projRef    = useRef(projects);
   const ideaStateRef = useRef(ideas);
+  const syncedReposRef = useRef([]);
   shaRef.current       = sha;
   projRef.current      = projects;
   ideaStateRef.current = ideas;
@@ -396,11 +441,33 @@ function App() {
       try {
         const { data, sha: fileSha } = await loadFromGH(creds);
         const nd = normalizeData(data);
-        setProjects(nd.projects);
-        setIdeas(nd.ideas);
+        let loadedProjects = nd.projects;
+        let loadedSynced = nd._syncedRepos;
         setSha(fileSha);
         shaRef.current = fileSha;
+        setIdeas(nd.ideas);
+        ideaStateRef.current = nd.ideas;
         setSync('idle');
+
+        // Auto-import repos from GitHub
+        const syncResult = await syncGitHubRepos(creds, loadedProjects, loadedSynced);
+        if (syncResult && syncResult.newProjects.length > 0) {
+          loadedProjects = [...loadedProjects, ...syncResult.newProjects];
+          loadedSynced = syncResult._syncedRepos;
+          syncedReposRef.current = loadedSynced;
+          setProjects(loadedProjects);
+          projRef.current = loadedProjects;
+          // Save the newly imported projects
+          try {
+            const newSha = await saveToGH(creds, { projects: loadedProjects, ideas: nd.ideas, _syncedRepos: loadedSynced }, shaRef.current);
+            setSha(newSha);
+            shaRef.current = newSha;
+          } catch {}
+        } else {
+          syncedReposRef.current = syncResult ? syncResult._syncedRepos : loadedSynced;
+          setProjects(loadedProjects);
+          projRef.current = loadedProjects;
+        }
       } catch (e) {
         if (e.message.includes('404')) {
           setSync('idle');
@@ -422,7 +489,7 @@ function App() {
       try {
         const newSha = await saveToGH(
           creds,
-          { projects: projRef.current, ideas: ideaStateRef.current },
+          { projects: projRef.current, ideas: ideaStateRef.current, _syncedRepos: syncedReposRef.current },
           shaRef.current
         );
         setSha(newSha);
@@ -444,7 +511,10 @@ function App() {
       const { data, sha: fileSha } = await loadFromGH(creds);
       const nd = normalizeData(data);
       setProjects(nd.projects);
+      projRef.current = nd.projects;
       setIdeas(nd.ideas);
+      ideaStateRef.current = nd.ideas;
+      syncedReposRef.current = nd._syncedRepos;
       setSha(fileSha);
       shaRef.current = fileSha;
       setSync('idle');

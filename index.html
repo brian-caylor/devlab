@@ -15,8 +15,8 @@
     html, body { background: #08080f; min-height: 100vh; }
     #root { min-height: 100vh; }
     ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #1e1e32; border-radius: 4px; }
+    ::-webkit-scrollbar-track { background: #10101a; }
+    ::-webkit-scrollbar-thumb { background: #2e2e4a; border-radius: 4px; }
     input, textarea, button, select { font-family: 'DM Sans', sans-serif; }
     input::placeholder, textarea::placeholder { color: #6a6a88; }
     textarea { resize: vertical; }
@@ -43,7 +43,7 @@
 
     .task-row { transition: background .12s; }
     .task-row:hover { background: rgba(255,255,255,0.025); }
-    .drag-handle { cursor: grab; opacity: .3; transition: opacity .15s; user-select: none; -webkit-user-select: none; touch-action: none; }
+    .drag-handle { cursor: grab; opacity: .5; transition: opacity .15s; user-select: none; -webkit-user-select: none; touch-action: none; }
     .drag-handle:hover { opacity: 1; }
     .drag-over-top { box-shadow: 0 -2px 0 0 #00e676; }
     .drag-over-bottom { box-shadow: 0 2px 0 0 #00e676; }
@@ -51,12 +51,12 @@
     .md-preview h1 { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; margin: 14px 0 6px; color: #d8d8e8; }
     .md-preview h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; margin: 12px 0 5px; color: #d8d8e8; }
     .md-preview h3 { font-size: 15px; font-weight: 600; margin: 10px 0 4px; color: #d8d8e8; }
-    .md-preview p { margin: 4px 0; line-height: 1.65; color: #7070a0; font-size: 13.5px; }
+    .md-preview p { margin: 4px 0; line-height: 1.65; color: #9090b8; font-size: 14px; }
     .md-preview code { background: #0c0c16; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #b0b0cc; }
     .md-preview pre { background: #0c0c16; padding: 14px; border-radius: 8px; overflow-x: auto; margin: 8px 0; border: 1px solid #18182a; }
     .md-preview pre code { padding: 0; background: none; font-size: 12.5px; line-height: 1.6; }
     .md-preview ul, .md-preview ol { padding-left: 20px; margin: 6px 0; }
-    .md-preview li { margin: 3px 0; color: #7070a0; font-size: 13.5px; line-height: 1.6; }
+    .md-preview li { margin: 3px 0; color: #9090b8; font-size: 14px; line-height: 1.6; }
     .md-preview a { color: #29b6f6; text-decoration: underline; }
     .md-preview a:hover { color: #4fc3f7; }
     .md-preview hr { border: none; border-top: 1px solid #18182a; margin: 14px 0; }
@@ -85,7 +85,7 @@ const STATUS = {
   paused:   { label: 'Paused',   color: '#ffa726', bg: 'rgba(255,167,38,0.10)' },
   released: { label: 'Released', color: '#29b6f6', bg: 'rgba(41,182,246,0.10)' },
   idea:     { label: 'Idea',     color: '#ce93d8', bg: 'rgba(206,147,216,0.10)' },
-  archived: { label: 'Archived', color: '#546e7a', bg: 'rgba(84,110,122,0.10)' },
+  archived: { label: 'Archived', color: '#7a90a0', bg: 'rgba(84,110,122,0.10)' },
 };
 
 const TASK_STATUS = {
@@ -405,7 +405,7 @@ function LandingPage({ onSave }) {
         <div style={{ textAlign:'center', borderTop:'1px solid #18182a', paddingTop:24 }}>
           <div style={{ display:'flex', justifyContent:'center', gap:16, flexWrap:'wrap', marginBottom:12 }}>
             {['React 18', 'GitHub API', 'Netlify', 'Claude API', 'Zero dependencies'].map(t => (
-              <span key={t} style={{ fontSize:10, padding:'3px 10px', borderRadius:5, background:'#18182a', color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>{t}</span>
+              <span key={t} style={{ fontSize:10, padding:'3px 10px', borderRadius:5, background:'#18182a', color:'#7a7a98', fontFamily:"'JetBrains Mono',monospace" }}>{t}</span>
             ))}
           </div>
           <p style={{ fontSize:11, color:'#3a3a55' }}>
@@ -1447,13 +1447,13 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
               const lc = LABEL_COLORS[l] || DEFAULT_LABEL_COLOR;
               return <span key={l} style={{ fontSize:9, fontWeight:600, padding:'1px 6px', borderRadius:99, color:lc.color, background:lc.bg, letterSpacing:'0.04em', maxWidth:70, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{l}</span>;
             })}
-            {(task.labels || []).length > 3 && <span style={{ fontSize:9, color:'#4a4a6a' }}>+{task.labels.length - 3}</span>}
+            {(task.labels || []).length > 3 && <span style={{ fontSize:9, color:'#7070a0' }}>+{task.labels.length - 3}</span>}
           </div>
         )}
 
         {/* Sub-task count */}
         {(task.subtasks || []).length > 0 && (
-          <span style={{ fontSize:9, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace", flexShrink:0 }}>
+          <span style={{ fontSize:9, color:'#7070a0', fontFamily:"'JetBrains Mono',monospace", flexShrink:0 }}>
             {(task.subtasks||[]).filter(s=>s.status==='done').length}/{(task.subtasks||[]).length} ◦
           </span>
         )}
@@ -1691,7 +1691,7 @@ function KanbanBoard({ tasks, projectId, onUpdate, expandedId, setExpandedId, on
                         return <span key={l} style={{ fontSize:8, padding:'1px 5px', borderRadius:99, color:lc.color, background:lc.bg }}>{l}</span>;
                       })}
                       {task.dueDate && <span style={{ fontSize:9, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>{new Date(task.dueDate+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>}
-                      {(task.subtasks||[]).length > 0 && <span style={{ fontSize:9, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>{(task.subtasks||[]).filter(s=>s.status==='done').length}/{(task.subtasks||[]).length} ◦</span>}
+                      {(task.subtasks||[]).length > 0 && <span style={{ fontSize:9, color:'#7070a0', fontFamily:"'JetBrains Mono',monospace" }}>{(task.subtasks||[]).filter(s=>s.status==='done').length}/{(task.subtasks||[]).length} ◦</span>}
                     </div>
                   </div>
                 );

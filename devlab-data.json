@@ -242,7 +242,7 @@
           "title": "Consider allowing the ReadMe.md files to be visible from DevLab projects",
           "description": "",
           "status": "todo",
-          "priority": "none",
+          "priority": "low",
           "dueDate": null,
           "order": 1,
           "createdAt": "2026-04-16T06:56:31.197Z",
@@ -260,7 +260,7 @@
       "repo": "github.com/brian-caylor/devlab",
       "notes": "",
       "createdAt": "2026-04-15T05:26:27Z",
-      "lastUpdated": "2026-04-16T06:56:48.706Z"
+      "lastUpdated": "2026-04-16T06:56:50.546Z"
     },
     {
       "priority": "none",

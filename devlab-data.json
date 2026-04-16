@@ -408,7 +408,7 @@
       "order": 19,
       "tasks": [],
       "milestones": [],
-      "hidden": true,
+      "hidden": false,
       "id": "c6l0bc4azhcmo123jau",
       "name": "Test",
       "description": "",

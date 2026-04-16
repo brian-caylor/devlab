@@ -217,7 +217,7 @@
       "createdAt": "2025-11-01T00:00:00.000Z"
     },
     {
-      "priority": "none",
+      "priority": "high",
       "order": 8,
       "tasks": [
         {
@@ -242,11 +242,11 @@
       "description": "a way to manage multiple projects across multiple computers and models",
       "status": "active",
       "machines": [],
-      "aiModel": "",
+      "aiModel": "Claude",
       "repo": "github.com/brian-caylor/devlab",
       "notes": "",
       "createdAt": "2026-04-15T05:26:27Z",
-      "lastUpdated": "2026-04-16T06:45:29.895Z"
+      "lastUpdated": "2026-04-16T06:47:14.246Z"
     },
     {
       "priority": "none",

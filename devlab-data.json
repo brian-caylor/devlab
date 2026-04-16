@@ -221,18 +221,21 @@
       "order": 8,
       "tasks": [
         {
-          "id": "mh1bswwh31pmo1479ae",
-          "title": "Test \"Hey Siri, DevLab Idea\" to ensure it runs the shortcut and works",
           "description": "",
-          "status": "todo",
           "priority": "medium",
           "dueDate": "2026-04-16",
           "order": 0,
-          "createdAt": "2026-04-16T06:45:09.446Z",
           "completedAt": null,
           "labels": [
             "feature"
-          ]
+          ],
+          "subtasks": [],
+          "githubLink": null,
+          "milestoneId": null,
+          "id": "mh1bswwh31pmo1479ae",
+          "title": "Test \"Hey Siri, DevLab Idea\" to ensure it runs the shortcut and works",
+          "status": "todo",
+          "createdAt": "2026-04-16T06:45:09.446Z"
         }
       ],
       "milestones": [],
@@ -261,9 +264,9 @@
       "machines": [],
       "aiModel": "",
       "repo": "github.com/brian-caylor/Brian-caylor",
-      "notes": "",
+      "notes": "GitHub Profile",
       "createdAt": "2026-04-13T04:58:06Z",
-      "lastUpdated": "2026-04-13T04:59:30Z"
+      "lastUpdated": "2026-04-16T06:53:31.471Z"
     },
     {
       "priority": "none",

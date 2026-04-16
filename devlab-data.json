@@ -221,7 +221,7 @@
       "order": 8,
       "tasks": [
         {
-          "description": "",
+          "description": "Confirmed to work from my iPhone.  ",
           "priority": "medium",
           "dueDate": "2026-04-16",
           "order": 0,
@@ -283,7 +283,7 @@
       "repo": "github.com/brian-caylor/devlab",
       "notes": "",
       "createdAt": "2026-04-15T05:26:27Z",
-      "lastUpdated": "2026-04-16T21:01:57.385Z"
+      "lastUpdated": "2026-04-16T21:02:19.739Z"
     },
     {
       "priority": "none",

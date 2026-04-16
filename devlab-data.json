@@ -253,7 +253,7 @@
           "title": "Need to be able to clear/hide completed tasks from Tasks window",
           "description": "",
           "status": "todo",
-          "priority": "medium",
+          "priority": "high",
           "dueDate": "2026-04-16",
           "order": 2,
           "createdAt": "2026-04-16T06:58:06.292Z",
@@ -271,7 +271,7 @@
       "repo": "github.com/brian-caylor/devlab",
       "notes": "",
       "createdAt": "2026-04-15T05:26:27Z",
-      "lastUpdated": "2026-04-16T06:58:13.872Z"
+      "lastUpdated": "2026-04-16T06:58:16.158Z"
     },
     {
       "priority": "none",

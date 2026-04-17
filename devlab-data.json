@@ -270,6 +270,17 @@
           "title": "Need to be able to clear/hide completed tasks from Tasks window",
           "status": "done",
           "createdAt": "2026-04-16T06:58:06.292Z"
+        },
+        {
+          "id": "spsvsn1ak3dmo33sxi5",
+          "title": "Add project templates for common development setups to speed up new project creation",
+          "description": "",
+          "status": "todo",
+          "priority": "medium",
+          "dueDate": null,
+          "order": 3,
+          "createdAt": "2026-04-17T16:09:33.341Z",
+          "completedAt": null
         }
       ],
       "milestones": [],
@@ -283,7 +294,7 @@
       "repo": "github.com/brian-caylor/devlab",
       "notes": "",
       "createdAt": "2026-04-15T05:26:27Z",
-      "lastUpdated": "2026-04-17T15:11:20.009Z"
+      "lastUpdated": "2026-04-17T16:09:33.341Z"
     },
     {
       "priority": "none",

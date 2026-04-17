@@ -11,23 +11,62 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { color-scheme: dark; }
-    html, body { background: #08080f; min-height: 100vh; }
+    :root {
+      color-scheme: dark;
+      --bg: #08080f;
+      --surface: #10101a;
+      --surface-raised: #0c0c16;
+      --border: var(--border);
+      --border-alt: var(--border-alt);
+      --border-emphasis: #252538;
+      --text-primary: #d8d8e8;
+      --text-secondary: #9090b8;
+      --text-muted: #7a7a98;
+      --text-faint: #7070a0;
+      --text-dim: #5a5a7a;
+      --text-dimmer: #4a4a6a;
+      --text-placeholder: #6a6a88;
+      --scrollbar-thumb: #2e2e4a;
+      --scrollbar-track: #10101a;
+      --hover-overlay: rgba(255,255,255,0.035);
+      --hover-overlay-soft: rgba(255,255,255,0.025);
+    }
+    [data-theme="light"] {
+      color-scheme: light;
+      --bg: #f4f4f8;
+      --surface: #ffffff;
+      --surface-raised: #f2f2f7;
+      --border: #e4e4ec;
+      --border-alt: #d8d8e0;
+      --border-emphasis: #b8b8c4;
+      --text-primary: #0a0a18;
+      --text-secondary: #2a2a40;
+      --text-muted: #4a4a6a;
+      --text-faint: #5a5a78;
+      --text-dim: #7a7a98;
+      --text-dimmer: #9090b0;
+      --text-placeholder: #9898b0;
+      --scrollbar-thumb: #c8c8d0;
+      --scrollbar-track: #eaeaf0;
+      --hover-overlay: rgba(0,0,0,0.05);
+      --hover-overlay-soft: rgba(0,0,0,0.03);
+    }
+    html, body { background: var(--bg); min-height: 100vh; }
     #root { min-height: 100vh; }
     ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: #10101a; }
-    ::-webkit-scrollbar-thumb { background: #2e2e4a; border-radius: 4px; }
+    ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+    ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
     input, textarea, button, select { font-family: 'DM Sans', sans-serif; }
-    input::placeholder, textarea::placeholder { color: #6a6a88; }
+    input::placeholder, textarea::placeholder { color: var(--text-placeholder); }
     textarea { resize: vertical; }
     a { color: inherit; text-decoration: none; }
     input:focus, textarea:focus, select:focus, button:focus-visible { outline: 1px solid #29b6f6; outline-offset: 1px; }
 
     .card { transition: transform .18s ease, border-color .18s ease; cursor: pointer; }
-    .card:hover { transform: translateY(-2px); border-color: #252538 !important; }
+    .card:hover { transform: translateY(-2px); border-color: var(--border-emphasis) !important; }
     .pill { transition: all .14s ease; cursor: pointer; }
     .idea-row { transition: background .15s; }
-    .idea-row:hover { background: rgba(255,255,255,0.035) !important; }
+    .idea-row:hover { background: var(--hover-overlay) !important; }
     .icon-btn { transition: opacity .15s; opacity: .6; cursor: pointer; }
     .icon-btn:hover { opacity: 1; }
     .tab-btn { transition: all .15s; cursor: pointer; }
@@ -42,26 +81,26 @@
     .pulsing { animation: pulse 1.5s infinite; }
 
     .task-row { transition: background .12s; }
-    .task-row:hover { background: rgba(255,255,255,0.025); }
+    .task-row:hover { background: var(--hover-overlay-soft); }
     .drag-handle { cursor: grab; opacity: .5; transition: opacity .15s; user-select: none; -webkit-user-select: none; touch-action: none; }
     .drag-handle:hover { opacity: 1; }
     .drag-over-top { box-shadow: 0 -2px 0 0 #00e676; }
     .drag-over-bottom { box-shadow: 0 2px 0 0 #00e676; }
 
-    .md-preview h1 { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; margin: 14px 0 6px; color: #d8d8e8; }
-    .md-preview h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; margin: 12px 0 5px; color: #d8d8e8; }
-    .md-preview h3 { font-size: 15px; font-weight: 600; margin: 10px 0 4px; color: #d8d8e8; }
-    .md-preview p { margin: 4px 0; line-height: 1.65; color: #9090b8; font-size: 14px; }
-    .md-preview code { background: #0c0c16; padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #b0b0cc; }
-    .md-preview pre { background: #0c0c16; padding: 14px; border-radius: 8px; overflow-x: auto; margin: 8px 0; border: 1px solid #18182a; }
+    .md-preview h1 { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; margin: 14px 0 6px; color: var(--text-primary); }
+    .md-preview h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; margin: 12px 0 5px; color: var(--text-primary); }
+    .md-preview h3 { font-size: 15px; font-weight: 600; margin: 10px 0 4px; color: var(--text-primary); }
+    .md-preview p { margin: 4px 0; line-height: 1.65; color: var(--text-secondary); font-size: 14px; }
+    .md-preview code { background: var(--surface-raised); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--text-primary); }
+    .md-preview pre { background: var(--surface-raised); padding: 14px; border-radius: 8px; overflow-x: auto; margin: 8px 0; border: 1px solid var(--border); }
     .md-preview pre code { padding: 0; background: none; font-size: 12.5px; line-height: 1.6; }
     .md-preview ul, .md-preview ol { padding-left: 20px; margin: 6px 0; }
-    .md-preview li { margin: 3px 0; color: #9090b8; font-size: 14px; line-height: 1.6; }
+    .md-preview li { margin: 3px 0; color: var(--text-secondary); font-size: 14px; line-height: 1.6; }
     .md-preview a { color: #29b6f6; text-decoration: underline; }
     .md-preview a:hover { color: #4fc3f7; }
-    .md-preview hr { border: none; border-top: 1px solid #18182a; margin: 14px 0; }
-    .md-preview strong { color: #d8d8e8; }
-    .md-preview em { font-style: italic; color: #9090b8; }
+    .md-preview hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+    .md-preview strong { color: var(--text-primary); }
+    .md-preview em { font-style: italic; color: var(--text-secondary); }
     .md-preview br { display: block; margin: 4px 0; content: ''; }
 
     @media (max-width: 640px) {
@@ -89,7 +128,7 @@ const STATUS = {
 };
 
 const TASK_STATUS = {
-  todo:        { label: 'Todo',        color: '#9090b8', bg: 'rgba(74,74,106,0.12)' },
+  todo:        { label: 'Todo',        color: 'var(--text-secondary)', bg: 'rgba(74,74,106,0.12)' },
   in_progress: { label: 'In Progress', color: '#ffa726', bg: 'rgba(255,167,38,0.12)' },
   blocked:     { label: 'Blocked',     color: '#ef5350', bg: 'rgba(239,83,80,0.12)' },
   done:        { label: 'Done',        color: '#00e676', bg: 'rgba(0,230,118,0.12)' },
@@ -101,7 +140,7 @@ const PRIORITY = {
   high:     { label: 'High',     color: '#ffa726', bg: 'rgba(255,167,38,0.10)' },
   medium:   { label: 'Medium',   color: '#29b6f6', bg: 'rgba(41,182,246,0.10)' },
   low:      { label: 'Low',      color: '#546e7a', bg: 'rgba(84,110,122,0.10)' },
-  none:     { label: 'None',     color: '#7070a0', bg: 'transparent' },
+  none:     { label: 'None',     color: 'var(--text-faint)', bg: 'transparent' },
 };
 const PRIORITY_CYCLE = ['none', 'low', 'medium', 'high', 'critical'];
 const PRIORITY_ORDER = { critical: 0, high: 1, medium: 2, low: 3, none: 4 };
@@ -117,7 +156,7 @@ const LABEL_COLORS = {
   blocked:  { color: '#ef5350', bg: 'rgba(239,83,80,0.10)' },
   question: { color: '#ffa726', bg: 'rgba(255,167,38,0.10)' },
 };
-const DEFAULT_LABEL_COLOR = { color: '#4a4a6a', bg: 'rgba(74,74,106,0.10)' };
+const DEFAULT_LABEL_COLOR = { color: 'var(--text-dimmer)', bg: 'rgba(74,74,106,0.10)' };
 const ANTHROPIC_KEY = 'devlab-anthropic-key';
 
 // ── Utilities ──────────────────────────────────────────────────────────────────
@@ -245,6 +284,10 @@ const VISIBLE_TABS_KEY = 'devlab-visible-tabs';
 const loadVisibleTabs = () => { try { return JSON.parse(localStorage.getItem(VISIBLE_TABS_KEY)) || OPTIONAL_TABS; } catch { return OPTIONAL_TABS; } };
 const saveVisibleTabs = (tabs) => { try { localStorage.setItem(VISIBLE_TABS_KEY, JSON.stringify(tabs)); } catch {} };
 
+const THEME_KEY = 'devlab-theme';
+const loadTheme = () => { try { return localStorage.getItem(THEME_KEY) || 'dark'; } catch { return 'dark'; } };
+const saveTheme = (t) => { try { localStorage.setItem(THEME_KEY, t); } catch {} };
+
 // ── Markdown parser ───────────────────────────────────────────────────────────
 function renderMarkdown(text) {
   if (!text) return '';
@@ -347,8 +390,8 @@ function LandingPage({ onSave }) {
     setLoading(false);
   };
 
-  const inputStyle = { width:'100%', background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:8, padding:'10px 14px', color:'#d8d8e8', fontSize:14, outline:'none' };
-  const labelStyle = { display:'block', fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:6 };
+  const inputStyle = { width:'100%', background:'var(--surface-raised)', border:'1px solid var(--border-alt)', borderRadius:8, padding:'10px 14px', color:'var(--text-primary)', fontSize:14, outline:'none' };
+  const labelStyle = { display:'block', fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:6 };
   const features = [
     { icon: '◈', title: 'Git-backed data', desc: 'Every save is a real commit. Your data lives in your repo — no vendor lock-in.' },
     { icon: '✓', title: 'Tasks & Kanban', desc: 'Tasks with priorities, due dates, labels, sub-tasks, and a drag-and-drop Kanban board per project.' },
@@ -359,7 +402,7 @@ function LandingPage({ onSave }) {
   ];
 
   return (
-    <div style={{ minHeight:'100vh', background:'#08080f', color:'#d8d8e8', fontFamily:"'DM Sans',sans-serif" }}>
+    <div style={{ minHeight:'100vh', background:'var(--bg)', color:'var(--text-primary)', fontFamily:"'DM Sans',sans-serif" }}>
       <div style={{ maxWidth:800, margin:'0 auto', padding:'80px 24px 60px' }}>
         {/* Hero */}
         <div style={{ textAlign:'center', marginBottom:60 }}>
@@ -369,10 +412,10 @@ function LandingPage({ onSave }) {
             </svg>
             <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:36, fontWeight:700, letterSpacing:'0.14em', color:'#fff' }}>DEV LAB</span>
           </div>
-          <p style={{ fontSize:18, color:'#7070a0', lineHeight:1.7, maxWidth:540, margin:'0 auto 12px' }}>
+          <p style={{ fontSize:18, color:'var(--text-faint)', lineHeight:1.7, maxWidth:540, margin:'0 auto 12px' }}>
             A personal project management tool for solo developers. Track projects, tasks, ideas, and milestones — all backed by Git.
           </p>
-          <p style={{ fontSize:13, color:'#4a4a6a', lineHeight:1.6 }}>
+          <p style={{ fontSize:13, color:'var(--text-dimmer)', lineHeight:1.6 }}>
             Single-file React app. No build step. No database. Just a GitHub repo and a browser.
           </p>
         </div>
@@ -380,10 +423,10 @@ function LandingPage({ onSave }) {
         {/* Features grid */}
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(220px, 1fr))', gap:16, marginBottom:48 }}>
           {features.map(f => (
-            <div key={f.title} style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:'20px 18px' }}>
+            <div key={f.title} style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:'20px 18px' }}>
               <div style={{ fontSize:18, marginBottom:8 }}>{f.icon}</div>
               <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:15, fontWeight:700, color:'#fff', letterSpacing:'0.03em', marginBottom:6 }}>{f.title}</div>
-              <div style={{ fontSize:12.5, color:'#7070a0', lineHeight:1.6 }}>{f.desc}</div>
+              <div style={{ fontSize:12.5, color:'var(--text-faint)', lineHeight:1.6 }}>{f.desc}</div>
             </div>
           ))}
         </div>
@@ -396,29 +439,29 @@ function LandingPage({ onSave }) {
             onMouseOut={e => e.currentTarget.style.opacity='1'}>
             Clone on GitHub →
           </a>
-          <p style={{ fontSize:12, color:'#3a3a55', marginTop:14, lineHeight:1.6 }}>
+          <p style={{ fontSize:12, color:'var(--text-dimmer)', marginTop:14, lineHeight:1.6 }}>
             Clone the repo, deploy to Netlify, connect your GitHub PAT — running in under 10 minutes.
           </p>
         </div>
 
         {/* Tech footer */}
-        <div style={{ textAlign:'center', borderTop:'1px solid #18182a', paddingTop:24 }}>
+        <div style={{ textAlign:'center', borderTop:'1px solid var(--border)', paddingTop:24 }}>
           <div style={{ display:'flex', justifyContent:'center', gap:16, flexWrap:'wrap', marginBottom:12 }}>
             {['React 18', 'GitHub API', 'Netlify', 'Claude API', 'Zero dependencies'].map(t => (
-              <span key={t} style={{ fontSize:10, padding:'3px 10px', borderRadius:5, background:'#18182a', color:'#7a7a98', fontFamily:"'JetBrains Mono',monospace" }}>{t}</span>
+              <span key={t} style={{ fontSize:10, padding:'3px 10px', borderRadius:5, background:'var(--border)', color:'var(--text-muted)', fontFamily:"'JetBrains Mono',monospace" }}>{t}</span>
             ))}
           </div>
-          <p style={{ fontSize:11, color:'#3a3a55' }}>
+          <p style={{ fontSize:11, color:'var(--text-dimmer)' }}>
             Built by <a href="https://github.com/Brian-Caylor" target="_blank" rel="noopener noreferrer" style={{ color:'#29b6f6', textDecoration:'none' }}>Brian Caylor</a>
             {' · '}
-            <span onClick={() => setShowConnect(!showConnect)} style={{ color:'#3a3a55', cursor:'pointer' }}>connect</span>
+            <span onClick={() => setShowConnect(!showConnect)} style={{ color:'var(--text-dimmer)', cursor:'pointer' }}>connect</span>
           </p>
         </div>
 
         {/* Hidden connect form — for owner setup */}
         {showConnect && (
-          <div style={{ maxWidth:400, margin:'32px auto 0', background:'#10101a', border:'1px solid #1e1e2e', borderRadius:12, padding:24 }}>
-            <div style={{ fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:16 }}>Connect Your Instance</div>
+          <div style={{ maxWidth:400, margin:'32px auto 0', background:'var(--surface)', border:'1px solid var(--border-alt)', borderRadius:12, padding:24 }}>
+            <div style={{ fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:16 }}>Connect Your Instance</div>
             <div style={{ marginBottom:12 }}>
               <label style={labelStyle}>GitHub Owner</label>
               <input value={owner} onChange={e => setOwner(e.target.value)} placeholder="your-github-username" style={inputStyle}/>
@@ -467,6 +510,11 @@ function App() {
   const [showSearch, setShowSearch] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [visibleTabs, setVisibleTabs] = useState(loadVisibleTabs);
+  const [theme, setTheme] = useState(loadTheme);
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    saveTheme(theme);
+  }, [theme]);
   const scrollRef  = useRef(0);
   const ideaRef    = useRef(null);
   const saveTimer  = useRef(null);
@@ -707,11 +755,11 @@ function App() {
   const blank    = { name:'', description:'', status:'active', machines:[], repo:'', notes:'', aiModel:'Claude', priority:'none' };
   const activeProject = projects.find(p => p.id === activeProjectId);
 
-  const syncColor = { loading:'#3a3a55', saving:'#ffa726', idle:'#7a9a7a', error:'#ef5350' }[sync];
+  const syncColor = { loading:'var(--text-dimmer)', saving:'#ffa726', idle:'#7a9a7a', error:'#ef5350' }[sync];
   const syncLabel = { loading:'Loading…', saving:'Saving…', idle:'Synced', error:'Error' }[sync];
 
   return (
-    <div style={{ fontFamily:"'DM Sans',sans-serif", background:'#08080f', minHeight:'100vh', color:'#d8d8e8', maxWidth:1400, margin:'0 auto', padding:'0 clamp(20px, 3vw, 48px)', paddingBottom:80 }}>
+    <div style={{ fontFamily:"'DM Sans',sans-serif", background:'var(--bg)', minHeight:'100vh', color:'var(--text-primary)', maxWidth:1400, margin:'0 auto', padding:'0 clamp(20px, 3vw, 48px)', paddingBottom:80 }}>
 
       {/* ── Header ── */}
       <div style={{ padding:'24px 0 0', display:'flex', alignItems:'flex-start', justifyContent:'space-between', flexWrap:'wrap', gap:16 }} className="header-row">
@@ -728,13 +776,13 @@ function App() {
               )}
             </button>
           </div>
-          <div style={{ fontSize:11, color:'#7070a0', fontFamily:"'JetBrains Mono',monospace" }}>
+          <div style={{ fontSize:11, color:'var(--text-faint)', fontFamily:"'JetBrains Mono',monospace" }}>
             {visibleProjects.length} projects · {ideas.length} ideas · {creds.owner}/{creds.repo}
           </div>
         </div>
 
         <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-          <div style={{ display:'flex', gap:3, background:'#10101a', padding:4, borderRadius:10 }}>
+          <div style={{ display:'flex', gap:3, background:'var(--surface)', padding:4, borderRadius:10 }}>
             {[
               { key:'projects', label:'Projects' },
               { key:'tasks',    label:'Tasks', badge: visibleProjects.reduce((n, p) => n + (p.tasks || []).filter(t => t.status !== 'done').length, 0) },
@@ -744,7 +792,7 @@ function App() {
               { key:'ideas',    label:'Ideas', badge: ideas.length },
             ].filter(Boolean).map(t => (
               <button key={t.key} className="tab-btn"
-                style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 14px', borderRadius:7, border:'none', background: tab===t.key && view==='dashboard'?'#1a1a2a':'transparent', color: tab===t.key && view==='dashboard'?'#d8d8e8':'#3a3a55', fontSize:13, cursor:'pointer', fontWeight:500 }}
+                style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 14px', borderRadius:7, border:'none', background: tab===t.key && view==='dashboard'?'var(--border-alt)':'transparent', color: tab===t.key && view==='dashboard'?'var(--text-primary)':'var(--text-dimmer)', fontSize:13, cursor:'pointer', fontWeight:500 }}
                 onClick={() => { setTab(t.key); if (view !== 'dashboard') { setView('dashboard'); setActiveProjectId(null); } }}>
                 {t.label}
                 {t.badge > 0 && <span style={{ background:'#ffa726', color:'#000', fontSize:10, fontWeight:700, padding:'1px 6px', borderRadius:99 }}>{t.badge}</span>}
@@ -752,12 +800,12 @@ function App() {
             ))}
           </div>
           <button className="icon-btn" onClick={() => setShowSearch(true)} title="Search (⌘K)"
-            style={{ padding:'9px 11px', background:'#10101a', border:'1px solid #1a1a2a', borderRadius:9, color:'#4a4a6a', fontSize:14, cursor:'pointer' }}>
+            style={{ padding:'9px 11px', background:'var(--surface)', border:'1px solid var(--border-alt)', borderRadius:9, color:'var(--text-dimmer)', fontSize:14, cursor:'pointer' }}>
             🔍
           </button>
           <button className="icon-btn" onClick={() => setShowSettings(true)}
             title="Settings"
-            style={{ padding:'9px 11px', background:'#10101a', border:'1px solid #1a1a2a', borderRadius:9, color:'#4a4a6a', fontSize:14, cursor:'pointer' }}>
+            style={{ padding:'9px 11px', background:'var(--surface)', border:'1px solid var(--border-alt)', borderRadius:9, color:'var(--text-dimmer)', fontSize:14, cursor:'pointer' }}>
             ⚙
           </button>
         </div>
@@ -793,21 +841,21 @@ function App() {
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:18, flexWrap:'wrap', gap:10 }}>
             <div style={{ display:'flex', gap:6, flexWrap:'wrap', alignItems:'center' }}>
               <button className="pill"
-                style={{ padding:'5px 12px', borderRadius:99, border:`1px solid ${filter==='all'?'#d8d8e8':'#18182a'}`, background: filter==='all'?'#1a1a2a':'transparent', color: filter==='all'?'#d8d8e8':'#7070a0', fontSize:12, fontWeight:500, display:'flex', alignItems:'center', gap:5 }}
+                style={{ padding:'5px 12px', borderRadius:99, border:`1px solid ${filter==='all'?'var(--text-primary)':'var(--border)'}`, background: filter==='all'?'var(--border-alt)':'transparent', color: filter==='all'?'var(--text-primary)':'var(--text-faint)', fontSize:12, fontWeight:500, display:'flex', alignItems:'center', gap:5 }}
                 onClick={() => setFilter('all')}>
                 All <span style={{ opacity:.5 }}>{projects.length}</span>
               </button>
               {Object.entries(STATUS).map(([key, cfg]) =>
                 counts[key] > 0 && (
                   <button key={key} className="pill"
-                    style={{ padding:'5px 12px', borderRadius:99, border:`1px solid ${filter===key?cfg.color:'#18182a'}`, background: filter===key?cfg.bg:'transparent', color: filter===key?cfg.color:'#7070a0', fontSize:12, fontWeight:500, display:'flex', alignItems:'center', gap:5 }}
+                    style={{ padding:'5px 12px', borderRadius:99, border:`1px solid ${filter===key?cfg.color:'var(--border)'}`, background: filter===key?cfg.bg:'transparent', color: filter===key?cfg.color:'var(--text-faint)', fontSize:12, fontWeight:500, display:'flex', alignItems:'center', gap:5 }}
                     onClick={() => setFilter(key)}>
                     {cfg.label} <span style={{ opacity:.5 }}>{counts[key]}</span>
                   </button>
                 )
               )}
               <select value={sortMode} onChange={e => setSortMode(e.target.value)}
-                style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:7, padding:'5px 10px', color:'#4a4a6a', fontSize:11, outline:'none', cursor:'pointer' }}>
+                style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:7, padding:'5px 10px', color:'var(--text-dimmer)', fontSize:11, outline:'none', cursor:'pointer' }}>
                 <option value="updated">↕ Last Updated</option>
                 <option value="priority">↕ Priority</option>
                 <option value="custom">↕ Custom Order</option>
@@ -828,10 +876,10 @@ function App() {
             onReorder={reorderProjects}
           />
           {sorted.length === 0 && !ready && (
-            <div style={{ color:'#7070a0', fontSize:13, textAlign:'center', padding:'48px 0' }}>Loading your projects…</div>
+            <div style={{ color:'var(--text-faint)', fontSize:13, textAlign:'center', padding:'48px 0' }}>Loading your projects…</div>
           )}
           {sorted.length === 0 && ready && (
-            <div style={{ color:'#7070a0', fontSize:13, textAlign:'center', padding:'48px 0' }}>No projects here. Start one.</div>
+            <div style={{ color:'var(--text-faint)', fontSize:13, textAlign:'center', padding:'48px 0' }}>No projects here. Start one.</div>
           )}
         </div>
       )}
@@ -864,7 +912,7 @@ function App() {
       {/* ── Dashboard: Ideas Tab ── */}
       {view === 'dashboard' && tab === 'ideas' && (
         <div style={{ padding:'22px 0' }} className="fade-in">
-          <div style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:18, marginBottom:14 }}>
+          <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:18, marginBottom:14 }}>
             <div style={{ display:'flex', alignItems:'center', gap:6, fontSize:10, fontWeight:600, color:'#ffa726', letterSpacing:'0.09em', textTransform:'uppercase', marginBottom:12 }}>
               ⚡ Quick Capture
             </div>
@@ -873,7 +921,7 @@ function App() {
                 onChange={e => setNewIdea(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) addIdea(); }}
                 placeholder="What's the next thing you want to build?  ⌘↵ to save"
-                style={{ flex:1, background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:8, padding:'10px 14px', color:'#d8d8e8', fontSize:14, outline:'none', lineHeight:1.5 }}
+                style={{ flex:1, background:'var(--surface-raised)', border:'1px solid var(--border-alt)', borderRadius:8, padding:'10px 14px', color:'var(--text-primary)', fontSize:14, outline:'none', lineHeight:1.5 }}
                 rows={3}/>
               <button onClick={addIdea}
                 style={{ background:'#ffa726', border:'none', borderRadius:8, padding:'0 16px', color:'#000', cursor:'pointer', fontSize:18, display:'flex', alignItems:'center', opacity: newIdea.trim()?1:.35, transition:'opacity .15s' }}>
@@ -884,15 +932,15 @@ function App() {
 
           <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
             {ideas.length === 0 && ready && (
-              <div style={{ color:'#7070a0', fontSize:13, textAlign:'center', padding:'48px 0' }}>
+              <div style={{ color:'var(--text-faint)', fontSize:13, textAlign:'center', padding:'48px 0' }}>
                 No ideas queued. Drop one above before it evaporates.
               </div>
             )}
             {ideas.map(idea => (
-              <div key={idea.id} className="idea-row" style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:10, padding:'14px 16px' }}>
-                <div style={{ fontSize:14, color:'#b0b0cc', lineHeight:1.55, marginBottom:10 }}>{idea.text}</div>
+              <div key={idea.id} className="idea-row" style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:10, padding:'14px 16px' }}>
+                <div style={{ fontSize:14, color:'var(--text-primary)', lineHeight:1.55, marginBottom:10 }}>{idea.text}</div>
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:8 }}>
-                  <span style={{ fontSize:10, color:'#3a3a55', fontFamily:"'JetBrains Mono',monospace" }}>
+                  <span style={{ fontSize:10, color:'var(--text-dimmer)', fontFamily:"'JetBrains Mono',monospace" }}>
                     ⏱ {ago(idea.createdAt)}
                   </span>
                   <div style={{ display:'flex', alignItems:'center', gap:6 }}>
@@ -927,7 +975,8 @@ function App() {
       {showSettings && (
         <SettingsModal onClose={() => setShowSettings(false)} onDisconnect={() => { dropCreds(); setCreds(null); }}
           hiddenProjects={projects.filter(p => p.hidden)} onUnhide={unhideProject}
-          visibleTabs={visibleTabs} onSetVisibleTabs={(tabs) => { setVisibleTabs(tabs); saveVisibleTabs(tabs); }} />
+          visibleTabs={visibleTabs} onSetVisibleTabs={(tabs) => { setVisibleTabs(tabs); saveVisibleTabs(tabs); }}
+          theme={theme} onSetTheme={setTheme} />
       )}
 
       {modal && (
@@ -1003,7 +1052,7 @@ function ProjectCard({ project, onOpen, onEdit, onDelete, onHide, onDragStart, o
       onDragOver={onDragOver}
       onDrop={onDrop}
       onDragEnd={onDragEnd}
-      style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:18, display:'flex', flexDirection:'column', gap:10, overflow:'hidden' }}>
+      style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:18, display:'flex', flexDirection:'column', gap:10, overflow:'hidden' }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8 }}>
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:19, fontWeight:700, letterSpacing:'0.02em', color:'#fff', marginBottom:5, lineHeight:1.15, wordBreak:'break-word' }}>{project.name}</div>
@@ -1019,24 +1068,24 @@ function ProjectCard({ project, onOpen, onEdit, onDelete, onHide, onDragStart, o
           </div>
         </div>
         <div style={{ display:'flex', gap:2, flexShrink:0 }}>
-          <span className="drag-handle" style={{ display:'flex', alignItems:'center', padding:'5px 4px', fontSize:14, color:'#5a5a7a' }}>⠿</span>
-          <button className="icon-btn" style={{ display:'flex', alignItems:'center', padding:'5px 6px', background:'transparent', border:'none', color:'#5a5a7a', borderRadius:5, fontSize:14 }} onClick={onEdit}>✎</button>
-          <button className="icon-btn" title="Hide project" style={{ display:'flex', alignItems:'center', padding:'5px 6px', background:'transparent', border:'none', color:'#5a5a7a', borderRadius:5, fontSize:13 }} onClick={onHide}>👁</button>
+          <span className="drag-handle" style={{ display:'flex', alignItems:'center', padding:'5px 4px', fontSize:14, color:'var(--text-dim)' }}>⠿</span>
+          <button className="icon-btn" style={{ display:'flex', alignItems:'center', padding:'5px 6px', background:'transparent', border:'none', color:'var(--text-dim)', borderRadius:5, fontSize:14 }} onClick={onEdit}>✎</button>
+          <button className="icon-btn" title="Hide project" style={{ display:'flex', alignItems:'center', padding:'5px 6px', background:'transparent', border:'none', color:'var(--text-dim)', borderRadius:5, fontSize:13 }} onClick={onHide}>👁</button>
           <button className="icon-btn" style={{ display:'flex', alignItems:'center', padding:'5px 6px', background:'transparent', border:'none', color:'#ef5350', borderRadius:5, fontSize:14 }} onClick={onDelete}>⊗</button>
         </div>
       </div>
 
       {project.description && (
-        <div style={{ fontSize:13, color:'#7070a0', lineHeight:1.6 }}>{project.description}</div>
+        <div style={{ fontSize:13, color:'var(--text-faint)', lineHeight:1.6 }}>{project.description}</div>
       )}
       {project.notes && (
-        <div style={{ fontSize:11.5, color:'#8a8aa8', lineHeight:1.6, fontFamily:"'JetBrains Mono',monospace", padding:'8px 10px', background:'#0c0c16', borderRadius:6, borderLeft:'2px solid #1e1e32', overflow:'hidden', maxHeight:60, WebkitLineClamp:2, display:'-webkit-box', WebkitBoxOrient:'vertical' }}>
+        <div style={{ fontSize:11.5, color:'var(--text-muted)', lineHeight:1.6, fontFamily:"'JetBrains Mono',monospace", padding:'8px 10px', background:'var(--surface-raised)', borderRadius:6, borderLeft:'2px solid var(--border)', overflow:'hidden', maxHeight:60, WebkitLineClamp:2, display:'-webkit-box', WebkitBoxOrient:'vertical' }}>
           {project.notes}
         </div>
       )}
 
       {hasTasks && (
-        <div style={{ display:'flex', alignItems:'center', gap:8, fontSize:11, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>
+        <div style={{ display:'flex', alignItems:'center', gap:8, fontSize:11, color:'var(--text-dimmer)', fontFamily:"'JetBrains Mono',monospace" }}>
           <span>{doneCount} / {tasks.length}</span>
         </div>
       )}
@@ -1044,7 +1093,7 @@ function ProjectCard({ project, onOpen, onEdit, onDelete, onHide, onDragStart, o
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:6, marginTop:2 }}>
         <div style={{ display:'flex', gap:4, flexWrap:'wrap' }}>
           {project.machines?.map(m => (
-            <span key={m} style={{ fontSize:10, padding:'2px 7px', borderRadius:4, background:'#18182a', color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>
+            <span key={m} style={{ fontSize:10, padding:'2px 7px', borderRadius:4, background:'var(--border)', color:'var(--text-dimmer)', fontFamily:"'JetBrains Mono',monospace" }}>
               {m.replace(' Desktop','').replace(' M4','')}
             </span>
           ))}
@@ -1054,11 +1103,11 @@ function ProjectCard({ project, onOpen, onEdit, onDelete, onHide, onDragStart, o
             </span>
           )}
         </div>
-        <div style={{ display:'flex', alignItems:'center', gap:5, fontSize:10, color:'#3a3a55', fontFamily:"'JetBrains Mono',monospace" }}>
+        <div style={{ display:'flex', alignItems:'center', gap:5, fontSize:10, color:'var(--text-dimmer)', fontFamily:"'JetBrains Mono',monospace" }}>
           ⏱ {ago(project.lastUpdated)}
           {project.repo && (
             <a href={`https://${project.repo.replace(/^https?:\/\//, '')}`} target="_blank" rel="noopener noreferrer"
-              style={{ color:'#3a3a55', marginLeft:2, fontSize:12 }}
+              style={{ color:'var(--text-dimmer)', marginLeft:2, fontSize:12 }}
               onClick={e => e.stopPropagation()}>↗</a>
           )}
         </div>
@@ -1066,7 +1115,7 @@ function ProjectCard({ project, onOpen, onEdit, onDelete, onHide, onDragStart, o
 
       {/* Progress bar */}
       {hasTasks && (
-        <div style={{ margin:'4px -18px -18px', height:4, background:'#18182a', borderRadius:'0 0 11px 11px', overflow:'hidden' }}>
+        <div style={{ margin:'4px -18px -18px', height:4, background:'var(--border)', borderRadius:'0 0 11px 11px', overflow:'hidden' }}>
           <div style={{ height:'100%', width:`${pct}%`, background: pct === 100 ? '#00e676' : '#ffa726', transition:'width 0.3s ease' }} />
         </div>
       )}
@@ -1084,18 +1133,18 @@ function ProjectDetail({ project, onBack, onEdit, onUpdateProject, onAddTask, on
       <div style={{ marginBottom:24 }}>
         <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:14 }}>
           <button onClick={onBack}
-            style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:8, padding:'7px 12px', color:'#7070a0', fontSize:13, cursor:'pointer', display:'flex', alignItems:'center', gap:5, transition:'border-color .15s' }}
-            onMouseOver={e => e.currentTarget.style.borderColor='#252538'}
-            onMouseOut={e => e.currentTarget.style.borderColor='#18182a'}>
+            style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:8, padding:'7px 12px', color:'var(--text-faint)', fontSize:13, cursor:'pointer', display:'flex', alignItems:'center', gap:5, transition:'border-color .15s' }}
+            onMouseOver={e => e.currentTarget.style.borderColor='var(--border-emphasis)'}
+            onMouseOut={e => e.currentTarget.style.borderColor='var(--border)'}>
             ← Back
           </button>
           <div style={{ flex:1 }}>
             <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:26, fontWeight:700, letterSpacing:'0.02em', color:'#fff', lineHeight:1.15 }}>{project.name}</div>
           </div>
           <button onClick={onEdit}
-            style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:8, padding:'7px 14px', color:'#7070a0', fontSize:13, cursor:'pointer', transition:'border-color .15s' }}
-            onMouseOver={e => e.currentTarget.style.borderColor='#252538'}
-            onMouseOut={e => e.currentTarget.style.borderColor='#18182a'}>
+            style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:8, padding:'7px 14px', color:'var(--text-faint)', fontSize:13, cursor:'pointer', transition:'border-color .15s' }}
+            onMouseOver={e => e.currentTarget.style.borderColor='var(--border-emphasis)'}
+            onMouseOut={e => e.currentTarget.style.borderColor='var(--border)'}>
             ✎ Edit
           </button>
         </div>
@@ -1110,7 +1159,7 @@ function ProjectDetail({ project, onBack, onEdit, onUpdateProject, onAddTask, on
             </span>
           )}
           {project.machines?.map(m => (
-            <span key={m} style={{ fontSize:10, padding:'3px 8px', borderRadius:5, background:'#18182a', color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>
+            <span key={m} style={{ fontSize:10, padding:'3px 8px', borderRadius:5, background:'var(--border)', color:'var(--text-dimmer)', fontFamily:"'JetBrains Mono',monospace" }}>
               {m}
             </span>
           ))}
@@ -1271,15 +1320,15 @@ function TaskList({ project, projectId, tasks, onAdd, onUpdate, onDelete, onReor
   };
 
   return (
-    <div style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:18 }}>
+    <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:18 }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
         <div style={{ display:'flex', alignItems:'center', gap:10 }}>
           <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:16, fontWeight:700, letterSpacing:'0.06em', color:'#fff', textTransform:'uppercase' }}>Tasks</span>
-          <span style={{ fontSize:11, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>{doneCount} / {tasks.length}</span>
+          <span style={{ fontSize:11, color:'var(--text-dimmer)', fontFamily:"'JetBrains Mono',monospace" }}>{doneCount} / {tasks.length}</span>
         </div>
         <div style={{ display:'flex', gap:2 }}>
-          <button onClick={() => switchView('list')} style={{ padding:'3px 8px', borderRadius:5, border:`1px solid ${viewMode==='list'?'#29b6f6':'#1a1a2a'}`, background: viewMode==='list'?'rgba(41,182,246,0.10)':'transparent', color: viewMode==='list'?'#29b6f6':'#4a4a6a', fontSize:10, cursor:'pointer' }}>≡ List</button>
-          <button onClick={() => switchView('board')} style={{ padding:'3px 8px', borderRadius:5, border:`1px solid ${viewMode==='board'?'#29b6f6':'#1a1a2a'}`, background: viewMode==='board'?'rgba(41,182,246,0.10)':'transparent', color: viewMode==='board'?'#29b6f6':'#4a4a6a', fontSize:10, cursor:'pointer' }}>⊞ Board</button>
+          <button onClick={() => switchView('list')} style={{ padding:'3px 8px', borderRadius:5, border:`1px solid ${viewMode==='list'?'#29b6f6':'var(--border-alt)'}`, background: viewMode==='list'?'rgba(41,182,246,0.10)':'transparent', color: viewMode==='list'?'#29b6f6':'var(--text-dimmer)', fontSize:10, cursor:'pointer' }}>≡ List</button>
+          <button onClick={() => switchView('board')} style={{ padding:'3px 8px', borderRadius:5, border:`1px solid ${viewMode==='board'?'#29b6f6':'var(--border-alt)'}`, background: viewMode==='board'?'rgba(41,182,246,0.10)':'transparent', color: viewMode==='board'?'#29b6f6':'var(--text-dimmer)', fontSize:10, cursor:'pointer' }}>⊞ Board</button>
         </div>
       </div>
 
@@ -1288,7 +1337,7 @@ function TaskList({ project, projectId, tasks, onAdd, onUpdate, onDelete, onReor
         <input ref={inputRef} value={newTitle} onChange={e => setNewTitle(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') { setNewTitle(''); inputRef.current?.blur(); } }}
           placeholder="Add a task… press Enter to save"
-          style={{ flex:1, background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:8, padding:'9px 12px', color:'#d8d8e8', fontSize:13, outline:'none' }}/>
+          style={{ flex:1, background:'var(--surface-raised)', border:'1px solid var(--border-alt)', borderRadius:8, padding:'9px 12px', color:'var(--text-primary)', fontSize:13, outline:'none' }}/>
         {loadAnthropicKey() && !showAI && (
           <button onClick={() => setShowAI(true)}
             style={{ padding:'6px 12px', background:'rgba(206,147,216,0.08)', border:'1px solid rgba(206,147,216,0.18)', borderRadius:8, color:'#ce93d8', fontSize:11, cursor:'pointer', flexShrink:0, whiteSpace:'nowrap' }}>
@@ -1323,7 +1372,7 @@ function TaskList({ project, projectId, tasks, onAdd, onUpdate, onDelete, onReor
             />
           ))}
           {tasks.length === 0 && (
-            <div style={{ color:'#7070a0', fontSize:13, textAlign:'center', padding:'24px 0' }}>No tasks yet. Add one above.</div>
+            <div style={{ color:'var(--text-faint)', fontSize:13, textAlign:'center', padding:'24px 0' }}>No tasks yet. Add one above.</div>
           )}
         </div>
       )}
@@ -1411,7 +1460,7 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
             onTouchStart={(e) => onTouchStart(e, idx)}
             onTouchMove={(e) => onTouchMove(e, idx)}
             onTouchEnd={onTouchEnd}
-            style={{ fontSize:14, color:'#3a3a55', lineHeight:1, padding:'2px 2px' }}>≡</span>
+            style={{ fontSize:14, color:'var(--text-dimmer)', lineHeight:1, padding:'2px 2px' }}>≡</span>
         )}
 
         {/* Checkbox */}
@@ -1423,18 +1472,18 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
         {/* Priority selector */}
         <select value={task.priority || 'none'} onClick={e => e.stopPropagation()}
           onChange={e => { e.stopPropagation(); onUpdate(projectId, task.id, { priority: e.target.value }); }}
-          style={{ fontSize:9, fontWeight:600, padding:'2px 4px', borderRadius:99, letterSpacing:'0.04em', textTransform:'uppercase', color:pr.color, background:pr.bg, border: (task.priority && task.priority !== 'none') ? 'none' : '1px solid #1a1a2a', cursor:'pointer', flexShrink:0, lineHeight:1.3, outline:'none', appearance:'none', WebkitAppearance:'none', paddingRight:12, backgroundImage:`url("data:image/svg+xml,%3Csvg width='8' height='5' viewBox='0 0 8 5' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L4 4L7 1' stroke='%234a4a6a' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E")`, backgroundRepeat:'no-repeat', backgroundPosition:'right 3px center' }}>
-          {PRIORITY_CYCLE.map(p => <option key={p} value={p} style={{ background:'#10101a', color: PRIORITY[p]?.color || '#3a3a55' }}>{PRIORITY[p]?.label || 'None'}</option>)}
+          style={{ fontSize:9, fontWeight:600, padding:'2px 4px', borderRadius:99, letterSpacing:'0.04em', textTransform:'uppercase', color:pr.color, background:pr.bg, border: (task.priority && task.priority !== 'none') ? 'none' : '1px solid var(--border-alt)', cursor:'pointer', flexShrink:0, lineHeight:1.3, outline:'none', appearance:'none', WebkitAppearance:'none', paddingRight:12, backgroundImage:`url("data:image/svg+xml,%3Csvg width='8' height='5' viewBox='0 0 8 5' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L4 4L7 1' stroke='%234a4a6a' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E")`, backgroundRepeat:'no-repeat', backgroundPosition:'right 3px center' }}>
+          {PRIORITY_CYCLE.map(p => <option key={p} value={p} style={{ background:'var(--surface)', color: PRIORITY[p]?.color || 'var(--text-dimmer)' }}>{PRIORITY[p]?.label || 'None'}</option>)}
         </select>
 
         {/* Title + Project label grouped together */}
         <div onClick={onToggleExpand} style={{ flex:1, display:'flex', alignItems:'center', gap:6, minWidth:0, cursor:'pointer' }}>
-          <span style={{ fontSize:13, color: isDone ? '#4a4a6a' : '#d8d8e8', textDecoration: isDone ? 'line-through' : 'none', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+          <span style={{ fontSize:13, color: isDone ? 'var(--text-dimmer)' : 'var(--text-primary)', textDecoration: isDone ? 'line-through' : 'none', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
             {task.title}
           </span>
           {projectLabel && (
             <button onClick={(e) => { e.stopPropagation(); onOpenProject && onOpenProject(); }}
-              style={{ fontSize:9, fontWeight:500, padding:'2px 8px', borderRadius:5, background:'#18182a', color:'#7070a0', border:'none', cursor:'pointer', flexShrink:0, lineHeight:1.3, maxWidth:120, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+              style={{ fontSize:9, fontWeight:500, padding:'2px 8px', borderRadius:5, background:'var(--border)', color:'var(--text-faint)', border:'none', cursor:'pointer', flexShrink:0, lineHeight:1.3, maxWidth:120, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
               {projectLabel}
             </button>
           )}
@@ -1447,13 +1496,13 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
               const lc = LABEL_COLORS[l] || DEFAULT_LABEL_COLOR;
               return <span key={l} style={{ fontSize:9, fontWeight:600, padding:'1px 6px', borderRadius:99, color:lc.color, background:lc.bg, letterSpacing:'0.04em', maxWidth:70, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{l}</span>;
             })}
-            {(task.labels || []).length > 3 && <span style={{ fontSize:9, color:'#7070a0' }}>+{task.labels.length - 3}</span>}
+            {(task.labels || []).length > 3 && <span style={{ fontSize:9, color:'var(--text-faint)' }}>+{task.labels.length - 3}</span>}
           </div>
         )}
 
         {/* Sub-task count */}
         {(task.subtasks || []).length > 0 && (
-          <span style={{ fontSize:9, color:'#7070a0', fontFamily:"'JetBrains Mono',monospace", flexShrink:0 }}>
+          <span style={{ fontSize:9, color:'var(--text-faint)', fontFamily:"'JetBrains Mono',monospace", flexShrink:0 }}>
             {(task.subtasks||[]).filter(s=>s.status==='done').length}/{(task.subtasks||[]).length} ◦
           </span>
         )}
@@ -1466,7 +1515,7 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
 
         {/* Due date (compact) */}
         {task.dueDate && (
-          <span style={{ fontSize:10, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace", flexShrink:0 }}>
+          <span style={{ fontSize:10, color:'var(--text-dimmer)', fontFamily:"'JetBrains Mono',monospace", flexShrink:0 }}>
             {formatDue(task.dueDate)}
           </span>
         )}
@@ -1478,52 +1527,52 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
 
       {/* Expanded panel */}
       {expanded && (
-        <div style={{ marginLeft:36, padding:'10px 14px', background:'#0c0c16', borderRadius:8, border:'1px solid #1a1a2a', marginTop:2, marginBottom:4, display:'flex', flexDirection:'column', gap:10 }}>
+        <div style={{ marginLeft:36, padding:'10px 14px', background:'var(--surface-raised)', borderRadius:8, border:'1px solid var(--border-alt)', marginTop:2, marginBottom:4, display:'flex', flexDirection:'column', gap:10 }}>
           <div>
-            <label style={{ fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Description</label>
+            <label style={{ fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Description</label>
             <textarea value={desc} onChange={e => setDesc(e.target.value)} onBlur={saveDesc}
               placeholder="Add details…"
-              style={{ width:'100%', background:'#10101a', border:'1px solid #1a1a2a', borderRadius:6, padding:'8px 10px', color:'#d8d8e8', fontSize:13, outline:'none', lineHeight:1.5, fontFamily:"'DM Sans',sans-serif" }}
+              style={{ width:'100%', background:'var(--surface)', border:'1px solid var(--border-alt)', borderRadius:6, padding:'8px 10px', color:'var(--text-primary)', fontSize:13, outline:'none', lineHeight:1.5, fontFamily:"'DM Sans',sans-serif" }}
               rows={3}/>
           </div>
           <div style={{ display:'flex', gap:14, flexWrap:'wrap', alignItems:'center' }}>
             <div>
-              <label style={{ fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Due Date</label>
+              <label style={{ fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Due Date</label>
               <input type="date" value={dueDate} onChange={e => saveDueDate(e.target.value)}
-                style={{ background:'#10101a', border:'1px solid #1a1a2a', borderRadius:6, padding:'6px 10px', color:'#d8d8e8', fontSize:12, outline:'none', fontFamily:"'JetBrains Mono',monospace" }}/>
+                style={{ background:'var(--surface)', border:'1px solid var(--border-alt)', borderRadius:6, padding:'6px 10px', color:'var(--text-primary)', fontSize:12, outline:'none', fontFamily:"'JetBrains Mono',monospace" }}/>
             </div>
             <div>
-              <label style={{ fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Status</label>
+              <label style={{ fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Status</label>
               <select value={task.status} onChange={e => {
                 const updates = { status: e.target.value };
                 if (e.target.value === 'done') updates.completedAt = now();
                 else updates.completedAt = null;
                 onUpdate(projectId, task.id, updates);
               }}
-                style={{ background:'#10101a', border:'1px solid #1a1a2a', borderRadius:6, padding:'6px 10px', color:'#d8d8e8', fontSize:12, outline:'none' }}>
+                style={{ background:'var(--surface)', border:'1px solid var(--border-alt)', borderRadius:6, padding:'6px 10px', color:'var(--text-primary)', fontSize:12, outline:'none' }}>
                 {Object.entries(TASK_STATUS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
               </select>
             </div>
             {(milestones || []).length > 0 && (
               <div>
-                <label style={{ fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Milestone</label>
+                <label style={{ fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Milestone</label>
                 <select value={task.milestoneId || ''} onChange={e => onUpdate(projectId, task.id, { milestoneId: e.target.value || null })}
-                  style={{ background:'#10101a', border:'1px solid #1a1a2a', borderRadius:6, padding:'6px 10px', color:'#d8d8e8', fontSize:12, outline:'none' }}>
+                  style={{ background:'var(--surface)', border:'1px solid var(--border-alt)', borderRadius:6, padding:'6px 10px', color:'var(--text-primary)', fontSize:12, outline:'none' }}>
                   <option value="">None</option>
                   {(milestones || []).map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
                 </select>
               </div>
             )}
             <div>
-              <label style={{ fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>GitHub Link</label>
+              <label style={{ fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>GitHub Link</label>
               <input value={task.githubLink || ''} onChange={e => onUpdate(projectId, task.id, { githubLink: e.target.value || null })}
                 placeholder="#123 or SHA or URL"
-                style={{ background:'#10101a', border:'1px solid #1a1a2a', borderRadius:6, padding:'6px 10px', color:'#d8d8e8', fontSize:12, outline:'none', fontFamily:"'JetBrains Mono',monospace", width:180 }}/>
+                style={{ background:'var(--surface)', border:'1px solid var(--border-alt)', borderRadius:6, padding:'6px 10px', color:'var(--text-primary)', fontSize:12, outline:'none', fontFamily:"'JetBrains Mono',monospace", width:180 }}/>
             </div>
           </div>
           {/* Labels */}
           <div>
-            <label style={{ fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:6 }}>Labels</label>
+            <label style={{ fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:6 }}>Labels</label>
             <div style={{ display:'flex', flexWrap:'wrap', gap:4, marginBottom:6 }}>
               {Object.keys(LABEL_COLORS).map(l => {
                 const on = (task.labels || []).includes(l);
@@ -1533,7 +1582,7 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
                     const labels = (task.labels || []);
                     onUpdate(projectId, task.id, { labels: on ? labels.filter(x => x !== l) : [...labels, l] });
                   }}
-                    style={{ fontSize:10, fontWeight:600, padding:'3px 8px', borderRadius:99, border:`1px solid ${on ? lc.color : '#1a1a2a'}`, background: on ? lc.bg : 'transparent', color: on ? lc.color : '#4a4a6a', cursor:'pointer', letterSpacing:'0.04em' }}>
+                    style={{ fontSize:10, fontWeight:600, padding:'3px 8px', borderRadius:99, border:`1px solid ${on ? lc.color : 'var(--border-alt)'}`, background: on ? lc.bg : 'transparent', color: on ? lc.color : 'var(--text-dimmer)', cursor:'pointer', letterSpacing:'0.04em' }}>
                     {l}
                   </button>
                 );
@@ -1541,7 +1590,7 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
             </div>
             <div style={{ display:'flex', gap:4, alignItems:'center', flexWrap:'wrap' }}>
               {(task.labels || []).filter(l => !LABEL_COLORS[l]).map(l => (
-                <span key={l} style={{ fontSize:10, fontWeight:600, padding:'2px 7px', borderRadius:99, color:'#4a4a6a', background:'rgba(74,74,106,0.10)', display:'flex', alignItems:'center', gap:3 }}>
+                <span key={l} style={{ fontSize:10, fontWeight:600, padding:'2px 7px', borderRadius:99, color:'var(--text-dimmer)', background:'rgba(74,74,106,0.10)', display:'flex', alignItems:'center', gap:3 }}>
                   {l} <span onClick={() => onUpdate(projectId, task.id, { labels: (task.labels || []).filter(x => x !== l) })} style={{ cursor:'pointer', color:'#ef5350', fontSize:8 }}>✕</span>
                 </span>
               ))}
@@ -1552,7 +1601,7 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
                   e.target.value = '';
                 }
               }}
-                style={{ background:'transparent', border:'1px solid #1a1a2a', borderRadius:6, padding:'3px 8px', color:'#d8d8e8', fontSize:10, outline:'none', width:80 }}/>
+                style={{ background:'transparent', border:'1px solid var(--border-alt)', borderRadius:6, padding:'3px 8px', color:'var(--text-primary)', fontSize:10, outline:'none', width:80 }}/>
             </div>
           </div>
           {/* Sub-tasks */}
@@ -1585,7 +1634,7 @@ function MilestonesPanel({ project, onUpdateProject }) {
     return (
       <div style={{ marginBottom:16 }}>
         <button onClick={() => setAdding(true)}
-          style={{ fontSize:11, color:'#4a4a6a', background:'transparent', border:'1px solid #18182a', borderRadius:8, padding:'6px 12px', cursor:'pointer' }}>
+          style={{ fontSize:11, color:'var(--text-dimmer)', background:'transparent', border:'1px solid var(--border)', borderRadius:8, padding:'6px 12px', cursor:'pointer' }}>
           + Add milestone
         </button>
       </div>
@@ -1593,7 +1642,7 @@ function MilestonesPanel({ project, onUpdateProject }) {
   }
 
   return (
-    <div style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:14, marginBottom:16 }}>
+    <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:14, marginBottom:16 }}>
       <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:14, fontWeight:700, letterSpacing:'0.06em', color:'#fff', textTransform:'uppercase', marginBottom:10 }}>Milestones</div>
       {milestones.map(ms => {
         const tasks = (project.tasks || []).filter(t => t.milestoneId === ms.id);
@@ -1602,12 +1651,12 @@ function MilestonesPanel({ project, onUpdateProject }) {
         return (
           <div key={ms.id} style={{ marginBottom:10 }}>
             <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}>
-              <span style={{ fontSize:13, color:'#d8d8e8', fontWeight:500, flex:1 }}>{ms.title}</span>
-              {ms.dueDate && <span style={{ fontSize:10, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>{new Date(ms.dueDate+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>}
-              <span style={{ fontSize:10, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>{done}/{tasks.length}</span>
+              <span style={{ fontSize:13, color:'var(--text-primary)', fontWeight:500, flex:1 }}>{ms.title}</span>
+              {ms.dueDate && <span style={{ fontSize:10, color:'var(--text-dimmer)', fontFamily:"'JetBrains Mono',monospace" }}>{new Date(ms.dueDate+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>}
+              <span style={{ fontSize:10, color:'var(--text-dimmer)', fontFamily:"'JetBrains Mono',monospace" }}>{done}/{tasks.length}</span>
               <button onClick={() => deleteMilestone(ms.id)} className="icon-btn" style={{ background:'transparent', border:'none', color:'#ef5350', fontSize:11, cursor:'pointer', padding:'0 2px' }}>✕</button>
             </div>
-            <div style={{ height:4, background:'#18182a', borderRadius:4, overflow:'hidden' }}>
+            <div style={{ height:4, background:'var(--border)', borderRadius:4, overflow:'hidden' }}>
               <div style={{ height:'100%', width:`${pct}%`, background: pct === 100 ? '#00e676' : '#ffa726', transition:'width 0.3s ease' }} />
             </div>
           </div>
@@ -1617,15 +1666,15 @@ function MilestonesPanel({ project, onUpdateProject }) {
         <div style={{ display:'flex', gap:6, alignItems:'center', marginTop:6 }}>
           <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Milestone title"
             onKeyDown={e => e.key === 'Enter' && addMilestone()}
-            style={{ flex:1, background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:6, padding:'6px 10px', color:'#d8d8e8', fontSize:12, outline:'none' }}/>
+            style={{ flex:1, background:'var(--surface-raised)', border:'1px solid var(--border-alt)', borderRadius:6, padding:'6px 10px', color:'var(--text-primary)', fontSize:12, outline:'none' }}/>
           <input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)}
-            style={{ background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:6, padding:'6px 8px', color:'#d8d8e8', fontSize:11, outline:'none', fontFamily:"'JetBrains Mono',monospace" }}/>
+            style={{ background:'var(--surface-raised)', border:'1px solid var(--border-alt)', borderRadius:6, padding:'6px 8px', color:'var(--text-primary)', fontSize:11, outline:'none', fontFamily:"'JetBrains Mono',monospace" }}/>
           <button onClick={addMilestone} style={{ padding:'6px 10px', background:'#00e676', border:'none', borderRadius:6, color:'#000', fontSize:11, fontWeight:600, cursor:'pointer' }}>Add</button>
-          <button onClick={() => setAdding(false)} style={{ padding:'6px 8px', background:'transparent', border:'none', color:'#4a4a6a', fontSize:11, cursor:'pointer' }}>✕</button>
+          <button onClick={() => setAdding(false)} style={{ padding:'6px 8px', background:'transparent', border:'none', color:'var(--text-dimmer)', fontSize:11, cursor:'pointer' }}>✕</button>
         </div>
       ) : (
         <button onClick={() => setAdding(true)}
-          style={{ fontSize:11, color:'#4a4a6a', background:'transparent', border:'none', cursor:'pointer', marginTop:4 }}>
+          style={{ fontSize:11, color:'var(--text-dimmer)', background:'transparent', border:'none', cursor:'pointer', marginTop:4 }}>
           + Add milestone
         </button>
       )}
@@ -1665,10 +1714,10 @@ function KanbanBoard({ tasks, projectId, onUpdate, expandedId, setExpandedId, on
           <div key={col}
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, col)}
-            style={{ minWidth:180, flex:1, background:'#0c0c16', borderRadius:10, padding:10, border:'1px solid #18182a', flexShrink:0 }}>
+            style={{ minWidth:180, flex:1, background:'var(--surface-raised)', borderRadius:10, padding:10, border:'1px solid var(--border)', flexShrink:0 }}>
             <div style={{ display:'flex', justifyContent:'space-between', marginBottom:10 }}>
               <span style={{ fontSize:10, fontWeight:700, color:cfg.color, letterSpacing:'0.06em', textTransform:'uppercase' }}>{cfg.label}</span>
-              <span style={{ fontSize:10, color:'#3a3a55', fontFamily:"'JetBrains Mono',monospace" }}>{colTasks.length}</span>
+              <span style={{ fontSize:10, color:'var(--text-dimmer)', fontFamily:"'JetBrains Mono',monospace" }}>{colTasks.length}</span>
             </div>
             <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
               {colTasks.map(task => {
@@ -1678,20 +1727,20 @@ function KanbanBoard({ tasks, projectId, onUpdate, expandedId, setExpandedId, on
                     onDragStart={(e) => handleDragStart(e, task.id, col)}
                     onDragEnd={handleDragEnd}
                     onClick={() => setExpandedId(expandedId === task.id ? null : task.id)}
-                    style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:8, padding:'10px 10px', cursor:'pointer', transition:'border-color .15s' }}
-                    onMouseOver={e => e.currentTarget.style.borderColor='#252538'}
-                    onMouseOut={e => e.currentTarget.style.borderColor='#18182a'}>
+                    style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:8, padding:'10px 10px', cursor:'pointer', transition:'border-color .15s' }}
+                    onMouseOver={e => e.currentTarget.style.borderColor='var(--border-emphasis)'}
+                    onMouseOut={e => e.currentTarget.style.borderColor='var(--border)'}>
                     {task.priority && task.priority !== 'none' && (
                       <span style={{ fontSize:9, fontWeight:600, padding:'1px 6px', borderRadius:99, color:pr.color, background:pr.bg, textTransform:'uppercase', display:'inline-block', marginBottom:4 }}>{pr.label}</span>
                     )}
-                    <div style={{ fontSize:12, color:'#d8d8e8', lineHeight:1.4, marginBottom:4 }}>{task.title}</div>
+                    <div style={{ fontSize:12, color:'var(--text-primary)', lineHeight:1.4, marginBottom:4 }}>{task.title}</div>
                     <div style={{ display:'flex', gap:3, flexWrap:'wrap', alignItems:'center' }}>
                       {(task.labels||[]).slice(0,2).map(l => {
                         const lc = LABEL_COLORS[l] || DEFAULT_LABEL_COLOR;
                         return <span key={l} style={{ fontSize:8, padding:'1px 5px', borderRadius:99, color:lc.color, background:lc.bg }}>{l}</span>;
                       })}
-                      {task.dueDate && <span style={{ fontSize:9, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>{new Date(task.dueDate+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>}
-                      {(task.subtasks||[]).length > 0 && <span style={{ fontSize:9, color:'#7070a0', fontFamily:"'JetBrains Mono',monospace" }}>{(task.subtasks||[]).filter(s=>s.status==='done').length}/{(task.subtasks||[]).length} ◦</span>}
+                      {task.dueDate && <span style={{ fontSize:9, color:'var(--text-dimmer)', fontFamily:"'JetBrains Mono',monospace" }}>{new Date(task.dueDate+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>}
+                      {(task.subtasks||[]).length > 0 && <span style={{ fontSize:9, color:'var(--text-faint)', fontFamily:"'JetBrains Mono',monospace" }}>{(task.subtasks||[]).filter(s=>s.status==='done').length}/{(task.subtasks||[]).length} ◦</span>}
                     </div>
                   </div>
                 );
@@ -1730,7 +1779,7 @@ function SubtaskPanel({ task, projectId, onUpdate }) {
 
   return (
     <div>
-      <label style={{ fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:6 }}>
+      <label style={{ fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:6 }}>
         Subtasks {subtasks.length > 0 && `(${doneCount} / ${subtasks.length} done)`}
       </label>
       <div style={{ display:'flex', flexDirection:'column', gap:2, marginBottom:6 }}>
@@ -1740,7 +1789,7 @@ function SubtaskPanel({ task, projectId, onUpdate }) {
               style={{ width:15, height:15, borderRadius:3, border:`1.5px solid ${s.status==='done'?'#00e676':'#2a2a40'}`, background: s.status==='done'?'rgba(0,230,118,0.15)':'transparent', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, padding:0 }}>
               {s.status === 'done' && <span style={{ color:'#00e676', fontSize:9, lineHeight:1 }}>✓</span>}
             </button>
-            <span style={{ flex:1, fontSize:12, color: s.status==='done'?'#4a4a6a':'#d8d8e8', textDecoration: s.status==='done'?'line-through':'none' }}>{s.title}</span>
+            <span style={{ flex:1, fontSize:12, color: s.status==='done'?'var(--text-dimmer)':'var(--text-primary)', textDecoration: s.status==='done'?'line-through':'none' }}>{s.title}</span>
             <button onClick={() => deleteSub(s.id)} style={{ background:'transparent', border:'none', color:'#ef5350', fontSize:11, cursor:'pointer', padding:'0 2px', opacity:.5 }}>✕</button>
           </div>
         ))}
@@ -1748,7 +1797,7 @@ function SubtaskPanel({ task, projectId, onUpdate }) {
       <input value={newSub} onChange={e => setNewSub(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter') addSub(); }}
         placeholder="+ Add a subtask…"
-        style={{ width:'100%', background:'transparent', border:'1px solid #1a1a2a', borderRadius:6, padding:'5px 8px', color:'#d8d8e8', fontSize:11, outline:'none' }}/>
+        style={{ width:'100%', background:'transparent', border:'1px solid var(--border-alt)', borderRadius:6, padding:'5px 8px', color:'var(--text-primary)', fontSize:11, outline:'none' }}/>
     </div>
   );
 }
@@ -1820,24 +1869,24 @@ function SearchOverlay({ projects, ideas, onClose, onOpenProject, onOpenIdeas })
     return (
       <div onClick={() => select(item)}
         onMouseEnter={() => setHlIdx(myIdx)}
-        style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 12px', borderRadius:8, cursor:'pointer', background: active ? '#1a1a2a' : 'transparent', borderLeft: active ? '2px solid #00e676' : '2px solid transparent', transition:'background .1s' }}>
+        style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 12px', borderRadius:8, cursor:'pointer', background: active ? 'var(--border-alt)' : 'transparent', borderLeft: active ? '2px solid #00e676' : '2px solid transparent', transition:'background .1s' }}>
         {children}
       </div>
     );
   };
 
   const SectionLabel = ({ label }) => (
-    <div style={{ fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.06em', textTransform:'uppercase', padding:'10px 12px 4px' }}>{label}</div>
+    <div style={{ fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.06em', textTransform:'uppercase', padding:'10px 12px 4px' }}>{label}</div>
   );
 
   return (
     <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', backdropFilter:'blur(6px)', display:'flex', alignItems:'flex-start', justifyContent:'center', zIndex:300, padding:'80px 16px 16px' }}
       onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="fade-in" style={{ width:'100%', maxWidth:560, background:'#10101a', border:'1px solid #252538', borderRadius:16, overflow:'hidden' }}>
-        <div style={{ padding:'16px 18px', borderBottom:'1px solid #18182a' }}>
+      <div className="fade-in" style={{ width:'100%', maxWidth:560, background:'var(--surface)', border:'1px solid var(--border-emphasis)', borderRadius:16, overflow:'hidden' }}>
+        <div style={{ padding:'16px 18px', borderBottom:'1px solid var(--border)' }}>
           <input ref={inputRef} value={query} onChange={e => setQuery(e.target.value)} onKeyDown={handleKey}
             placeholder="Search projects, tasks, ideas…"
-            style={{ width:'100%', background:'transparent', border:'none', color:'#d8d8e8', fontSize:15, outline:'none' }}/>
+            style={{ width:'100%', background:'transparent', border:'none', color:'var(--text-primary)', fontSize:15, outline:'none' }}/>
         </div>
         <div style={{ maxHeight:400, overflowY:'auto', padding:'4px 6px 10px' }}>
           {results.projects.length > 0 && <>
@@ -1845,7 +1894,7 @@ function SearchOverlay({ projects, ideas, onClose, onOpenProject, onOpenIdeas })
             {results.projects.map(p => (
               <ResultRow key={p.id} item={p}>
                 <span style={{ color:'#29b6f6', fontSize:12, flexShrink:0 }}>◈</span>
-                <span style={{ flex:1, fontSize:13, color:'#d8d8e8', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{highlight(p.name, debouncedQ)}</span>
+                <span style={{ flex:1, fontSize:13, color:'var(--text-primary)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{highlight(p.name, debouncedQ)}</span>
               </ResultRow>
             ))}
           </>}
@@ -1854,8 +1903,8 @@ function SearchOverlay({ projects, ideas, onClose, onOpenProject, onOpenIdeas })
             {results.tasks.map(t => (
               <ResultRow key={t.id} item={t}>
                 <span style={{ fontSize:11, flexShrink:0 }}>{t.status === 'done' ? '✓' : '□'}</span>
-                <span style={{ flex:1, fontSize:13, color:'#d8d8e8', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{highlight(t.title, debouncedQ)}</span>
-                <span style={{ fontSize:10, color:'#4a4a6a', flexShrink:0 }}>{t.projectName} →</span>
+                <span style={{ flex:1, fontSize:13, color:'var(--text-primary)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{highlight(t.title, debouncedQ)}</span>
+                <span style={{ fontSize:10, color:'var(--text-dimmer)', flexShrink:0 }}>{t.projectName} →</span>
               </ResultRow>
             ))}
           </>}
@@ -1864,12 +1913,12 @@ function SearchOverlay({ projects, ideas, onClose, onOpenProject, onOpenIdeas })
             {results.ideas.map(i => (
               <ResultRow key={i.id} item={i}>
                 <span style={{ fontSize:11, flexShrink:0 }}>💡</span>
-                <span style={{ flex:1, fontSize:13, color:'#d8d8e8', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{highlight(i.text, debouncedQ)}</span>
+                <span style={{ flex:1, fontSize:13, color:'var(--text-primary)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{highlight(i.text, debouncedQ)}</span>
               </ResultRow>
             ))}
           </>}
           {flat.length === 0 && debouncedQ.length >= 2 && (
-            <div style={{ textAlign:'center', padding:'24px 0', color:'#3a3a55', fontSize:13 }}>No results found.</div>
+            <div style={{ textAlign:'center', padding:'24px 0', color:'var(--text-dimmer)', fontSize:13 }}>No results found.</div>
           )}
         </div>
       </div>
@@ -1981,18 +2030,18 @@ function DigestView({ projects, ideas }) {
             </button>
           )}
           <button onClick={copyDigest}
-            style={{ padding:'7px 14px', background:'#1a1a2a', border:'1px solid #252538', borderRadius:8, color: copied ? '#00e676' : '#7070a0', fontSize:11, cursor:'pointer', fontWeight:500 }}>
+            style={{ padding:'7px 14px', background:'var(--border-alt)', border:'1px solid var(--border-emphasis)', borderRadius:8, color: copied ? '#00e676' : 'var(--text-faint)', fontSize:11, cursor:'pointer', fontWeight:500 }}>
             {copied ? '✓ Copied!' : 'Copy as markdown'}
           </button>
         </div>
       </div>
 
-      <div style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:20 }}>
+      <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:20 }}>
         <div className="md-preview" dangerouslySetInnerHTML={{ __html: renderMarkdown(markdownText) }} />
         {narrative && (
           <div style={{ marginTop:16, padding:14, background:'rgba(206,147,216,0.05)', border:'1px solid rgba(206,147,216,0.15)', borderRadius:10 }}>
             <div style={{ fontSize:10, fontWeight:600, color:'#ce93d8', letterSpacing:'0.06em', textTransform:'uppercase', marginBottom:8 }}>✨ AI Summary</div>
-            <div style={{ fontSize:13, color:'#b0b0cc', lineHeight:1.7 }}>{narrative}</div>
+            <div style={{ fontSize:13, color:'var(--text-primary)', lineHeight:1.7 }}>{narrative}</div>
           </div>
         )}
       </div>
@@ -2038,14 +2087,14 @@ function LabelsView({ projects, onOpenProject }) {
   }, [tasksForLabel]);
 
   if (sortedLabels.length === 0) {
-    return <div style={{ padding:'22px 0' }} className="fade-in"><div style={{ textAlign:'center', padding:'60px 20px', color:'#7070a0', fontSize:14 }}>No labels in use. Add labels to tasks from the project detail view.</div></div>;
+    return <div style={{ padding:'22px 0' }} className="fade-in"><div style={{ textAlign:'center', padding:'60px 20px', color:'var(--text-faint)', fontSize:14 }}>No labels in use. Add labels to tasks from the project detail view.</div></div>;
   }
 
   return (
     <div style={{ padding:'22px 0' }} className="fade-in">
       <div style={{ display:'grid', gridTemplateColumns:'220px 1fr', gap:20, alignItems:'start' }} className="detail-panels">
         {/* Label list */}
-        <div style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:14 }}>
+        <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:14 }}>
           <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:14, fontWeight:700, letterSpacing:'0.06em', color:'#fff', textTransform:'uppercase', marginBottom:10 }}>Labels ({sortedLabels.length})</div>
           <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
             {sortedLabels.map(([label, count]) => {
@@ -2053,9 +2102,9 @@ function LabelsView({ projects, onOpenProject }) {
               const isActive = label === active;
               return (
                 <button key={label} onClick={() => setSelectedLabel(label)}
-                  style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'7px 10px', borderRadius:7, border:'none', background: isActive ? '#1a1a2a' : 'transparent', cursor:'pointer', textAlign:'left', borderLeft: isActive ? `2px solid ${lc.color}` : '2px solid transparent' }}>
-                  <span style={{ fontSize:12, color: isActive ? lc.color : '#7070a0', fontWeight: isActive ? 600 : 400 }}>{label}</span>
-                  <span style={{ fontSize:10, color:'#3a3a55', fontFamily:"'JetBrains Mono',monospace" }}>{count}</span>
+                  style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'7px 10px', borderRadius:7, border:'none', background: isActive ? 'var(--border-alt)' : 'transparent', cursor:'pointer', textAlign:'left', borderLeft: isActive ? `2px solid ${lc.color}` : '2px solid transparent' }}>
+                  <span style={{ fontSize:12, color: isActive ? lc.color : 'var(--text-faint)', fontWeight: isActive ? 600 : 400 }}>{label}</span>
+                  <span style={{ fontSize:10, color:'var(--text-dimmer)', fontFamily:"'JetBrains Mono',monospace" }}>{count}</span>
                 </button>
               );
             })}
@@ -2063,14 +2112,14 @@ function LabelsView({ projects, onOpenProject }) {
         </div>
 
         {/* Tasks for label */}
-        <div style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:18 }}>
+        <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:18 }}>
           <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:14, fontWeight:700, letterSpacing:'0.06em', color:'#fff', textTransform:'uppercase', marginBottom:14 }}>
             Tasks labeled "{active}" ({tasksForLabel.length})
           </div>
           {grouped.map(([pid, { name, tasks }]) => (
             <div key={pid} style={{ marginBottom:14 }}>
               <div onClick={() => onOpenProject(pid)}
-                style={{ fontSize:12, fontWeight:600, color:'#7070a0', cursor:'pointer', marginBottom:6 }}>{name} ({tasks.length})</div>
+                style={{ fontSize:12, fontWeight:600, color:'var(--text-faint)', cursor:'pointer', marginBottom:6 }}>{name} ({tasks.length})</div>
               {tasks.map(t => {
                 const ts = TASK_STATUS[t.status] || TASK_STATUS.todo;
                 const pr = PRIORITY[t.priority] || PRIORITY.medium;
@@ -2080,9 +2129,9 @@ function LabelsView({ projects, onOpenProject }) {
                     onMouseOver={e => e.currentTarget.style.background='rgba(255,255,255,0.025)'}
                     onMouseOut={e => e.currentTarget.style.background='transparent'}>
                     <span style={{ fontSize:10 }}>{t.status === 'done' ? '✓' : '□'}</span>
-                    <span style={{ flex:1, fontSize:13, color: t.status === 'done' ? '#4a4a6a' : '#d8d8e8', textDecoration: t.status === 'done' ? 'line-through' : 'none' }}>{t.title}</span>
+                    <span style={{ flex:1, fontSize:13, color: t.status === 'done' ? 'var(--text-dimmer)' : 'var(--text-primary)', textDecoration: t.status === 'done' ? 'line-through' : 'none' }}>{t.title}</span>
                     {t.priority !== 'none' && <span style={{ fontSize:9, fontWeight:600, padding:'2px 6px', borderRadius:99, color:pr.color, background:pr.bg, textTransform:'uppercase' }}>{pr.label}</span>}
-                    {t.dueDate && <span style={{ fontSize:10, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>{new Date(t.dueDate+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>}
+                    {t.dueDate && <span style={{ fontSize:10, color:'var(--text-dimmer)', fontFamily:"'JetBrains Mono',monospace" }}>{new Date(t.dueDate+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>}
                   </div>
                 );
               })}
@@ -2146,10 +2195,10 @@ function FocusView({ projects, onOpenProject }) {
         {task.priority !== 'none' && (
           <span style={{ fontSize:9, fontWeight:600, padding:'2px 6px', borderRadius:99, textTransform:'uppercase', color:pr.color, background:pr.bg, flexShrink:0 }}>{pr.label}</span>
         )}
-        <span style={{ flex:1, fontSize:13, color:'#d8d8e8', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{task.title}</span>
-        <span style={{ fontSize:10, color:'#4a4a6a', flexShrink:0, cursor:'pointer' }}>{task.projectName} →</span>
+        <span style={{ flex:1, fontSize:13, color:'var(--text-primary)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{task.title}</span>
+        <span style={{ fontSize:10, color:'var(--text-dimmer)', flexShrink:0, cursor:'pointer' }}>{task.projectName} →</span>
         {dueDate && (
-          <span style={{ fontSize:10, fontFamily:"'JetBrains Mono',monospace", flexShrink:0, color: isOverdue ? '#ef5350' : isDueToday ? '#ffa726' : '#4a4a6a' }}>
+          <span style={{ fontSize:10, fontFamily:"'JetBrains Mono',monospace", flexShrink:0, color: isOverdue ? '#ef5350' : isDueToday ? '#ffa726' : 'var(--text-dimmer)' }}>
             {dueDate.toLocaleDateString('en-US', { month:'short', day:'numeric' })}
           </span>
         )}
@@ -2160,30 +2209,30 @@ function FocusView({ projects, onOpenProject }) {
   const SectionHeader = ({ title, count }) => (
     <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10, marginTop:4 }}>
       <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:15, fontWeight:700, letterSpacing:'0.06em', color:'#fff', textTransform:'uppercase' }}>{title}</span>
-      {count > 0 && <span style={{ fontSize:10, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>({count})</span>}
+      {count > 0 && <span style={{ fontSize:10, color:'var(--text-dimmer)', fontFamily:"'JetBrains Mono',monospace" }}>({count})</span>}
     </div>
   );
 
   return (
     <div style={{ padding:'22px 0' }} className="fade-in">
       {allEmpty ? (
-        <div style={{ textAlign:'center', padding:'60px 20px', color:'#7070a0', fontSize:14 }}>Nothing urgent. Go build something.</div>
+        <div style={{ textAlign:'center', padding:'60px 20px', color:'var(--text-faint)', fontSize:14 }}>Nothing urgent. Go build something.</div>
       ) : (
         <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
           {urgent.length > 0 && (
-            <div style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:18 }}>
+            <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:18 }}>
               <SectionHeader title="Critical & High Priority" count={urgent.length} />
               {urgent.map(t => <FocusTask key={t.id} task={t} />)}
             </div>
           )}
           {dueSoon.length > 0 && (
-            <div style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:18 }}>
+            <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:18 }}>
               <SectionHeader title="Due Soon" count={dueSoon.length} />
               {dueSoon.map(t => <FocusTask key={t.id} task={t} />)}
             </div>
           )}
           {stalled.length > 0 && (
-            <div style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:18 }}>
+            <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:18 }}>
               <SectionHeader title="Stalled Projects" count={stalled.length} />
               {stalled.map(p => (
                 <div key={p.id} onClick={() => onOpenProject(p.id)}
@@ -2191,8 +2240,8 @@ function FocusView({ projects, onOpenProject }) {
                   onMouseOver={e => e.currentTarget.style.background='rgba(255,255,255,0.025)'}
                   onMouseOut={e => e.currentTarget.style.background='transparent'}>
                   <span style={{ fontSize:12, color:'#ffa726' }}>⚠</span>
-                  <span style={{ flex:1, fontSize:13, color:'#7070a0' }}>{p.name}</span>
-                  <span style={{ fontSize:10, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>no activity for {Math.floor((Date.now() - new Date(p.lastUpdated || 0)) / 86400000)}d</span>
+                  <span style={{ flex:1, fontSize:13, color:'var(--text-faint)' }}>{p.name}</span>
+                  <span style={{ fontSize:10, color:'var(--text-dimmer)', fontFamily:"'JetBrains Mono',monospace" }}>no activity for {Math.floor((Date.now() - new Date(p.lastUpdated || 0)) / 86400000)}d</span>
                 </div>
               ))}
             </div>
@@ -2238,27 +2287,27 @@ function GitHubActivity({ project, creds }) {
   const prCount = prs.data.length;
   const issueCount = issues.data.length;
   const lastCommit = commits.data[0] ? relativeTime(commits.data[0].commit?.author?.date) : '';
-  const skeleton = <div className="pulsing" style={{ height:14, width:'60%', background:'#18182a', borderRadius:4, margin:'6px 0' }} />;
+  const skeleton = <div className="pulsing" style={{ height:14, width:'60%', background:'var(--border)', borderRadius:4, margin:'6px 0' }} />;
 
   const SubSection = ({ title, loading, error, children, emptyMsg }) => (
     <div style={{ marginBottom:14 }}>
-      <div style={{ fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.06em', textTransform:'uppercase', marginBottom:8 }}>{title}</div>
+      <div style={{ fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.06em', textTransform:'uppercase', marginBottom:8 }}>{title}</div>
       {loading ? <>{skeleton}{skeleton}</> : error ? (
-        <div style={{ fontSize:12, color:'#4a4a6a', fontStyle:'italic' }}>Could not load {title.toLowerCase()}</div>
+        <div style={{ fontSize:12, color:'var(--text-dimmer)', fontStyle:'italic' }}>Could not load {title.toLowerCase()}</div>
       ) : children.length === 0 ? (
-        <div style={{ fontSize:12, color:'#3a3a55' }}>{emptyMsg}</div>
+        <div style={{ fontSize:12, color:'var(--text-dimmer)' }}>{emptyMsg}</div>
       ) : children}
     </div>
   );
 
   return (
-    <div style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:18, gridColumn:'1 / -1' }}>
+    <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:18, gridColumn:'1 / -1' }}>
       <button onClick={() => setCollapsed(!collapsed)}
-        style={{ display:'flex', width:'100%', justifyContent:'space-between', alignItems:'center', background:'none', border:'none', cursor:'pointer', padding:0, color:'#d8d8e8' }}>
+        style={{ display:'flex', width:'100%', justifyContent:'space-between', alignItems:'center', background:'none', border:'none', cursor:'pointer', padding:0, color:'var(--text-primary)' }}>
         <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:16, fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase' }}>
           {collapsed ? '▸' : '▾'} GitHub Activity
         </span>
-        <span style={{ fontSize:10, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>
+        <span style={{ fontSize:10, color:'var(--text-dimmer)', fontFamily:"'JetBrains Mono',monospace" }}>
           {!commits.loading && !prs.loading && !issues.loading ? `${prCount} PRs · ${issueCount} issues${lastCommit ? ` · last commit ${lastCommit}` : ''}` : 'Loading…'}
         </span>
       </button>
@@ -2268,10 +2317,10 @@ function GitHubActivity({ project, creds }) {
           <SubSection title="Recent Commits" loading={commits.loading} error={commits.error} emptyMsg="No commits found">{
             commits.data.map(c => (
               <a key={c.sha} href={c.html_url} target="_blank" rel="noopener noreferrer"
-                style={{ display:'flex', alignItems:'baseline', gap:8, padding:'5px 0', fontSize:12, color:'#7070a0', textDecoration:'none' }}>
+                style={{ display:'flex', alignItems:'baseline', gap:8, padding:'5px 0', fontSize:12, color:'var(--text-faint)', textDecoration:'none' }}>
                 <span style={{ fontFamily:"'JetBrains Mono',monospace", color:'#29b6f6', fontSize:11, flexShrink:0 }}>{c.sha.slice(0,7)}</span>
                 <span style={{ flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{(c.commit?.message || '').split('\n')[0].slice(0,72)}</span>
-                <span style={{ color:'#3a3a55', flexShrink:0, fontSize:10, fontFamily:"'JetBrains Mono',monospace" }}>{relativeTime(c.commit?.author?.date)}</span>
+                <span style={{ color:'var(--text-dimmer)', flexShrink:0, fontSize:10, fontFamily:"'JetBrains Mono',monospace" }}>{relativeTime(c.commit?.author?.date)}</span>
               </a>
             ))
           }</SubSection>
@@ -2279,10 +2328,10 @@ function GitHubActivity({ project, creds }) {
           <SubSection title="Pull Requests" loading={prs.loading} error={prs.error} emptyMsg="No open PRs">{
             prs.data.map(pr => (
               <a key={pr.id} href={pr.html_url} target="_blank" rel="noopener noreferrer"
-                style={{ display:'flex', alignItems:'baseline', gap:8, padding:'5px 0', fontSize:12, color:'#7070a0', textDecoration:'none' }}>
+                style={{ display:'flex', alignItems:'baseline', gap:8, padding:'5px 0', fontSize:12, color:'var(--text-faint)', textDecoration:'none' }}>
                 <span style={{ fontFamily:"'JetBrains Mono',monospace", color:'#00e676', fontSize:11, flexShrink:0 }}>#{pr.number}</span>
                 <span style={{ flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{pr.title}</span>
-                <span style={{ color:'#3a3a55', flexShrink:0, fontSize:10, fontFamily:"'JetBrains Mono',monospace" }}>{relativeTime(pr.created_at)}</span>
+                <span style={{ color:'var(--text-dimmer)', flexShrink:0, fontSize:10, fontFamily:"'JetBrains Mono',monospace" }}>{relativeTime(pr.created_at)}</span>
               </a>
             ))
           }</SubSection>
@@ -2290,13 +2339,13 @@ function GitHubActivity({ project, creds }) {
           <SubSection title="Issues" loading={issues.loading} error={issues.error} emptyMsg="No open issues">{
             issues.data.map(iss => (
               <a key={iss.id} href={iss.html_url} target="_blank" rel="noopener noreferrer"
-                style={{ display:'flex', alignItems:'center', gap:8, padding:'5px 0', fontSize:12, color:'#7070a0', textDecoration:'none' }}>
+                style={{ display:'flex', alignItems:'center', gap:8, padding:'5px 0', fontSize:12, color:'var(--text-faint)', textDecoration:'none' }}>
                 <span style={{ fontFamily:"'JetBrains Mono',monospace", color:'#ffa726', fontSize:11, flexShrink:0 }}>#{iss.number}</span>
                 <span style={{ flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{iss.title}</span>
                 {iss.labels?.slice(0,2).map(l => (
                   <span key={l.id} style={{ fontSize:9, padding:'1px 6px', borderRadius:99, background:`#${l.color}22`, color:`#${l.color}`, flexShrink:0 }}>{l.name}</span>
                 ))}
-                <span style={{ color:'#3a3a55', flexShrink:0, fontSize:10, fontFamily:"'JetBrains Mono',monospace" }}>{relativeTime(iss.created_at)}</span>
+                <span style={{ color:'var(--text-dimmer)', flexShrink:0, fontSize:10, fontFamily:"'JetBrains Mono',monospace" }}>{relativeTime(iss.created_at)}</span>
               </a>
             ))
           }</SubSection>
@@ -2391,7 +2440,7 @@ function GlobalTaskList({ projects, onUpdate, onDelete, onOpenProject }) {
         {/* Status pills */}
         <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
           <button className="pill"
-            style={{ padding:'5px 12px', borderRadius:99, border:`1px solid ${statusFilter==='all'?'#d8d8e8':'#18182a'}`, background: statusFilter==='all'?'#1a1a2a':'transparent', color: statusFilter==='all'?'#d8d8e8':'#7070a0', fontSize:12, fontWeight:500, display:'flex', alignItems:'center', gap:5 }}
+            style={{ padding:'5px 12px', borderRadius:99, border:`1px solid ${statusFilter==='all'?'var(--text-primary)':'var(--border)'}`, background: statusFilter==='all'?'var(--border-alt)':'transparent', color: statusFilter==='all'?'var(--text-primary)':'var(--text-faint)', fontSize:12, fontWeight:500, display:'flex', alignItems:'center', gap:5 }}
             onClick={() => setStatusFilter('all')}>
             Active <span style={{ opacity:.5 }}>{statusCounts.all}</span>
           </button>
@@ -2399,7 +2448,7 @@ function GlobalTaskList({ projects, onUpdate, onDelete, onOpenProject }) {
             const cfg = TASK_STATUS[key];
             return statusCounts[key] > 0 && (
               <button key={key} className="pill"
-                style={{ padding:'5px 12px', borderRadius:99, border:`1px solid ${statusFilter===key?cfg.color:'#18182a'}`, background: statusFilter===key?cfg.bg:'transparent', color: statusFilter===key?cfg.color:'#7070a0', fontSize:12, fontWeight:500, display:'flex', alignItems:'center', gap:5 }}
+                style={{ padding:'5px 12px', borderRadius:99, border:`1px solid ${statusFilter===key?cfg.color:'var(--border)'}`, background: statusFilter===key?cfg.bg:'transparent', color: statusFilter===key?cfg.color:'var(--text-faint)', fontSize:12, fontWeight:500, display:'flex', alignItems:'center', gap:5 }}
                 onClick={() => setStatusFilter(statusFilter === key ? 'all' : key)}>
                 {cfg.label} <span style={{ opacity:.5 }}>{statusCounts[key]}</span>
               </button>
@@ -2413,7 +2462,7 @@ function GlobalTaskList({ projects, onUpdate, onDelete, onOpenProject }) {
             const cfg = PRIORITY[key];
             return priCounts[key] > 0 && (
               <button key={key} className="pill"
-                style={{ padding:'5px 10px', borderRadius:99, border:`1px solid ${priorityFilter===key?cfg.color:'#18182a'}`, background: priorityFilter===key?cfg.bg:'transparent', color: priorityFilter===key?cfg.color:'#7070a0', fontSize:11, fontWeight:500, display:'flex', alignItems:'center', gap:4 }}
+                style={{ padding:'5px 10px', borderRadius:99, border:`1px solid ${priorityFilter===key?cfg.color:'var(--border)'}`, background: priorityFilter===key?cfg.bg:'transparent', color: priorityFilter===key?cfg.color:'var(--text-faint)', fontSize:11, fontWeight:500, display:'flex', alignItems:'center', gap:4 }}
                 onClick={() => setPriorityFilter(priorityFilter === key ? 'all' : key)}>
                 {cfg.label} <span style={{ opacity:.5 }}>{priCounts[key]}</span>
               </button>
@@ -2424,12 +2473,12 @@ function GlobalTaskList({ projects, onUpdate, onDelete, onOpenProject }) {
         {/* Project filter + Sort */}
         <div style={{ display:'flex', gap:6, marginLeft:'auto', flexWrap:'wrap' }}>
           <select value={projectFilter} onChange={e => setProjectFilter(e.target.value)}
-            style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:7, padding:'5px 10px', color:'#4a4a6a', fontSize:11, outline:'none', cursor:'pointer' }}>
+            style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:7, padding:'5px 10px', color:'var(--text-dimmer)', fontSize:11, outline:'none', cursor:'pointer' }}>
             <option value="all">All Projects</option>
             {projectsWithTasks.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
           <select value={sortBy} onChange={e => setSortBy(e.target.value)}
-            style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:7, padding:'5px 10px', color:'#4a4a6a', fontSize:11, outline:'none', cursor:'pointer' }}>
+            style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:7, padding:'5px 10px', color:'var(--text-dimmer)', fontSize:11, outline:'none', cursor:'pointer' }}>
             <option value="priority">↕ Priority</option>
             <option value="due">↕ Due Date</option>
             <option value="recent">↕ Recently Added</option>
@@ -2439,10 +2488,10 @@ function GlobalTaskList({ projects, onUpdate, onDelete, onOpenProject }) {
       </div>
 
       {/* Task list */}
-      <div style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:18 }}>
+      <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:18 }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
           <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:16, fontWeight:700, letterSpacing:'0.06em', color:'#fff', textTransform:'uppercase' }}>All Tasks</span>
-          <span style={{ fontSize:11, color:'#4a4a6a', fontFamily:"'JetBrains Mono',monospace" }}>
+          <span style={{ fontSize:11, color:'var(--text-dimmer)', fontFamily:"'JetBrains Mono',monospace" }}>
             {sorted.filter(t => t.status === 'done').length} / {sorted.length} done
           </span>
         </div>
@@ -2463,7 +2512,7 @@ function GlobalTaskList({ projects, onUpdate, onDelete, onOpenProject }) {
             />
           ))}
           {sorted.length === 0 && (
-            <div style={{ color:'#7070a0', fontSize:13, textAlign:'center', padding:'32px 0' }}>
+            <div style={{ color:'var(--text-faint)', fontSize:13, textAlign:'center', padding:'32px 0' }}>
               {allTasks.length === 0 ? 'No tasks yet. Add some from a project.' : 'No tasks match your filters.'}
             </div>
           )}
@@ -2506,30 +2555,30 @@ function NotesPanel({ projectId, initialNotes, onSave }) {
   if (isMobile && !mobileOpen) {
     return (
       <button onClick={() => setMobileOpen(true)}
-        style={{ width:'100%', background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:'14px 18px', color:'#7070a0', fontSize:13, cursor:'pointer', textAlign:'left', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+        style={{ width:'100%', background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:'14px 18px', color:'var(--text-faint)', fontSize:13, cursor:'pointer', textAlign:'left', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
         <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:16, fontWeight:700, letterSpacing:'0.06em', color:'#fff', textTransform:'uppercase' }}>Notes</span>
-        <span style={{ fontSize:12, color:'#4a4a6a' }}>▾ Expand</span>
+        <span style={{ fontSize:12, color:'var(--text-dimmer)' }}>▾ Expand</span>
       </button>
     );
   }
 
   return (
-    <div style={{ background:'#10101a', border:'1px solid #18182a', borderRadius:12, padding:18 }}>
+    <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:18 }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
         <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:16, fontWeight:700, letterSpacing:'0.06em', color:'#fff', textTransform:'uppercase' }}>Notes</span>
         <div style={{ display:'flex', gap:2 }}>
           {isMobile && (
             <button onClick={() => setMobileOpen(false)}
-              style={{ padding:'4px 10px', borderRadius:6, border:'1px solid #1a1a2a', background:'transparent', color:'#4a4a6a', fontSize:11, cursor:'pointer', marginRight:6 }}>
+              style={{ padding:'4px 10px', borderRadius:6, border:'1px solid var(--border-alt)', background:'transparent', color:'var(--text-dimmer)', fontSize:11, cursor:'pointer', marginRight:6 }}>
               ▴ Collapse
             </button>
           )}
           <button onClick={() => switchMode('edit')}
-            style={{ padding:'4px 12px', borderRadius:6, border:`1px solid ${mode==='edit'?'#29b6f6':'#1a1a2a'}`, background: mode==='edit'?'rgba(41,182,246,0.10)':'transparent', color: mode==='edit'?'#29b6f6':'#4a4a6a', fontSize:11, cursor:'pointer', fontWeight:500 }}>
+            style={{ padding:'4px 12px', borderRadius:6, border:`1px solid ${mode==='edit'?'#29b6f6':'var(--border-alt)'}`, background: mode==='edit'?'rgba(41,182,246,0.10)':'transparent', color: mode==='edit'?'#29b6f6':'var(--text-dimmer)', fontSize:11, cursor:'pointer', fontWeight:500 }}>
             Edit
           </button>
           <button onClick={() => switchMode('preview')}
-            style={{ padding:'4px 12px', borderRadius:6, border:`1px solid ${mode==='preview'?'#29b6f6':'#1a1a2a'}`, background: mode==='preview'?'rgba(41,182,246,0.10)':'transparent', color: mode==='preview'?'#29b6f6':'#4a4a6a', fontSize:11, cursor:'pointer', fontWeight:500 }}>
+            style={{ padding:'4px 12px', borderRadius:6, border:`1px solid ${mode==='preview'?'#29b6f6':'var(--border-alt)'}`, background: mode==='preview'?'rgba(41,182,246,0.10)':'transparent', color: mode==='preview'?'#29b6f6':'var(--text-dimmer)', fontSize:11, cursor:'pointer', fontWeight:500 }}>
             Preview
           </button>
         </div>
@@ -2538,14 +2587,14 @@ function NotesPanel({ projectId, initialNotes, onSave }) {
       {mode === 'edit' ? (
         <textarea value={text} onChange={handleChange} onBlur={handleBlur}
           placeholder="Write your notes here… supports **markdown**"
-          style={{ width:'100%', minHeight:240, background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:8, padding:'12px 14px', color:'#d8d8e8', fontSize:13, outline:'none', lineHeight:1.65, fontFamily:"'JetBrains Mono',monospace", resize:'vertical' }}/>
+          style={{ width:'100%', minHeight:240, background:'var(--surface-raised)', border:'1px solid var(--border-alt)', borderRadius:8, padding:'12px 14px', color:'var(--text-primary)', fontSize:13, outline:'none', lineHeight:1.65, fontFamily:"'JetBrains Mono',monospace", resize:'vertical' }}/>
       ) : (
         <div className="md-preview"
           style={{ minHeight:100, padding:'4px 0', fontSize:13.5, lineHeight:1.65 }}>
           {text ? (
             <div dangerouslySetInnerHTML={{ __html: renderMarkdown(text) }} />
           ) : (
-            <div style={{ color:'#3a3a55', fontSize:13, fontStyle:'italic' }}>No notes yet. Switch to Edit to start writing.</div>
+            <div style={{ color:'var(--text-dimmer)', fontSize:13, fontStyle:'italic' }}>No notes yet. Switch to Edit to start writing.</div>
           )}
         </div>
       )}
@@ -2560,18 +2609,18 @@ function ProjectModal({ mode, data, onSave, onClose }) {
   const toggle = (k, v) => setForm(f => ({ ...f, [k]: (f[k]||[]).includes(v) ? f[k].filter(x=>x!==v) : [...(f[k]||[]),v] }));
   const pick   = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  const inputStyle = { width:'100%', background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:8, padding:'10px 14px', color:'#d8d8e8', fontSize:14, outline:'none', lineHeight:1.5 };
-  const labelStyle = { display:'block', fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:7 };
+  const inputStyle = { width:'100%', background:'var(--surface-raised)', border:'1px solid var(--border-alt)', borderRadius:8, padding:'10px 14px', color:'var(--text-primary)', fontSize:14, outline:'none', lineHeight:1.5 };
+  const labelStyle = { display:'block', fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:7 };
 
   return (
     <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', backdropFilter:'blur(6px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:200, padding:16 }}
       onClick={e => e.target===e.currentTarget && onClose()}>
-      <div style={{ background:'#10101a', border:'1px solid #252538', borderRadius:16, width:'100%', maxWidth:520, maxHeight:'92vh', display:'flex', flexDirection:'column' }}>
-        <div style={{ padding:'20px 24px 16px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'1px solid #18182a' }}>
+      <div style={{ background:'var(--surface)', border:'1px solid var(--border-emphasis)', borderRadius:16, width:'100%', maxWidth:520, maxHeight:'92vh', display:'flex', flexDirection:'column' }}>
+        <div style={{ padding:'20px 24px 16px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'1px solid var(--border)' }}>
           <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:21, fontWeight:700, color:'#fff', letterSpacing:'0.05em' }}>
             {mode==='add' ? 'New Project' : 'Edit Project'}
           </span>
-          <button className="icon-btn" style={{ padding:'4px 6px', background:'transparent', border:'none', color:'#5a5a7a', borderRadius:5, fontSize:17, cursor:'pointer' }} onClick={onClose}>✕</button>
+          <button className="icon-btn" style={{ padding:'4px 6px', background:'transparent', border:'none', color:'var(--text-dim)', borderRadius:5, fontSize:17, cursor:'pointer' }} onClick={onClose}>✕</button>
         </div>
 
         <div style={{ padding:'20px 24px', overflowY:'auto', display:'flex', flexDirection:'column', gap:18 }}>
@@ -2590,7 +2639,7 @@ function ProjectModal({ mode, data, onSave, onClose }) {
                 const on = form.status === key;
                 return (
                   <button key={key} className="chip-btn"
-                    style={{ padding:'5px 12px', borderRadius:7, border:`1px solid ${on?cfg.color:'#1e1e2e'}`, background:on?cfg.bg:'transparent', color:on?cfg.color:'#4a4a6a', fontSize:12, cursor:'pointer' }}
+                    style={{ padding:'5px 12px', borderRadius:7, border:`1px solid ${on?cfg.color:'var(--border-alt)'}`, background:on?cfg.bg:'transparent', color:on?cfg.color:'var(--text-dimmer)', fontSize:12, cursor:'pointer' }}
                     onClick={() => pick('status', key)}>
                     {cfg.label}
                   </button>
@@ -2605,7 +2654,7 @@ function ProjectModal({ mode, data, onSave, onClose }) {
                 const on = (form.priority || 'none') === key;
                 return (
                   <button key={key} className="chip-btn"
-                    style={{ padding:'5px 12px', borderRadius:7, border:`1px solid ${on ? (key === 'none' ? '#3a3a55' : cfg.color) : '#1e1e2e'}`, background:on ? (key === 'none' ? 'rgba(58,58,85,0.15)' : cfg.bg) : 'transparent', color:on ? (key === 'none' ? '#7070a0' : cfg.color) : '#4a4a6a', fontSize:12, cursor:'pointer' }}
+                    style={{ padding:'5px 12px', borderRadius:7, border:`1px solid ${on ? (key === 'none' ? 'var(--text-dimmer)' : cfg.color) : 'var(--border-alt)'}`, background:on ? (key === 'none' ? 'rgba(58,58,85,0.15)' : cfg.bg) : 'transparent', color:on ? (key === 'none' ? 'var(--text-faint)' : cfg.color) : 'var(--text-dimmer)', fontSize:12, cursor:'pointer' }}
                     onClick={() => pick('priority', key)}>
                     {cfg.label}
                   </button>
@@ -2620,7 +2669,7 @@ function ProjectModal({ mode, data, onSave, onClose }) {
                 const on = (form.machines||[]).includes(m);
                 return (
                   <button key={m} className="chip-btn"
-                    style={{ padding:'5px 12px', borderRadius:7, border:`1px solid ${on?'#00e676':'#1e1e2e'}`, background:on?'rgba(0,230,118,0.10)':'transparent', color:on?'#00e676':'#4a4a6a', fontSize:12, cursor:'pointer' }}
+                    style={{ padding:'5px 12px', borderRadius:7, border:`1px solid ${on?'#00e676':'var(--border-alt)'}`, background:on?'rgba(0,230,118,0.10)':'transparent', color:on?'#00e676':'var(--text-dimmer)', fontSize:12, cursor:'pointer' }}
                     onClick={() => toggle('machines', m)}>
                     {m}
                   </button>
@@ -2635,7 +2684,7 @@ function ProjectModal({ mode, data, onSave, onClose }) {
                 const on = form.aiModel === m;
                 return (
                   <button key={m} className="chip-btn"
-                    style={{ padding:'5px 12px', borderRadius:7, border:`1px solid ${on?'#29b6f6':'#1e1e2e'}`, background:on?'rgba(41,182,246,0.10)':'transparent', color:on?'#29b6f6':'#4a4a6a', fontSize:12, cursor:'pointer' }}
+                    style={{ padding:'5px 12px', borderRadius:7, border:`1px solid ${on?'#29b6f6':'var(--border-alt)'}`, background:on?'rgba(41,182,246,0.10)':'transparent', color:on?'#29b6f6':'var(--text-dimmer)', fontSize:12, cursor:'pointer' }}
                     onClick={() => pick('aiModel', m)}>
                     {m}
                   </button>
@@ -2653,8 +2702,8 @@ function ProjectModal({ mode, data, onSave, onClose }) {
           </div>
         </div>
 
-        <div style={{ padding:'16px 24px', borderTop:'1px solid #18182a', display:'flex', justifyContent:'flex-end', gap:10 }}>
-          <button style={{ padding:'9px 18px', background:'transparent', border:'1px solid #1e1e2e', borderRadius:8, color:'#7070a0', fontSize:14, cursor:'pointer' }} onClick={onClose}>Cancel</button>
+        <div style={{ padding:'16px 24px', borderTop:'1px solid var(--border)', display:'flex', justifyContent:'flex-end', gap:10 }}>
+          <button style={{ padding:'9px 18px', background:'transparent', border:'1px solid var(--border-alt)', borderRadius:8, color:'var(--text-faint)', fontSize:14, cursor:'pointer' }} onClick={onClose}>Cancel</button>
           <button
             style={{ padding:'9px 20px', background:'#00e676', border:'none', borderRadius:8, color:'#000', fontSize:14, fontWeight:600, cursor:'pointer', opacity: form.name?.trim()?1:.4, transition:'opacity .15s' }}
             onClick={() => form.name?.trim() && onSave({ ...form, lastUpdated: now() })}>
@@ -2667,11 +2716,11 @@ function ProjectModal({ mode, data, onSave, onClose }) {
 }
 
 // ── Settings Modal ────────────────────────────────────────────────────────────
-function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibleTabs, onSetVisibleTabs }) {
+function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibleTabs, onSetVisibleTabs, theme, onSetTheme }) {
   const [aiKey, setAiKey] = useState(loadAnthropicKey());
   const [saved, setSaved] = useState(false);
-  const inputStyle = { width:'100%', background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:8, padding:'10px 14px', color:'#d8d8e8', fontSize:14, outline:'none' };
-  const labelStyle = { display:'block', fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:6 };
+  const inputStyle = { width:'100%', background:'var(--surface-raised)', border:'1px solid var(--border-alt)', borderRadius:8, padding:'10px 14px', color:'var(--text-primary)', fontSize:14, outline:'none' };
+  const labelStyle = { display:'block', fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:6 };
 
   const saveKey = () => {
     localStorage.setItem(ANTHROPIC_KEY, aiKey.trim());
@@ -2682,53 +2731,68 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibl
   return (
     <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', backdropFilter:'blur(6px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:200, padding:16 }}
       onClick={e => e.target===e.currentTarget && onClose()}>
-      <div style={{ background:'#10101a', border:'1px solid #252538', borderRadius:16, width:'100%', maxWidth:440, padding:24 }}>
+      <div style={{ background:'var(--surface)', border:'1px solid var(--border-emphasis)', borderRadius:16, width:'100%', maxWidth:440, padding:24 }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
           <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:21, fontWeight:700, color:'#fff', letterSpacing:'0.05em' }}>Settings</span>
-          <button className="icon-btn" style={{ padding:'4px 6px', background:'transparent', border:'none', color:'#5a5a7a', borderRadius:5, fontSize:17, cursor:'pointer' }} onClick={onClose}>✕</button>
+          <button className="icon-btn" style={{ padding:'4px 6px', background:'transparent', border:'none', color:'var(--text-dim)', borderRadius:5, fontSize:17, cursor:'pointer' }} onClick={onClose}>✕</button>
         </div>
 
         <div style={{ marginBottom:20 }}>
           <label style={labelStyle}>Anthropic API Key (optional — for AI features)</label>
           <input type="password" value={aiKey} onChange={e => setAiKey(e.target.value)} placeholder="sk-ant-…" style={inputStyle}/>
-          <p style={{ fontSize:11, color:'#3a3a55', marginTop:6, lineHeight:1.5 }}>
+          <p style={{ fontSize:11, color:'var(--text-dimmer)', marginTop:6, lineHeight:1.5 }}>
             Enables AI task suggestions and digest narrative.{' '}
             <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer" style={{ color:'#29b6f6' }}>Get a key →</a>
           </p>
-          <button onClick={saveKey} style={{ marginTop:8, padding:'7px 16px', background: saved?'rgba(0,230,118,0.15)':'#1a1a2a', border:'1px solid #252538', borderRadius:8, color: saved?'#00e676':'#7070a0', fontSize:12, fontWeight:500, cursor:'pointer' }}>
+          <button onClick={saveKey} style={{ marginTop:8, padding:'7px 16px', background: saved?'rgba(0,230,118,0.15)':'var(--border-alt)', border:'1px solid var(--border-emphasis)', borderRadius:8, color: saved?'#00e676':'var(--text-faint)', fontSize:12, fontWeight:500, cursor:'pointer' }}>
             {saved ? '✓ Saved' : 'Save Key'}
           </button>
         </div>
 
-        <div style={{ borderTop:'1px solid #18182a', paddingTop:16, marginBottom:16 }}>
-          <label style={{ display:'block', fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:10 }}>Navigation Tabs</label>
+        <div style={{ borderTop:'1px solid var(--border)', paddingTop:16, marginBottom:16 }}>
+          <label style={{ display:'block', fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:10 }}>Appearance</label>
+          <div style={{ display:'flex', gap:6 }}>
+            {[{ key:'dark', label:'🌙 Dark' }, { key:'light', label:'☀ Light' }].map(opt => {
+              const on = theme === opt.key;
+              return (
+                <button key={opt.key} onClick={() => onSetTheme(opt.key)}
+                  style={{ flex:1, padding:'8px 12px', borderRadius:7, border:`1px solid ${on ? '#00e676' : 'var(--border-alt)'}`, background: on ? 'rgba(0,230,118,0.08)' : 'transparent', color: on ? '#00e676' : 'var(--text-faint)', fontSize:12, fontWeight:500, cursor:'pointer' }}>
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div style={{ borderTop:'1px solid var(--border)', paddingTop:16, marginBottom:16 }}>
+          <label style={{ display:'block', fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:10 }}>Navigation Tabs</label>
           <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
             {OPTIONAL_TABS.map(tabKey => {
               const on = visibleTabs.includes(tabKey);
               return (
-                <div key={tabKey} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'6px 10px', background:'#0c0c16', borderRadius:6, border:'1px solid #1a1a2a' }}>
-                  <span style={{ fontSize:12, color: on ? '#d8d8e8' : '#4a4a6a' }}>{TAB_LABELS[tabKey]}</span>
+                <div key={tabKey} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'6px 10px', background:'var(--surface-raised)', borderRadius:6, border:'1px solid var(--border-alt)' }}>
+                  <span style={{ fontSize:12, color: on ? 'var(--text-primary)' : 'var(--text-dimmer)' }}>{TAB_LABELS[tabKey]}</span>
                   <button onClick={() => {
                     const next = on ? visibleTabs.filter(t => t !== tabKey) : [...visibleTabs, tabKey];
                     onSetVisibleTabs(next);
                   }}
-                    style={{ fontSize:10, padding:'3px 12px', borderRadius:6, border:`1px solid ${on ? 'rgba(0,230,118,0.25)' : '#1a1a2a'}`, background: on ? 'rgba(0,230,118,0.08)' : 'transparent', color: on ? '#00e676' : '#4a4a6a', cursor:'pointer', fontWeight:500 }}>
+                    style={{ fontSize:10, padding:'3px 12px', borderRadius:6, border:`1px solid ${on ? 'rgba(0,230,118,0.25)' : 'var(--border-alt)'}`, background: on ? 'rgba(0,230,118,0.08)' : 'transparent', color: on ? '#00e676' : 'var(--text-dimmer)', cursor:'pointer', fontWeight:500 }}>
                     {on ? 'Visible' : 'Hidden'}
                   </button>
                 </div>
               );
             })}
           </div>
-          <p style={{ fontSize:10, color:'#3a3a55', marginTop:6 }}>Projects, Tasks, and Ideas are always shown.</p>
+          <p style={{ fontSize:10, color:'var(--text-dimmer)', marginTop:6 }}>Projects, Tasks, and Ideas are always shown.</p>
         </div>
 
         {hiddenProjects.length > 0 && (
-          <div style={{ borderTop:'1px solid #18182a', paddingTop:16, marginBottom:16 }}>
-            <label style={{ display:'block', fontSize:10, fontWeight:600, color:'#7a7a98', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:8 }}>Hidden Projects ({hiddenProjects.length})</label>
+          <div style={{ borderTop:'1px solid var(--border)', paddingTop:16, marginBottom:16 }}>
+            <label style={{ display:'block', fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:8 }}>Hidden Projects ({hiddenProjects.length})</label>
             <div style={{ display:'flex', flexDirection:'column', gap:4, maxHeight:160, overflowY:'auto' }}>
               {hiddenProjects.map(p => (
-                <div key={p.id} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'6px 10px', background:'#0c0c16', borderRadius:6, border:'1px solid #1a1a2a' }}>
-                  <span style={{ fontSize:12, color:'#7070a0' }}>{p.name}</span>
+                <div key={p.id} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'6px 10px', background:'var(--surface-raised)', borderRadius:6, border:'1px solid var(--border-alt)' }}>
+                  <span style={{ fontSize:12, color:'var(--text-faint)' }}>{p.name}</span>
                   <button onClick={() => onUnhide(p.id)}
                     style={{ fontSize:10, padding:'3px 10px', background:'rgba(41,182,246,0.08)', border:'1px solid rgba(41,182,246,0.18)', borderRadius:6, color:'#29b6f6', cursor:'pointer' }}>
                     Unhide
@@ -2739,7 +2803,7 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibl
           </div>
         )}
 
-        <div style={{ borderTop:'1px solid #18182a', paddingTop:16 }}>
+        <div style={{ borderTop:'1px solid var(--border)', paddingTop:16 }}>
           <button onClick={() => { if(window.confirm('Disconnect from this repo? Your data stays in GitHub.')) { onDisconnect(); onClose(); } }}
             style={{ padding:'8px 16px', background:'transparent', border:'1px solid rgba(239,83,80,0.25)', borderRadius:8, color:'#ef5350', fontSize:12, cursor:'pointer' }}>
             Disconnect Repo
@@ -2788,18 +2852,18 @@ function AISuggestions({ project, onAddTasks, onClose }) {
   const checkedCount = checked.filter(Boolean).length;
 
   return (
-    <div style={{ background:'#0c0c16', border:'1px solid #1a1a2a', borderRadius:10, padding:14, marginBottom:12 }}>
+    <div style={{ background:'var(--surface-raised)', border:'1px solid var(--border-alt)', borderRadius:10, padding:14, marginBottom:12 }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
         <span style={{ fontSize:12, fontWeight:600, color:'#ce93d8' }}>✨ AI Suggestions</span>
-        <button onClick={onClose} className="icon-btn" style={{ background:'transparent', border:'none', color:'#5a5a7a', fontSize:13, cursor:'pointer', padding:'2px 4px' }}>✕</button>
+        <button onClick={onClose} className="icon-btn" style={{ background:'transparent', border:'none', color:'var(--text-dim)', fontSize:13, cursor:'pointer', padding:'2px 4px' }}>✕</button>
       </div>
-      {loading && <div className="pulsing" style={{ fontSize:12, color:'#7070a0', padding:'12px 0' }}>✨ Thinking…</div>}
+      {loading && <div className="pulsing" style={{ fontSize:12, color:'var(--text-faint)', padding:'12px 0' }}>✨ Thinking…</div>}
       {error && <div style={{ fontSize:12, color:'#ef5350', padding:'8px 0' }}>{error}</div>}
       {!loading && !error && suggestions.length > 0 && (
         <>
           <div style={{ display:'flex', flexDirection:'column', gap:4, marginBottom:10 }}>
             {suggestions.map((s, i) => (
-              <label key={i} style={{ display:'flex', alignItems:'center', gap:8, padding:'5px 6px', borderRadius:6, cursor:'pointer', fontSize:13, color: checked[i] ? '#d8d8e8' : '#4a4a6a' }}>
+              <label key={i} style={{ display:'flex', alignItems:'center', gap:8, padding:'5px 6px', borderRadius:6, cursor:'pointer', fontSize:13, color: checked[i] ? 'var(--text-primary)' : 'var(--text-dimmer)' }}>
                 <input type="checkbox" checked={checked[i]} onChange={() => setChecked(c => c.map((v, j) => j === i ? !v : v))}
                   style={{ accentColor:'#00e676' }}/>
                 {s}
@@ -2809,11 +2873,11 @@ function AISuggestions({ project, onAddTasks, onClose }) {
           <div style={{ display:'flex', gap:8 }}>
             <button onClick={() => { onAddTasks(suggestions.filter((_, i) => checked[i])); onClose(); }}
               disabled={checkedCount === 0}
-              style={{ padding:'7px 14px', background: checkedCount ? '#00e676' : '#1a1a2a', border:'none', borderRadius:8, color: checkedCount ? '#000' : '#4a4a6a', fontSize:12, fontWeight:600, cursor: checkedCount ? 'pointer' : 'default' }}>
+              style={{ padding:'7px 14px', background: checkedCount ? '#00e676' : 'var(--border-alt)', border:'none', borderRadius:8, color: checkedCount ? '#000' : 'var(--text-dimmer)', fontSize:12, fontWeight:600, cursor: checkedCount ? 'pointer' : 'default' }}>
               Add {checkedCount} selected
             </button>
             <button onClick={fetchSuggestions}
-              style={{ padding:'7px 14px', background:'transparent', border:'1px solid #1e1e2e', borderRadius:8, color:'#7070a0', fontSize:12, cursor:'pointer' }}>
+              style={{ padding:'7px 14px', background:'transparent', border:'1px solid var(--border-alt)', borderRadius:8, color:'var(--text-faint)', fontSize:12, cursor:'pointer' }}>
               Regenerate
             </button>
           </div>

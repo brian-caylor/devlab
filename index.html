@@ -1510,10 +1510,12 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
   const ts = TASK_STATUS[task.status] || TASK_STATUS.todo;
   const pr = PRIORITY[task.priority] || PRIORITY.medium;
 
+  const [title, setTitle] = useState(task.title || '');
   const [desc, setDesc] = useState(task.description || '');
   const [dueDate, setDueDate] = useState(task.dueDate || '');
 
   // Sync from props when task changes externally
+  useEffect(() => { setTitle(task.title || ''); }, [task.title]);
   useEffect(() => { setDesc(task.description || ''); }, [task.description]);
   useEffect(() => { setDueDate(task.dueDate || ''); }, [task.dueDate]);
 
@@ -1545,6 +1547,11 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
     onUpdate(projectId, task.id, { priority: next });
   };
 
+  const saveTitle = () => {
+    const trimmed = title.trim();
+    if (!trimmed) { setTitle(task.title || ''); return; }
+    if (trimmed !== task.title) onUpdate(projectId, task.id, { title: trimmed });
+  };
   const saveDesc = () => {
     if (desc !== (task.description || '')) onUpdate(projectId, task.id, { description: desc });
   };
@@ -1646,6 +1653,12 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
       {/* Expanded panel */}
       {expanded && (
         <div style={{ marginLeft:36, padding:'10px 14px', background:'var(--surface-raised)', borderRadius:8, border:'1px solid var(--border-alt)', marginTop:2, marginBottom:4, display:'flex', flexDirection:'column', gap:10 }}>
+          <div>
+            <label style={{ fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Title</label>
+            <input type="text" value={title} onChange={e => setTitle(e.target.value)} onBlur={saveTitle}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+              style={{ width:'100%', background:'var(--surface)', border:'1px solid var(--border-alt)', borderRadius:6, padding:'8px 10px', color:'var(--text-primary)', fontSize:13, outline:'none', fontFamily:"'DM Sans',sans-serif" }}/>
+          </div>
           <div>
             <label style={{ fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Description</label>
             <textarea value={desc} onChange={e => setDesc(e.target.value)} onBlur={saveDesc}

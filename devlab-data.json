@@ -386,13 +386,13 @@
       "id": "yfvihb5cnmo123jau",
       "name": "StoryEngine_Template",
       "description": "A project scaffold and prompt system for writing long-form fiction with Claude Code — world-building, character arcs, iterative drafting, continuity tracking, and manuscript export.",
-      "status": "active",
+      "status": "released",
       "machines": [],
       "aiModel": "",
       "repo": "github.com/brian-caylor/StoryEngine_Template",
       "notes": "",
       "createdAt": "2026-04-06T20:58:28Z",
-      "lastUpdated": "2026-04-13T02:20:41Z"
+      "lastUpdated": "2026-04-17T18:38:43.124Z"
     },
     {
       "priority": "none",

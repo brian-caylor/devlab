@@ -1008,7 +1008,8 @@ function App() {
           hiddenProjects={projects.filter(p => p.hidden)} onUnhide={unhideProject}
           visibleTabs={visibleTabs} onSetVisibleTabs={(tabs) => { setVisibleTabs(tabs); saveVisibleTabs(tabs); }}
           theme={theme} onSetTheme={setTheme}
-          models={models} onSetModels={(m) => { setModels(m); saveModels(m); }} />
+          models={models} onSetModels={(m) => { setModels(m); saveModels(m); }}
+          creds={creds} onUpdateCreds={(c) => { saveCreds(c); setCreds(c); }} />
       )}
 
       {modal && (
@@ -2797,9 +2798,13 @@ function ReadmeModal({ project, creds, onClose }) {
 }
 
 // ── Settings Modal ────────────────────────────────────────────────────────────
-function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibleTabs, onSetVisibleTabs, theme, onSetTheme, models, onSetModels }) {
-  const [section, setSection] = useState('ai-key');
+function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibleTabs, onSetVisibleTabs, theme, onSetTheme, models, onSetModels, creds, onUpdateCreds }) {
+  const [section, setSection] = useState('keys');
   const [aiKey, setAiKey] = useState(loadAnthropicKey());
+  const [ghToken, setGhToken] = useState('');
+  const [ghSaved, setGhSaved] = useState(false);
+  const [ghErr, setGhErr] = useState('');
+  const [ghLoading, setGhLoading] = useState(false);
   const [saved, setSaved] = useState(false);
   const [newModel, setNewModel] = useState('');
   const [editIdx, setEditIdx] = useState(-1);
@@ -2814,8 +2819,27 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibl
     setTimeout(() => setSaved(false), 1500);
   };
 
+  const saveGhToken = async () => {
+    if (!ghToken.trim()) { setGhErr('Enter a token.'); return; }
+    setGhLoading(true); setGhErr('');
+    const nextCreds = { ...creds, token: ghToken.trim() };
+    try {
+      await ghRequest(nextCreds, 'GET', DATA_FILE);
+    } catch (e) {
+      if (!e.message.includes('404')) {
+        setGhErr(e.message.includes('401') ? 'Token invalid or expired.' : e.message);
+        setGhLoading(false); return;
+      }
+    }
+    onUpdateCreds(nextCreds);
+    setGhToken('');
+    setGhSaved(true);
+    setTimeout(() => setGhSaved(false), 1500);
+    setGhLoading(false);
+  };
+
   const sections = [
-    { key: 'ai-key', label: 'Anthropic API Key' },
+    { key: 'keys', label: 'API Keys' },
     { key: 'appearance', label: 'Appearance' },
     { key: 'ai-models', label: 'AI Models', badge: models.length },
     { key: 'nav-tabs', label: 'Navigation Tabs' },
@@ -2851,18 +2875,41 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibl
 
           {/* Content */}
           <div style={{ padding:'20px 24px', overflowY:'auto' }}>
-            {section === 'ai-key' && (
+            {section === 'keys' && (
               <div>
-                <div style={sectionHeadingStyle}>Anthropic API Key</div>
-                <label style={labelStyle}>Optional — enables AI features</label>
-                <input type="password" value={aiKey} onChange={e => setAiKey(e.target.value)} placeholder="sk-ant-…" style={inputStyle}/>
-                <p style={{ fontSize:11, color:'var(--text-dimmer)', marginTop:8, lineHeight:1.5 }}>
-                  Powers AI task suggestions and digest narrative.{' '}
-                  <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer" style={{ color:'#29b6f6' }}>Get a key →</a>
-                </p>
-                <button onClick={saveKey} style={{ marginTop:10, padding:'8px 18px', background: saved?'rgba(0,230,118,0.15)':'var(--border-alt)', border:'1px solid var(--border-emphasis)', borderRadius:8, color: saved?'#00e676':'var(--text-faint)', fontSize:12, fontWeight:500, cursor:'pointer' }}>
-                  {saved ? '✓ Saved' : 'Save Key'}
-                </button>
+                <div style={sectionHeadingStyle}>API Keys</div>
+
+                {/* GitHub PAT */}
+                <div style={{ marginBottom:24 }}>
+                  <label style={labelStyle}>GitHub Personal Access Token</label>
+                  <p style={{ fontSize:11, color:'var(--text-faint)', marginBottom:8, fontFamily:"'JetBrains Mono',monospace" }}>
+                    Currently connected: {creds ? `${creds.owner}/${creds.repo}` : 'none'}
+                  </p>
+                  <input type="password" value={ghToken} onChange={e => setGhToken(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && saveGhToken()}
+                    placeholder="ghp_…" style={inputStyle}/>
+                  <p style={{ fontSize:11, color:'var(--text-dimmer)', marginTop:8, lineHeight:1.5 }}>
+                    Needs <code style={{ color:'#29b6f6', fontFamily:"'JetBrains Mono',monospace" }}>repo</code> scope. Used to read/write <code style={{ color:'var(--text-faint)', fontFamily:"'JetBrains Mono',monospace" }}>devlab-data.json</code>.{' '}
+                    <a href="https://github.com/settings/tokens/new?scopes=repo&description=DevLab" target="_blank" rel="noopener noreferrer" style={{ color:'#29b6f6' }}>Create one →</a>
+                  </p>
+                  {ghErr && <div style={{ color:'#ef5350', fontSize:12, marginTop:8 }}>{ghErr}</div>}
+                  <button onClick={saveGhToken} disabled={ghLoading} style={{ marginTop:10, padding:'8px 18px', background: ghSaved?'rgba(0,230,118,0.15)':'var(--border-alt)', border:'1px solid var(--border-emphasis)', borderRadius:8, color: ghSaved?'#00e676':'var(--text-faint)', fontSize:12, fontWeight:500, cursor: ghLoading?'not-allowed':'pointer', opacity: ghLoading?0.65:1 }}>
+                    {ghLoading ? 'Verifying…' : ghSaved ? '✓ Updated' : 'Update Token'}
+                  </button>
+                </div>
+
+                {/* Anthropic */}
+                <div style={{ borderTop:'1px solid var(--border)', paddingTop:20 }}>
+                  <label style={labelStyle}>Anthropic API Key (optional)</label>
+                  <input type="password" value={aiKey} onChange={e => setAiKey(e.target.value)} placeholder="sk-ant-…" style={inputStyle}/>
+                  <p style={{ fontSize:11, color:'var(--text-dimmer)', marginTop:8, lineHeight:1.5 }}>
+                    Powers AI task suggestions and digest narrative.{' '}
+                    <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer" style={{ color:'#29b6f6' }}>Get a key →</a>
+                  </p>
+                  <button onClick={saveKey} style={{ marginTop:10, padding:'8px 18px', background: saved?'rgba(0,230,118,0.15)':'var(--border-alt)', border:'1px solid var(--border-emphasis)', borderRadius:8, color: saved?'#00e676':'var(--text-faint)', fontSize:12, fontWeight:500, cursor:'pointer' }}>
+                    {saved ? '✓ Saved' : 'Save Key'}
+                  </button>
+                </div>
               </div>
             )}
 

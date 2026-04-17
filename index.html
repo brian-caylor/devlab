@@ -410,7 +410,7 @@ function LandingPage({ onSave }) {
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00e676" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
             </svg>
-            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:36, fontWeight:700, letterSpacing:'0.14em', color:'#fff' }}>DEV LAB</span>
+            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:36, fontWeight:700, letterSpacing:'0.14em', color:'var(--text-primary)' }}>DEV LAB</span>
           </div>
           <p style={{ fontSize:18, color:'var(--text-faint)', lineHeight:1.7, maxWidth:540, margin:'0 auto 12px' }}>
             A personal project management tool for solo developers. Track projects, tasks, ideas, and milestones — all backed by Git.
@@ -425,7 +425,7 @@ function LandingPage({ onSave }) {
           {features.map(f => (
             <div key={f.title} style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:'20px 18px' }}>
               <div style={{ fontSize:18, marginBottom:8 }}>{f.icon}</div>
-              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:15, fontWeight:700, color:'#fff', letterSpacing:'0.03em', marginBottom:6 }}>{f.title}</div>
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:15, fontWeight:700, color:'var(--text-primary)', letterSpacing:'0.03em', marginBottom:6 }}>{f.title}</div>
               <div style={{ fontSize:12.5, color:'var(--text-faint)', lineHeight:1.6 }}>{f.desc}</div>
             </div>
           ))}
@@ -768,7 +768,7 @@ function App() {
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#00e676" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
             </svg>
-            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:22, fontWeight:700, letterSpacing:'0.14em', color:'#fff' }}>DEV LAB</span>
+            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:22, fontWeight:700, letterSpacing:'0.14em', color:'var(--text-primary)' }}>DEV LAB</span>
             <button onClick={handleSync} title={syncMsg || 'Click to force sync'} style={{ background:'transparent', border:'none', cursor:'pointer', display:'flex', alignItems:'center', gap:5, padding:0 }}>
               <span style={{ fontSize:10, fontFamily:"'JetBrains Mono',monospace", color: syncColor, letterSpacing:'0.05em' }}>{syncLabel}</span>
               {(sync === 'loading' || sync === 'saving') && (
@@ -1055,7 +1055,7 @@ function ProjectCard({ project, onOpen, onEdit, onDelete, onHide, onDragStart, o
       style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:18, display:'flex', flexDirection:'column', gap:10, overflow:'hidden' }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8 }}>
         <div style={{ flex:1, minWidth:0 }}>
-          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:19, fontWeight:700, letterSpacing:'0.02em', color:'#fff', marginBottom:5, lineHeight:1.15, wordBreak:'break-word' }}>{project.name}</div>
+          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:19, fontWeight:700, letterSpacing:'0.02em', color:'var(--text-primary)', marginBottom:5, lineHeight:1.15, wordBreak:'break-word' }}>{project.name}</div>
           <div style={{ display:'flex', gap:5, flexWrap:'wrap', alignItems:'center' }}>
             <span style={{ display:'inline-block', fontSize:10, fontWeight:600, padding:'2px 8px', borderRadius:99, letterSpacing:'0.05em', textTransform:'uppercase', color:cfg.color, background:cfg.bg }}>
               {cfg.label}
@@ -1139,7 +1139,7 @@ function ProjectDetail({ project, onBack, onEdit, onUpdateProject, onAddTask, on
             ← Back
           </button>
           <div style={{ flex:1 }}>
-            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:26, fontWeight:700, letterSpacing:'0.02em', color:'#fff', lineHeight:1.15 }}>{project.name}</div>
+            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:26, fontWeight:700, letterSpacing:'0.02em', color:'var(--text-primary)', lineHeight:1.15 }}>{project.name}</div>
           </div>
           <button onClick={onEdit}
             style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:8, padding:'7px 14px', color:'var(--text-faint)', fontSize:13, cursor:'pointer', transition:'border-color .15s' }}
@@ -1323,7 +1323,7 @@ function TaskList({ project, projectId, tasks, onAdd, onUpdate, onDelete, onReor
     <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:18 }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
         <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:16, fontWeight:700, letterSpacing:'0.06em', color:'#fff', textTransform:'uppercase' }}>Tasks</span>
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:16, fontWeight:700, letterSpacing:'0.06em', color:'var(--text-primary)', textTransform:'uppercase' }}>Tasks</span>
           <span style={{ fontSize:11, color:'var(--text-dimmer)', fontFamily:"'JetBrains Mono',monospace" }}>{doneCount} / {tasks.length}</span>
         </div>
         <div style={{ display:'flex', gap:2 }}>
@@ -1643,7 +1643,7 @@ function MilestonesPanel({ project, onUpdateProject }) {
 
   return (
     <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:14, marginBottom:16 }}>
-      <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:14, fontWeight:700, letterSpacing:'0.06em', color:'#fff', textTransform:'uppercase', marginBottom:10 }}>Milestones</div>
+      <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:14, fontWeight:700, letterSpacing:'0.06em', color:'var(--text-primary)', textTransform:'uppercase', marginBottom:10 }}>Milestones</div>
       {milestones.map(ms => {
         const tasks = (project.tasks || []).filter(t => t.milestoneId === ms.id);
         const done = tasks.filter(t => t.status === 'done').length;
@@ -2021,7 +2021,7 @@ function DigestView({ projects, ideas }) {
   return (
     <div style={{ padding:'22px 0' }} className="fade-in">
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16, flexWrap:'wrap', gap:8 }}>
-        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:20, fontWeight:700, letterSpacing:'0.05em', color:'#fff' }}>Weekly Digest</span>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:20, fontWeight:700, letterSpacing:'0.05em', color:'var(--text-primary)' }}>Weekly Digest</span>
         <div style={{ display:'flex', gap:6 }}>
           {loadAnthropicKey() && (
             <button onClick={generateNarrative} disabled={narLoading}
@@ -2095,7 +2095,7 @@ function LabelsView({ projects, onOpenProject }) {
       <div style={{ display:'grid', gridTemplateColumns:'220px 1fr', gap:20, alignItems:'start' }} className="detail-panels">
         {/* Label list */}
         <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:14 }}>
-          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:14, fontWeight:700, letterSpacing:'0.06em', color:'#fff', textTransform:'uppercase', marginBottom:10 }}>Labels ({sortedLabels.length})</div>
+          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:14, fontWeight:700, letterSpacing:'0.06em', color:'var(--text-primary)', textTransform:'uppercase', marginBottom:10 }}>Labels ({sortedLabels.length})</div>
           <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
             {sortedLabels.map(([label, count]) => {
               const lc = LABEL_COLORS[label] || DEFAULT_LABEL_COLOR;
@@ -2113,7 +2113,7 @@ function LabelsView({ projects, onOpenProject }) {
 
         {/* Tasks for label */}
         <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:18 }}>
-          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:14, fontWeight:700, letterSpacing:'0.06em', color:'#fff', textTransform:'uppercase', marginBottom:14 }}>
+          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:14, fontWeight:700, letterSpacing:'0.06em', color:'var(--text-primary)', textTransform:'uppercase', marginBottom:14 }}>
             Tasks labeled "{active}" ({tasksForLabel.length})
           </div>
           {grouped.map(([pid, { name, tasks }]) => (
@@ -2208,7 +2208,7 @@ function FocusView({ projects, onOpenProject }) {
 
   const SectionHeader = ({ title, count }) => (
     <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10, marginTop:4 }}>
-      <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:15, fontWeight:700, letterSpacing:'0.06em', color:'#fff', textTransform:'uppercase' }}>{title}</span>
+      <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:15, fontWeight:700, letterSpacing:'0.06em', color:'var(--text-primary)', textTransform:'uppercase' }}>{title}</span>
       {count > 0 && <span style={{ fontSize:10, color:'var(--text-dimmer)', fontFamily:"'JetBrains Mono',monospace" }}>({count})</span>}
     </div>
   );
@@ -2490,7 +2490,7 @@ function GlobalTaskList({ projects, onUpdate, onDelete, onOpenProject }) {
       {/* Task list */}
       <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:18 }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
-          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:16, fontWeight:700, letterSpacing:'0.06em', color:'#fff', textTransform:'uppercase' }}>All Tasks</span>
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:16, fontWeight:700, letterSpacing:'0.06em', color:'var(--text-primary)', textTransform:'uppercase' }}>All Tasks</span>
           <span style={{ fontSize:11, color:'var(--text-dimmer)', fontFamily:"'JetBrains Mono',monospace" }}>
             {sorted.filter(t => t.status === 'done').length} / {sorted.length} done
           </span>
@@ -2556,7 +2556,7 @@ function NotesPanel({ projectId, initialNotes, onSave }) {
     return (
       <button onClick={() => setMobileOpen(true)}
         style={{ width:'100%', background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:'14px 18px', color:'var(--text-faint)', fontSize:13, cursor:'pointer', textAlign:'left', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:16, fontWeight:700, letterSpacing:'0.06em', color:'#fff', textTransform:'uppercase' }}>Notes</span>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:16, fontWeight:700, letterSpacing:'0.06em', color:'var(--text-primary)', textTransform:'uppercase' }}>Notes</span>
         <span style={{ fontSize:12, color:'var(--text-dimmer)' }}>▾ Expand</span>
       </button>
     );
@@ -2565,7 +2565,7 @@ function NotesPanel({ projectId, initialNotes, onSave }) {
   return (
     <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:18 }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
-        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:16, fontWeight:700, letterSpacing:'0.06em', color:'#fff', textTransform:'uppercase' }}>Notes</span>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:16, fontWeight:700, letterSpacing:'0.06em', color:'var(--text-primary)', textTransform:'uppercase' }}>Notes</span>
         <div style={{ display:'flex', gap:2 }}>
           {isMobile && (
             <button onClick={() => setMobileOpen(false)}
@@ -2617,7 +2617,7 @@ function ProjectModal({ mode, data, onSave, onClose }) {
       onClick={e => e.target===e.currentTarget && onClose()}>
       <div style={{ background:'var(--surface)', border:'1px solid var(--border-emphasis)', borderRadius:16, width:'100%', maxWidth:520, maxHeight:'92vh', display:'flex', flexDirection:'column' }}>
         <div style={{ padding:'20px 24px 16px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'1px solid var(--border)' }}>
-          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:21, fontWeight:700, color:'#fff', letterSpacing:'0.05em' }}>
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:21, fontWeight:700, color:'var(--text-primary)', letterSpacing:'0.05em' }}>
             {mode==='add' ? 'New Project' : 'Edit Project'}
           </span>
           <button className="icon-btn" style={{ padding:'4px 6px', background:'transparent', border:'none', color:'var(--text-dim)', borderRadius:5, fontSize:17, cursor:'pointer' }} onClick={onClose}>✕</button>
@@ -2733,7 +2733,7 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibl
       onClick={e => e.target===e.currentTarget && onClose()}>
       <div style={{ background:'var(--surface)', border:'1px solid var(--border-emphasis)', borderRadius:16, width:'100%', maxWidth:440, padding:24 }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
-          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:21, fontWeight:700, color:'#fff', letterSpacing:'0.05em' }}>Settings</span>
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:21, fontWeight:700, color:'var(--text-primary)', letterSpacing:'0.05em' }}>Settings</span>
           <button className="icon-btn" style={{ padding:'4px 6px', background:'transparent', border:'none', color:'var(--text-dim)', borderRadius:5, fontSize:17, cursor:'pointer' }} onClick={onClose}>✕</button>
         </div>
 

@@ -497,7 +497,7 @@ function App() {
   const [ideas,   setIdeas]   = useState([]);
   const [sha,     setSha]     = useState(null);
   const [tab,     setTab]     = useState('projects');
-  const [filter,  setFilter]  = useState('all');
+  const [filter,  setFilter]  = useState('active');
   const [sortMode,setSortMode]= useState('updated');
   const [modal,   setModal]   = useState(null);
   const [newIdea, setNewIdea] = useState('');
@@ -509,6 +509,7 @@ function App() {
   const [openTaskId, setOpenTaskId] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [readmeProject, setReadmeProject] = useState(null);
   const [visibleTabs, setVisibleTabs] = useState(loadVisibleTabs);
   const [theme, setTheme] = useState(loadTheme);
   useEffect(() => {
@@ -873,6 +874,7 @@ function App() {
             onEdit={(p) => setModal({ mode:'edit', data:{...p} })}
             onDelete={deleteProject}
             onHide={hideProject}
+            onOpenReadme={setReadmeProject}
             onReorder={reorderProjects}
           />
           {sorted.length === 0 && !ready && (
@@ -972,6 +974,10 @@ function App() {
         />
       )}
 
+      {readmeProject && (
+        <ReadmeModal project={readmeProject} creds={creds} onClose={() => setReadmeProject(null)} />
+      )}
+
       {showSettings && (
         <SettingsModal onClose={() => setShowSettings(false)} onDisconnect={() => { dropCreds(); setCreds(null); }}
           hiddenProjects={projects.filter(p => p.hidden)} onUnhide={unhideProject}
@@ -989,7 +995,7 @@ function App() {
 }
 
 // ── Project Grid (dashboard with DnD) ─────────────────────────────────────────
-function ProjectGrid({ projects, onOpen, onEdit, onDelete, onHide, onReorder }) {
+function ProjectGrid({ projects, onOpen, onEdit, onDelete, onHide, onOpenReadme, onReorder }) {
   const dragRef = useRef({ dragIdx: -1, overIdx: -1 });
   const touchRef = useRef({ dragIdx: -1, startY: 0, el: null, rects: [] });
 
@@ -1025,6 +1031,7 @@ function ProjectGrid({ projects, onOpen, onEdit, onDelete, onHide, onReorder }) 
           onEdit={(e) => { e.stopPropagation(); onEdit(p); }}
           onDelete={(e) => { e.stopPropagation(); onDelete(p.id); }}
           onHide={(e) => { e.stopPropagation(); onHide(p.id); }}
+          onOpenReadme={onOpenReadme}
           onDragStart={(e) => handleDragStart(e, i)}
           onDragOver={(e) => handleDragOver(e, i)}
           onDrop={(e) => handleDrop(e, i)}
@@ -1036,7 +1043,7 @@ function ProjectGrid({ projects, onOpen, onEdit, onDelete, onHide, onReorder }) 
 }
 
 // ── Project Card ───────────────────────────────────────────────────────────────
-function ProjectCard({ project, onOpen, onEdit, onDelete, onHide, onDragStart, onDragOver, onDrop, onDragEnd }) {
+function ProjectCard({ project, onOpen, onEdit, onDelete, onHide, onOpenReadme, onDragStart, onDragOver, onDrop, onDragEnd }) {
   const cfg = STATUS[project.status] || STATUS.idea;
   const pri = PRIORITY[project.priority] || PRIORITY.none;
   const tasks = project.tasks || [];
@@ -1105,6 +1112,11 @@ function ProjectCard({ project, onOpen, onEdit, onDelete, onHide, onDragStart, o
         </div>
         <div style={{ display:'flex', alignItems:'center', gap:5, fontSize:10, color:'var(--text-dimmer)', fontFamily:"'JetBrains Mono',monospace" }}>
           ⏱ {ago(project.lastUpdated)}
+          {project.repo && (
+            <button onClick={(e) => { e.stopPropagation(); onOpenReadme && onOpenReadme(project); }}
+              title="View README"
+              style={{ background:'transparent', border:'none', padding:'0 2px', color:'var(--text-dimmer)', fontSize:11, cursor:'pointer', marginLeft:2 }}>📄</button>
+          )}
           {project.repo && (
             <a href={`https://${project.repo.replace(/^https?:\/\//, '')}`} target="_blank" rel="noopener noreferrer"
               style={{ color:'var(--text-dimmer)', marginLeft:2, fontSize:12 }}
@@ -2709,6 +2721,55 @@ function ProjectModal({ mode, data, onSave, onClose }) {
             onClick={() => form.name?.trim() && onSave({ ...form, lastUpdated: now() })}>
             {mode==='add' ? 'Add Project' : 'Save Changes'}
           </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── README Modal ──────────────────────────────────────────────────────────────
+function ReadmeModal({ project, creds, onClose }) {
+  const [state, setState] = useState({ loading: true, content: '', error: null });
+  const repo = useMemo(() => parseRepo(project.repo), [project.repo]);
+
+  useEffect(() => {
+    if (!repo || !creds) { setState({ loading: false, content: '', error: 'No repo configured' }); return; }
+    (async () => {
+      try {
+        const res = await fetch(`https://api.github.com/repos/${repo.owner}/${repo.repoName}/readme`, {
+          headers: { Authorization: `Bearer ${creds.token}`, Accept: 'application/vnd.github.v3+json' },
+        });
+        if (!res.ok) {
+          setState({ loading: false, content: '', error: res.status === 404 ? 'No README found in this repo.' : `Could not load README (${res.status}).` });
+          return;
+        }
+        const data = await res.json();
+        const content = fromBase64(data.content);
+        setState({ loading: false, content, error: null });
+      } catch (e) {
+        setState({ loading: false, content: '', error: 'Could not reach GitHub.' });
+      }
+    })();
+  }, [project.id, repo, creds]);
+
+  return (
+    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', backdropFilter:'blur(6px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:250, padding:16 }}
+      onClick={e => e.target === e.currentTarget && onClose()}>
+      <div style={{ background:'var(--surface)', border:'1px solid var(--border-emphasis)', borderRadius:16, width:'100%', maxWidth:780, maxHeight:'88vh', display:'flex', flexDirection:'column' }}>
+        <div style={{ padding:'18px 22px 14px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'1px solid var(--border)' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:10, minWidth:0 }}>
+            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:18, fontWeight:700, color:'var(--text-primary)', letterSpacing:'0.05em' }}>README</span>
+            <span style={{ fontSize:11, color:'var(--text-faint)', fontFamily:"'JetBrains Mono',monospace", overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{repo ? `${repo.owner}/${repo.repoName}` : project.name}</span>
+          </div>
+          <button className="icon-btn" style={{ padding:'4px 6px', background:'transparent', border:'none', color:'var(--text-dim)', borderRadius:5, fontSize:17, cursor:'pointer' }} onClick={onClose}>✕</button>
+        </div>
+
+        <div style={{ padding:'18px 22px', overflowY:'auto', flex:1 }}>
+          {state.loading && <div className="pulsing" style={{ fontSize:12, color:'var(--text-faint)' }}>Loading README…</div>}
+          {state.error && <div style={{ fontSize:13, color:'var(--text-faint)', fontStyle:'italic' }}>{state.error}</div>}
+          {!state.loading && !state.error && (
+            <div className="md-preview" dangerouslySetInnerHTML={{ __html: renderMarkdown(state.content) }} />
+          )}
         </div>
       </div>
     </div>

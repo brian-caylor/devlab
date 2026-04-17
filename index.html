@@ -110,6 +110,7 @@
       .settings-body { grid-template-columns: 1fr !important; }
       .settings-sidebar { flex-direction: row !important; overflow-x: auto; border-right: none !important; border-bottom: 1px solid var(--border); padding: 8px !important; }
       .settings-sidebar button { flex-shrink: 0; border-left: none !important; border-bottom: 2px solid transparent; }
+      .digest-layout { grid-template-columns: 1fr !important; }
     }
   </style>
 </head>
@@ -1225,6 +1226,7 @@ function ProjectDetail({ project, onBack, onEdit, onUpdateProject, onAddTask, on
           onDelete={onDeleteTask}
           onReorder={onReorderTasks}
           openTaskId={openTaskId}
+          creds={creds}
         />
         <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
           <NotesPanel
@@ -1259,7 +1261,7 @@ function ProjectDetail({ project, onBack, onEdit, onUpdateProject, onAddTask, on
 }
 
 // ── Task List ──────────────────────────────────────────────────────────────────
-function TaskList({ project, projectId, tasks, onAdd, onUpdate, onDelete, onReorder, openTaskId }) {
+function TaskList({ project, projectId, tasks, onAdd, onUpdate, onDelete, onReorder, openTaskId, creds }) {
   const [newTitle, setNewTitle] = useState('');
   const [expandedId, setExpandedId] = useState(null);
   const [showAI, setShowAI] = useState(false);
@@ -1395,7 +1397,7 @@ function TaskList({ project, projectId, tasks, onAdd, onUpdate, onDelete, onReor
       </div>
 
       {showAI && project && (
-        <AISuggestions project={project} onClose={() => setShowAI(false)}
+        <AISuggestions project={project} creds={creds} onClose={() => setShowAI(false)}
           onAddTasks={(titles) => titles.forEach(t => onAdd(projectId, t))} />
       )}
 
@@ -2100,16 +2102,18 @@ function DigestView({ projects, ideas }) {
         </div>
       </div>
 
-      <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:20 }}>
-        <div className="md-preview" dangerouslySetInnerHTML={{ __html: renderMarkdown(markdownText) }} />
+      <div className="digest-layout" style={{ display:'grid', gridTemplateColumns: (narrative || narError) ? '3fr 2fr' : '1fr', gap:16, alignItems:'start' }}>
+        <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:20 }}>
+          <div className="md-preview" dangerouslySetInnerHTML={{ __html: renderMarkdown(markdownText) }} />
+        </div>
         {narrative && (
-          <div style={{ marginTop:16, padding:14, background:'rgba(206,147,216,0.05)', border:'1px solid rgba(206,147,216,0.15)', borderRadius:10 }}>
-            <div style={{ fontSize:10, fontWeight:600, color:'#ce93d8', letterSpacing:'0.06em', textTransform:'uppercase', marginBottom:8 }}>✨ AI Summary</div>
-            <div style={{ fontSize:13, color:'var(--text-primary)', lineHeight:1.7 }}>{narrative}</div>
+          <div style={{ padding:18, background:'rgba(206,147,216,0.05)', border:'1px solid rgba(206,147,216,0.18)', borderRadius:12, position:'sticky', top:20 }}>
+            <div style={{ fontSize:10, fontWeight:600, color:'#ce93d8', letterSpacing:'0.06em', textTransform:'uppercase', marginBottom:10 }}>✨ AI Summary</div>
+            <div style={{ fontSize:14, color:'var(--text-primary)', lineHeight:1.7 }}>{narrative}</div>
           </div>
         )}
-        {narError && (
-          <div style={{ marginTop:16, padding:14, background:'rgba(239,83,80,0.06)', border:'1px solid rgba(239,83,80,0.20)', borderRadius:10 }}>
+        {narError && !narrative && (
+          <div style={{ padding:18, background:'rgba(239,83,80,0.06)', border:'1px solid rgba(239,83,80,0.20)', borderRadius:12, position:'sticky', top:20 }}>
             <div style={{ fontSize:10, fontWeight:600, color:'#ef5350', letterSpacing:'0.06em', textTransform:'uppercase', marginBottom:6 }}>Narrative failed</div>
             <div style={{ fontSize:13, color:'#ef5350', lineHeight:1.6 }}>{narError}</div>
           </div>
@@ -3065,7 +3069,7 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibl
 }
 
 // ── AI Suggestions Panel ──────────────────────────────────────────────────────
-function AISuggestions({ project, onAddTasks, onClose }) {
+function AISuggestions({ project, creds, onAddTasks, onClose }) {
   const [suggestions, setSuggestions] = useState([]);
   const [checked, setChecked] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -3077,7 +3081,24 @@ function AISuggestions({ project, onAddTasks, onClose }) {
     if (!key) { setError('No API key set.'); setLoading(false); return; }
     const doneTasks = (project.tasks||[]).filter(t => t.status === 'done');
     const openTasks = (project.tasks||[]).filter(t => t.status !== 'done');
-    const prompt = `You are helping a developer decide what to work on next in their personal project.\n\nProject: ${project.name}\nDescription: ${project.description || 'None'}\nStatus: ${project.status}\nNotes: ${project.notes || 'None'}\n\nAlready-completed tasks (DO NOT suggest any of these again, even if rephrased):\n${doneTasks.map(t => `- ${t.title}`).join('\n') || 'None'}\n\nCurrently open tasks (DO NOT duplicate these, even if rephrased):\n${openTasks.map(t => `- [${t.priority}] ${t.title}`).join('\n') || 'None'}\n\nBased on the project description, notes, and what's already done vs open, suggest 4-5 NEW next tasks that logically extend the work. Each should:\n- Be a concrete, single-session task (not vague like "improve code quality")\n- Not overlap semantically with any task in the two lists above\n- Reflect what the project's current state suggests as meaningful next steps\n\nIf you can't identify 4-5 genuinely new, valuable tasks given what's already listed, return fewer — quality over quantity. Return an empty array [] if everything obvious is already covered.\n\nOutput format: a single JSON array of strings only. No markdown code fences, no preamble, no surrounding text. Your entire response must be parseable by JSON.parse().\n\nExample:\n["Add error handling to the auth flow", "Write unit tests for the parser", "Update README with install instructions"]`;
+
+    // Try to fetch README for richer project context
+    let readme = '';
+    const repo = parseRepo(project.repo);
+    if (repo && creds) {
+      try {
+        const res = await fetch(`https://api.github.com/repos/${repo.owner}/${repo.repoName}/readme`, {
+          headers: { Authorization: `Bearer ${creds.token}`, Accept: 'application/vnd.github.v3+json' },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          readme = fromBase64(data.content).slice(0, 4000); // cap to keep prompt focused
+        }
+      } catch {}
+    }
+
+    const readmeBlock = readme ? `\n\nREADME.md content (for deeper project context):\n"""\n${readme}\n"""\n` : '';
+    const prompt = `You are helping a developer decide what to work on next in their personal project.\n\nProject: ${project.name}\nDescription: ${project.description || 'None'}\nStatus: ${project.status}\nNotes: ${project.notes || 'None'}${readmeBlock}\n\nAlready-completed tasks (DO NOT suggest any of these again, even if rephrased):\n${doneTasks.map(t => `- ${t.title}`).join('\n') || 'None'}\n\nCurrently open tasks (DO NOT duplicate these, even if rephrased):\n${openTasks.map(t => `- [${t.priority}] ${t.title}`).join('\n') || 'None'}\n\nBased on the project description, notes, README (if present), and what's already done vs open, suggest 4-5 NEW next tasks that logically extend the work. Each should:\n- Be a concrete, single-session task (not vague like "improve code quality")\n- Not overlap semantically with any task in the two lists above\n- Reflect what the project's current state suggests as meaningful next steps\n- Draw on README details where relevant (features mentioned but not built, roadmap items, obvious gaps)\n\nIf you can't identify 4-5 genuinely new, valuable tasks given what's already listed, return fewer — quality over quantity. Return an empty array [] if everything obvious is already covered.\n\nOutput format: a single JSON array of strings only. No markdown code fences, no preamble, no surrounding text. Your entire response must be parseable by JSON.parse().\n\nExample:\n["Add error handling to the auth flow", "Write unit tests for the parser", "Update README with install instructions"]`;
 
     try {
       const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -3122,7 +3143,7 @@ function AISuggestions({ project, onAddTasks, onClose }) {
       setError('Network error reaching Claude API.');
     }
     setLoading(false);
-  }, [project]);
+  }, [project, creds]);
 
   useEffect(() => { fetchSuggestions(); }, []);
 

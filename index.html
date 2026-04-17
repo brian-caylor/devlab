@@ -312,6 +312,14 @@ const DEFAULT_MODELS = ['Claude', 'ChatGPT/Sol', 'Gemini', 'Mixed', 'Other'];
 const loadModels = () => { try { const v = JSON.parse(localStorage.getItem(MODELS_KEY)); return Array.isArray(v) && v.length ? v : DEFAULT_MODELS; } catch { return DEFAULT_MODELS; } };
 const saveModels = (m) => { try { localStorage.setItem(MODELS_KEY, JSON.stringify(m)); } catch {} };
 
+const DIGEST_SUMMARIES_KEY = 'devlab-digest-summaries';
+const loadDigestSummaries = () => { try { return JSON.parse(localStorage.getItem(DIGEST_SUMMARIES_KEY)) || {}; } catch { return {}; } };
+const saveDigestSummaries = (s) => { try { localStorage.setItem(DIGEST_SUMMARIES_KEY, JSON.stringify(s)); } catch {} };
+const getWeekStart = (d = new Date()) => { const x = new Date(d); x.setHours(0, 0, 0, 0); x.setDate(x.getDate() - x.getDay()); return x; };
+const toWeekKey = (d) => { const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2, '0'); const day = String(d.getDate()).padStart(2, '0'); return `${y}-${m}-${day}`; };
+const fromWeekKey = (key) => { const [y, m, d] = key.split('-').map(Number); return new Date(y, m - 1, d); };
+const formatWeekLabel = (key) => { const start = fromWeekKey(key); const end = new Date(start); end.setDate(end.getDate() + 6); const fmt = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); return `${fmt(start)} – ${fmt(end)}`; };
+
 // ── Markdown parser ───────────────────────────────────────────────────────────
 function renderMarkdown(text) {
   if (!text) return '';
@@ -1979,13 +1987,21 @@ function SearchOverlay({ projects, ideas, onClose, onOpenProject, onOpenIdeas })
 // ── Digest View ───────────────────────────────────────────────────────────────
 function DigestView({ projects, ideas }) {
   const [copied, setCopied] = useState(false);
-  const [narrative, setNarrative] = useState('');
+  const [summaries, setSummaries] = useState(() => loadDigestSummaries());
+  const [selectedWeek, setSelectedWeek] = useState(null);
   const [narLoading, setNarLoading] = useState(false);
   const [narError, setNarError] = useState('');
 
-  const sevenDaysAgo = useMemo(() => new Date(Date.now() - 7 * 86400000).toISOString(), []);
   const today = new Date();
-  const weekStart = new Date(Date.now() - 7 * 86400000);
+  const weekStart = useMemo(() => getWeekStart(), []);
+  const weekStartIso = useMemo(() => weekStart.toISOString(), [weekStart]);
+  const currentWeekKey = useMemo(() => toWeekKey(weekStart), [weekStart]);
+
+  useEffect(() => {
+    if (selectedWeek !== null) return;
+    const keys = Object.keys(summaries).sort().reverse();
+    if (keys[0]) setSelectedWeek(keys[0]);
+  }, [summaries, selectedWeek]);
 
   const digest = useMemo(() => {
     const completed = [];
@@ -1998,8 +2014,8 @@ function DigestView({ projects, ideas }) {
       const pCompleted = [];
       const pAdded = [];
       (p.tasks || []).forEach(t => {
-        if (t.completedAt && t.completedAt >= sevenDaysAgo) pCompleted.push(t);
-        if (t.createdAt && t.createdAt >= sevenDaysAgo && t.status !== 'done') pAdded.push(t);
+        if (t.completedAt && t.completedAt >= weekStartIso) pCompleted.push(t);
+        if (t.createdAt && t.createdAt >= weekStartIso && t.status !== 'done') pAdded.push(t);
         if (t.status !== 'done' && (t.priority === 'critical' || t.priority === 'high')) critHigh.push({ ...t, projectName: p.name });
       });
       if (pCompleted.length > 0) completed.push({ name: p.name, tasks: pCompleted });
@@ -2007,11 +2023,11 @@ function DigestView({ projects, ideas }) {
       if (p.status === 'active' && new Date(p.lastUpdated || 0) < cutoff) stalledProjs.push(p);
     });
 
-    const newIdeas = ideas.filter(i => i.createdAt && i.createdAt >= sevenDaysAgo);
+    const newIdeas = ideas.filter(i => i.createdAt && i.createdAt >= weekStartIso);
     const totalCompleted = completed.reduce((n, g) => n + g.tasks.length, 0);
 
     return { completed, added, critHigh, stalledProjs, newIdeas, totalCompleted };
-  }, [projects, ideas, sevenDaysAgo]);
+  }, [projects, ideas, weekStartIso]);
 
   const markdownText = useMemo(() => {
     const d = digest;
@@ -2045,6 +2061,11 @@ function DigestView({ projects, ideas }) {
     return md;
   }, [digest]);
 
+  const sortedWeeks = useMemo(() => Object.keys(summaries).sort().reverse(), [summaries]);
+  const currentSummary = selectedWeek ? summaries[selectedWeek] : null;
+  const narrative = currentSummary?.narrative || '';
+  const hasCurrentWeekSummary = Boolean(summaries[currentWeekKey]);
+
   const copyDigest = () => {
     navigator.clipboard.writeText(markdownText + (narrative ? '\n\n' + narrative : ''));
     setCopied(true);
@@ -2054,7 +2075,7 @@ function DigestView({ projects, ideas }) {
   const generateNarrative = async () => {
     const key = loadAnthropicKey();
     if (!key) { setNarError('No Anthropic API key set. Add one in Settings.'); return; }
-    setNarLoading(true); setNarError(''); setNarrative('');
+    setNarLoading(true); setNarError('');
     try {
       const d = digest;
       const topProject = d.completed.sort((a,b) => b.tasks.length - a.tasks.length)[0]?.name || 'N/A';
@@ -2076,12 +2097,26 @@ function DigestView({ projects, ideas }) {
         setNarError(msg);
       } else {
         const data = await res.json();
-        setNarrative(data.content[0].text);
+        const text = data.content[0].text;
+        const next = { ...summaries, [currentWeekKey]: { narrative: text, generatedAt: new Date().toISOString() } };
+        setSummaries(next);
+        saveDigestSummaries(next);
+        setSelectedWeek(currentWeekKey);
       }
     } catch (e) {
       setNarError(`Network error: ${e.message || 'could not reach Claude API.'}`);
     }
     setNarLoading(false);
+  };
+
+  const deleteSummary = () => {
+    if (!selectedWeek) return;
+    const next = { ...summaries };
+    delete next[selectedWeek];
+    setSummaries(next);
+    saveDigestSummaries(next);
+    const keys = Object.keys(next).sort().reverse();
+    setSelectedWeek(keys[0] || null);
   };
 
   return (
@@ -2092,7 +2127,7 @@ function DigestView({ projects, ideas }) {
           {loadAnthropicKey() && (
             <button onClick={generateNarrative} disabled={narLoading}
               style={{ padding:'7px 14px', background:'rgba(206,147,216,0.08)', border:'1px solid rgba(206,147,216,0.18)', borderRadius:8, color:'#ce93d8', fontSize:11, cursor:'pointer' }}>
-              {narLoading ? '✨ Writing…' : '✨ Write narrative'}
+              {narLoading ? '✨ Writing…' : (hasCurrentWeekSummary ? '✨ Regenerate this week' : '✨ Write narrative')}
             </button>
           )}
           <button onClick={copyDigest}
@@ -2103,17 +2138,35 @@ function DigestView({ projects, ideas }) {
       </div>
 
       <div className="digest-layout" style={{ display:'grid', gridTemplateColumns: (narrative || narError) ? '3fr 2fr' : '1fr', gap:16, alignItems:'start' }}>
-        <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:20 }}>
+        <div style={{ background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, padding:20, minWidth:0 }}>
           <div className="md-preview" dangerouslySetInnerHTML={{ __html: renderMarkdown(markdownText) }} />
         </div>
         {narrative && (
-          <div style={{ padding:18, background:'rgba(206,147,216,0.05)', border:'1px solid rgba(206,147,216,0.18)', borderRadius:12, position:'sticky', top:20 }}>
-            <div style={{ fontSize:10, fontWeight:600, color:'#ce93d8', letterSpacing:'0.06em', textTransform:'uppercase', marginBottom:10 }}>✨ AI Summary</div>
-            <div style={{ fontSize:14, color:'var(--text-primary)', lineHeight:1.7 }}>{narrative}</div>
+          <div style={{ padding:18, background:'rgba(206,147,216,0.05)', border:'1px solid rgba(206,147,216,0.18)', borderRadius:12, position:'sticky', top:20, minWidth:0 }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:8, marginBottom:10 }}>
+              <div style={{ fontSize:10, fontWeight:600, color:'#ce93d8', letterSpacing:'0.06em', textTransform:'uppercase' }}>
+                ✨ AI Summary{selectedWeek === currentWeekKey ? ' · this week' : ''}
+              </div>
+              <div style={{ display:'flex', gap:6, alignItems:'center' }}>
+                {sortedWeeks.length > 1 && (
+                  <select value={selectedWeek || ''} onChange={e => setSelectedWeek(e.target.value)}
+                    style={{ fontSize:10, background:'transparent', border:'1px solid rgba(206,147,216,0.25)', borderRadius:6, color:'#ce93d8', padding:'3px 6px', cursor:'pointer' }}>
+                    {sortedWeeks.map(k => (
+                      <option key={k} value={k} style={{ background:'var(--surface)', color:'var(--text-primary)' }}>
+                        {formatWeekLabel(k)}{k === currentWeekKey ? ' (this week)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                <button onClick={deleteSummary} title="Delete this summary"
+                  style={{ background:'transparent', border:'none', color:'var(--text-dim)', fontSize:12, cursor:'pointer', padding:'2px 6px', lineHeight:1 }}>✕</button>
+              </div>
+            </div>
+            <div style={{ fontSize:14, color:'var(--text-primary)', lineHeight:1.7, overflowWrap:'anywhere' }}>{narrative}</div>
           </div>
         )}
         {narError && !narrative && (
-          <div style={{ padding:18, background:'rgba(239,83,80,0.06)', border:'1px solid rgba(239,83,80,0.20)', borderRadius:12, position:'sticky', top:20 }}>
+          <div style={{ padding:18, background:'rgba(239,83,80,0.06)', border:'1px solid rgba(239,83,80,0.20)', borderRadius:12, position:'sticky', top:20, minWidth:0 }}>
             <div style={{ fontSize:10, fontWeight:600, color:'#ef5350', letterSpacing:'0.06em', textTransform:'uppercase', marginBottom:6 }}>Narrative failed</div>
             <div style={{ fontSize:13, color:'#ef5350', lineHeight:1.6 }}>{narError}</div>
           </div>
@@ -3161,10 +3214,10 @@ function AISuggestions({ project, creds, onAddTasks, onClose }) {
         <>
           <div style={{ display:'flex', flexDirection:'column', gap:4, marginBottom:10 }}>
             {suggestions.map((s, i) => (
-              <label key={i} style={{ display:'flex', alignItems:'center', gap:8, padding:'5px 6px', borderRadius:6, cursor:'pointer', fontSize:13, color: checked[i] ? 'var(--text-primary)' : 'var(--text-dimmer)' }}>
+              <label key={i} style={{ display:'flex', alignItems:'flex-start', gap:8, padding:'5px 6px', borderRadius:6, cursor:'pointer', fontSize:13, color: checked[i] ? 'var(--text-primary)' : 'var(--text-dimmer)', minWidth:0 }}>
                 <input type="checkbox" checked={checked[i]} onChange={() => setChecked(c => c.map((v, j) => j === i ? !v : v))}
-                  style={{ accentColor:'#00e676' }}/>
-                {s}
+                  style={{ accentColor:'#00e676', marginTop:3, flexShrink:0 }}/>
+                <span style={{ flex:1, minWidth:0, overflowWrap:'anywhere', lineHeight:1.4 }}>{s}</span>
               </label>
             ))}
           </div>

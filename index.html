@@ -3055,7 +3055,7 @@ function AISuggestions({ project, onAddTasks, onClose }) {
     if (!key) { setError('No API key set.'); setLoading(false); return; }
     const doneTasks = (project.tasks||[]).filter(t => t.status === 'done');
     const openTasks = (project.tasks||[]).filter(t => t.status !== 'done');
-    const prompt = `You are helping a developer manage their personal project.\n\nProject: ${project.name}\nDescription: ${project.description || 'None'}\nStatus: ${project.status}\nNotes: ${project.notes || 'None'}\n\nOpen tasks (${openTasks.length}):\n${openTasks.map(t => `- [${t.priority}] ${t.title}`).join('\n') || 'None'}\n\nCompleted tasks (${doneTasks.length}):\n${doneTasks.slice(-5).map(t => `- ${t.title}`).join('\n') || 'None'}\n\nSuggest 4-5 specific, actionable next tasks. Each should be completable in one session, concrete, and not duplicate open tasks.\n\nRespond ONLY with a valid JSON array of strings. No explanation, no markdown.`;
+    const prompt = `You are helping a developer manage their personal project.\n\nProject: ${project.name}\nDescription: ${project.description || 'None'}\nStatus: ${project.status}\nNotes: ${project.notes || 'None'}\n\nOpen tasks (${openTasks.length}):\n${openTasks.map(t => `- [${t.priority}] ${t.title}`).join('\n') || 'None'}\n\nCompleted tasks (${doneTasks.length}):\n${doneTasks.slice(-5).map(t => `- ${t.title}`).join('\n') || 'None'}\n\nSuggest 4-5 specific, actionable next tasks. Each should be completable in one session, concrete, and not duplicate open tasks.\n\nOutput format: a single JSON array of strings only. No markdown code fences, no "Here are the suggestions:", no surrounding text. Your entire response must be parseable by JSON.parse().\n\nExample of a valid response:\n["Add error handling to the auth flow", "Write unit tests for the parser", "Update README with install instructions"]`;
 
     try {
       const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -3076,11 +3076,28 @@ function AISuggestions({ project, onAddTasks, onClose }) {
       }
       const data = await res.json();
       const text = data.content[0].text.trim();
-      const parsed = JSON.parse(text);
-      setSuggestions(parsed);
+      // Tolerant JSON extraction — handle markdown fences, preamble, trailing text
+      let jsonStr = text
+        .replace(/^```(?:json)?\s*/i, '')
+        .replace(/\s*```$/i, '')
+        .trim();
+      const arrayMatch = jsonStr.match(/\[[\s\S]*\]/);
+      if (arrayMatch) jsonStr = arrayMatch[0];
+      let parsed;
+      try {
+        parsed = JSON.parse(jsonStr);
+      } catch {
+        setError(`Couldn't parse response. Raw text: ${text.slice(0, 120)}${text.length > 120 ? '…' : ''}`);
+        setLoading(false); return;
+      }
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        setError('Claude returned no suggestions. Try regenerating.');
+        setLoading(false); return;
+      }
+      setSuggestions(parsed.filter(s => typeof s === 'string'));
       setChecked(parsed.map(() => true));
     } catch (e) {
-      setError('Unexpected response format. Try regenerating.');
+      setError('Network error reaching Claude API.');
     }
     setLoading(false);
   }, [project]);

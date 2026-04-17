@@ -107,6 +107,9 @@
       .projects-grid { grid-template-columns: 1fr !important; }
       .header-row { flex-direction: column; gap: 14px; align-items: flex-start !important; }
       .detail-panels { grid-template-columns: 1fr !important; }
+      .settings-body { grid-template-columns: 1fr !important; }
+      .settings-sidebar { flex-direction: row !important; overflow-x: auto; border-right: none !important; border-bottom: 1px solid var(--border); padding: 8px !important; }
+      .settings-sidebar button { flex-shrink: 0; border-left: none !important; border-bottom: 2px solid transparent; }
     }
   </style>
 </head>
@@ -2795,6 +2798,7 @@ function ReadmeModal({ project, creds, onClose }) {
 
 // ── Settings Modal ────────────────────────────────────────────────────────────
 function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibleTabs, onSetVisibleTabs, theme, onSetTheme, models, onSetModels }) {
+  const [section, setSection] = useState('ai-key');
   const [aiKey, setAiKey] = useState(loadAnthropicKey());
   const [saved, setSaved] = useState(false);
   const [newModel, setNewModel] = useState('');
@@ -2802,6 +2806,7 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibl
   const [editVal, setEditVal] = useState('');
   const inputStyle = { width:'100%', background:'var(--surface-raised)', border:'1px solid var(--border-alt)', borderRadius:8, padding:'10px 14px', color:'var(--text-primary)', fontSize:14, outline:'none' };
   const labelStyle = { display:'block', fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:6 };
+  const sectionHeadingStyle = { fontFamily:"'Barlow Condensed',sans-serif", fontSize:18, fontWeight:700, color:'var(--text-primary)', letterSpacing:'0.04em', marginBottom:14 };
 
   const saveKey = () => {
     localStorage.setItem(ANTHROPIC_KEY, aiKey.trim());
@@ -2809,126 +2814,181 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibl
     setTimeout(() => setSaved(false), 1500);
   };
 
+  const sections = [
+    { key: 'ai-key', label: 'Anthropic API Key' },
+    { key: 'appearance', label: 'Appearance' },
+    { key: 'ai-models', label: 'AI Models', badge: models.length },
+    { key: 'nav-tabs', label: 'Navigation Tabs' },
+    { key: 'hidden', label: 'Hidden Projects', badge: hiddenProjects.length },
+    { key: 'account', label: 'Account' },
+  ];
+
+  const SidebarItem = ({ item }) => {
+    const active = section === item.key;
+    return (
+      <button onClick={() => setSection(item.key)}
+        style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:8, width:'100%', padding:'9px 12px', borderRadius:7, border:'none', background: active ? 'var(--surface-raised)' : 'transparent', color: active ? 'var(--text-primary)' : 'var(--text-faint)', fontSize:13, fontWeight: active ? 600 : 400, cursor:'pointer', textAlign:'left', borderLeft: active ? '2px solid #00e676' : '2px solid transparent' }}>
+        <span>{item.label}</span>
+        {item.badge > 0 && <span style={{ fontSize:10, padding:'1px 7px', borderRadius:99, background:'var(--border)', color:'var(--text-faint)', fontFamily:"'JetBrains Mono',monospace" }}>{item.badge}</span>}
+      </button>
+    );
+  };
+
   return (
     <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', backdropFilter:'blur(6px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:200, padding:16 }}
       onClick={e => e.target===e.currentTarget && onClose()}>
-      <div style={{ background:'var(--surface)', border:'1px solid var(--border-emphasis)', borderRadius:16, width:'100%', maxWidth:440, padding:24 }}>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
+      <div style={{ background:'var(--surface)', border:'1px solid var(--border-emphasis)', borderRadius:16, width:'100%', maxWidth:780, height:'min(600px, 90vh)', display:'flex', flexDirection:'column', overflow:'hidden' }}>
+        <div style={{ padding:'18px 22px 14px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'1px solid var(--border)' }}>
           <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:21, fontWeight:700, color:'var(--text-primary)', letterSpacing:'0.05em' }}>Settings</span>
           <button className="icon-btn" style={{ padding:'4px 6px', background:'transparent', border:'none', color:'var(--text-dim)', borderRadius:5, fontSize:17, cursor:'pointer' }} onClick={onClose}>✕</button>
         </div>
 
-        <div style={{ marginBottom:20 }}>
-          <label style={labelStyle}>Anthropic API Key (optional — for AI features)</label>
-          <input type="password" value={aiKey} onChange={e => setAiKey(e.target.value)} placeholder="sk-ant-…" style={inputStyle}/>
-          <p style={{ fontSize:11, color:'var(--text-dimmer)', marginTop:6, lineHeight:1.5 }}>
-            Enables AI task suggestions and digest narrative.{' '}
-            <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer" style={{ color:'#29b6f6' }}>Get a key →</a>
-          </p>
-          <button onClick={saveKey} style={{ marginTop:8, padding:'7px 16px', background: saved?'rgba(0,230,118,0.15)':'var(--border-alt)', border:'1px solid var(--border-emphasis)', borderRadius:8, color: saved?'#00e676':'var(--text-faint)', fontSize:12, fontWeight:500, cursor:'pointer' }}>
-            {saved ? '✓ Saved' : 'Save Key'}
-          </button>
-        </div>
-
-        <div style={{ borderTop:'1px solid var(--border)', paddingTop:16, marginBottom:16 }}>
-          <label style={{ display:'block', fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:10 }}>Appearance</label>
-          <div style={{ display:'flex', gap:6 }}>
-            {[{ key:'dark', label:'🌙 Dark' }, { key:'light', label:'☀ Light' }].map(opt => {
-              const on = theme === opt.key;
-              return (
-                <button key={opt.key} onClick={() => onSetTheme(opt.key)}
-                  style={{ flex:1, padding:'8px 12px', borderRadius:7, border:`1px solid ${on ? '#00e676' : 'var(--border-alt)'}`, background: on ? 'rgba(0,230,118,0.08)' : 'transparent', color: on ? '#00e676' : 'var(--text-faint)', fontSize:12, fontWeight:500, cursor:'pointer' }}>
-                  {opt.label}
-                </button>
-              );
-            })}
+        <div className="settings-body" style={{ display:'grid', gridTemplateColumns:'200px 1fr', flex:1, overflow:'hidden' }}>
+          {/* Sidebar */}
+          <div className="settings-sidebar" style={{ borderRight:'1px solid var(--border)', padding:'14px 10px', display:'flex', flexDirection:'column', gap:2, overflowY:'auto', background:'var(--bg)' }}>
+            {sections.map(s => <SidebarItem key={s.key} item={s} />)}
           </div>
-        </div>
 
-        <div style={{ borderTop:'1px solid var(--border)', paddingTop:16, marginBottom:16 }}>
-          <label style={{ display:'block', fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:10 }}>AI Models ({models.length})</label>
-          <div style={{ display:'flex', flexDirection:'column', gap:4, marginBottom:8 }}>
-            {models.map((m, i) => (
-              <div key={i} style={{ display:'flex', alignItems:'center', gap:6, padding:'6px 10px', background:'var(--surface-raised)', borderRadius:6, border:'1px solid var(--border-alt)' }}>
-                {editIdx === i ? (
-                  <>
-                    <input value={editVal} onChange={e => setEditVal(e.target.value)}
-                      onKeyDown={e => { if (e.key === 'Enter' && editVal.trim()) { onSetModels(models.map((x, j) => j === i ? editVal.trim() : x)); setEditIdx(-1); } if (e.key === 'Escape') setEditIdx(-1); }}
-                      autoFocus
-                      style={{ flex:1, background:'var(--surface)', border:'1px solid var(--border-alt)', borderRadius:4, padding:'3px 8px', color:'var(--text-primary)', fontSize:12, outline:'none' }}/>
-                    <button onClick={() => { if (editVal.trim()) { onSetModels(models.map((x, j) => j === i ? editVal.trim() : x)); setEditIdx(-1); } }}
-                      style={{ fontSize:10, padding:'3px 8px', background:'rgba(0,230,118,0.10)', border:'1px solid rgba(0,230,118,0.25)', borderRadius:4, color:'#00e676', cursor:'pointer' }}>Save</button>
-                    <button onClick={() => setEditIdx(-1)} style={{ fontSize:10, padding:'3px 6px', background:'transparent', border:'none', color:'var(--text-dim)', cursor:'pointer' }}>✕</button>
-                  </>
+          {/* Content */}
+          <div style={{ padding:'20px 24px', overflowY:'auto' }}>
+            {section === 'ai-key' && (
+              <div>
+                <div style={sectionHeadingStyle}>Anthropic API Key</div>
+                <label style={labelStyle}>Optional — enables AI features</label>
+                <input type="password" value={aiKey} onChange={e => setAiKey(e.target.value)} placeholder="sk-ant-…" style={inputStyle}/>
+                <p style={{ fontSize:11, color:'var(--text-dimmer)', marginTop:8, lineHeight:1.5 }}>
+                  Powers AI task suggestions and digest narrative.{' '}
+                  <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer" style={{ color:'#29b6f6' }}>Get a key →</a>
+                </p>
+                <button onClick={saveKey} style={{ marginTop:10, padding:'8px 18px', background: saved?'rgba(0,230,118,0.15)':'var(--border-alt)', border:'1px solid var(--border-emphasis)', borderRadius:8, color: saved?'#00e676':'var(--text-faint)', fontSize:12, fontWeight:500, cursor:'pointer' }}>
+                  {saved ? '✓ Saved' : 'Save Key'}
+                </button>
+              </div>
+            )}
+
+            {section === 'appearance' && (
+              <div>
+                <div style={sectionHeadingStyle}>Appearance</div>
+                <label style={labelStyle}>Theme</label>
+                <div style={{ display:'flex', gap:8 }}>
+                  {[{ key:'dark', label:'🌙 Dark' }, { key:'light', label:'☀ Light' }].map(opt => {
+                    const on = theme === opt.key;
+                    return (
+                      <button key={opt.key} onClick={() => onSetTheme(opt.key)}
+                        style={{ flex:1, padding:'10px 14px', borderRadius:8, border:`1px solid ${on ? '#00e676' : 'var(--border-alt)'}`, background: on ? 'rgba(0,230,118,0.08)' : 'transparent', color: on ? '#00e676' : 'var(--text-faint)', fontSize:13, fontWeight:500, cursor:'pointer' }}>
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {section === 'ai-models' && (
+              <div>
+                <div style={sectionHeadingStyle}>AI Models</div>
+                <label style={labelStyle}>Choices shown in the Project editor ({models.length})</label>
+                <div style={{ display:'flex', flexDirection:'column', gap:4, marginBottom:10 }}>
+                  {models.map((m, i) => (
+                    <div key={i} style={{ display:'flex', alignItems:'center', gap:6, padding:'7px 10px', background:'var(--surface-raised)', borderRadius:6, border:'1px solid var(--border-alt)' }}>
+                      {editIdx === i ? (
+                        <>
+                          <input value={editVal} onChange={e => setEditVal(e.target.value)}
+                            onKeyDown={e => { if (e.key === 'Enter' && editVal.trim()) { onSetModels(models.map((x, j) => j === i ? editVal.trim() : x)); setEditIdx(-1); } if (e.key === 'Escape') setEditIdx(-1); }}
+                            autoFocus
+                            style={{ flex:1, background:'var(--surface)', border:'1px solid var(--border-alt)', borderRadius:4, padding:'3px 8px', color:'var(--text-primary)', fontSize:12, outline:'none' }}/>
+                          <button onClick={() => { if (editVal.trim()) { onSetModels(models.map((x, j) => j === i ? editVal.trim() : x)); setEditIdx(-1); } }}
+                            style={{ fontSize:10, padding:'3px 8px', background:'rgba(0,230,118,0.10)', border:'1px solid rgba(0,230,118,0.25)', borderRadius:4, color:'#00e676', cursor:'pointer' }}>Save</button>
+                          <button onClick={() => setEditIdx(-1)} style={{ fontSize:10, padding:'3px 6px', background:'transparent', border:'none', color:'var(--text-dim)', cursor:'pointer' }}>✕</button>
+                        </>
+                      ) : (
+                        <>
+                          <span style={{ flex:1, fontSize:12.5, color:'var(--text-primary)' }}>{m}</span>
+                          <button onClick={() => { setEditIdx(i); setEditVal(m); }}
+                            title="Edit"
+                            style={{ fontSize:11, padding:'3px 7px', background:'transparent', border:'none', color:'var(--text-faint)', cursor:'pointer' }}>✎</button>
+                          <button onClick={() => onSetModels(models.filter((_, j) => j !== i))}
+                            title="Remove"
+                            style={{ fontSize:11, padding:'3px 7px', background:'transparent', border:'none', color:'#ef5350', cursor:'pointer' }}>✕</button>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display:'flex', gap:6 }}>
+                  <input value={newModel} onChange={e => setNewModel(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter' && newModel.trim() && !models.includes(newModel.trim())) { onSetModels([...models, newModel.trim()]); setNewModel(''); } }}
+                    placeholder="+ Add a model (e.g. GPT-5, Grok)"
+                    style={{ flex:1, background:'var(--surface-raised)', border:'1px solid var(--border-alt)', borderRadius:6, padding:'7px 10px', color:'var(--text-primary)', fontSize:12, outline:'none' }}/>
+                  <button onClick={() => { if (newModel.trim() && !models.includes(newModel.trim())) { onSetModels([...models, newModel.trim()]); setNewModel(''); } }}
+                    disabled={!newModel.trim()}
+                    style={{ fontSize:11, padding:'7px 16px', background: newModel.trim() ? '#00e676' : 'var(--border-alt)', border:'none', borderRadius:6, color: newModel.trim() ? '#000' : 'var(--text-dimmer)', fontWeight:600, cursor: newModel.trim() ? 'pointer' : 'default' }}>Add</button>
+                </div>
+              </div>
+            )}
+
+            {section === 'nav-tabs' && (
+              <div>
+                <div style={sectionHeadingStyle}>Navigation Tabs</div>
+                <label style={labelStyle}>Toggle optional tabs — Projects, Tasks, and Ideas are always shown</label>
+                <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                  {OPTIONAL_TABS.map(tabKey => {
+                    const on = visibleTabs.includes(tabKey);
+                    return (
+                      <div key={tabKey} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 12px', background:'var(--surface-raised)', borderRadius:6, border:'1px solid var(--border-alt)' }}>
+                        <span style={{ fontSize:13, color: on ? 'var(--text-primary)' : 'var(--text-dimmer)' }}>{TAB_LABELS[tabKey]}</span>
+                        <button onClick={() => {
+                          const next = on ? visibleTabs.filter(t => t !== tabKey) : [...visibleTabs, tabKey];
+                          onSetVisibleTabs(next);
+                        }}
+                          style={{ fontSize:10, padding:'4px 14px', borderRadius:6, border:`1px solid ${on ? 'rgba(0,230,118,0.25)' : 'var(--border-alt)'}`, background: on ? 'rgba(0,230,118,0.08)' : 'transparent', color: on ? '#00e676' : 'var(--text-dimmer)', cursor:'pointer', fontWeight:500 }}>
+                          {on ? 'Visible' : 'Hidden'}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {section === 'hidden' && (
+              <div>
+                <div style={sectionHeadingStyle}>Hidden Projects</div>
+                {hiddenProjects.length === 0 ? (
+                  <div style={{ fontSize:13, color:'var(--text-faint)', fontStyle:'italic' }}>No hidden projects. Use the 👁 icon on a project card to hide it.</div>
                 ) : (
                   <>
-                    <span style={{ flex:1, fontSize:12, color:'var(--text-primary)' }}>{m}</span>
-                    <button onClick={() => { setEditIdx(i); setEditVal(m); }}
-                      title="Edit"
-                      style={{ fontSize:11, padding:'2px 6px', background:'transparent', border:'none', color:'var(--text-faint)', cursor:'pointer' }}>✎</button>
-                    <button onClick={() => onSetModels(models.filter((_, j) => j !== i))}
-                      title="Remove"
-                      style={{ fontSize:11, padding:'2px 6px', background:'transparent', border:'none', color:'#ef5350', cursor:'pointer' }}>✕</button>
+                    <label style={labelStyle}>{hiddenProjects.length} hidden — click to restore</label>
+                    <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
+                      {hiddenProjects.map(p => (
+                        <div key={p.id} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 12px', background:'var(--surface-raised)', borderRadius:6, border:'1px solid var(--border-alt)' }}>
+                          <span style={{ fontSize:13, color:'var(--text-faint)' }}>{p.name}</span>
+                          <button onClick={() => onUnhide(p.id)}
+                            style={{ fontSize:11, padding:'4px 12px', background:'rgba(41,182,246,0.08)', border:'1px solid rgba(41,182,246,0.18)', borderRadius:6, color:'#29b6f6', cursor:'pointer' }}>
+                            Unhide
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </>
                 )}
               </div>
-            ))}
-          </div>
-          <div style={{ display:'flex', gap:6 }}>
-            <input value={newModel} onChange={e => setNewModel(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter' && newModel.trim() && !models.includes(newModel.trim())) { onSetModels([...models, newModel.trim()]); setNewModel(''); } }}
-              placeholder="+ Add a model (e.g. GPT-5, Grok)"
-              style={{ flex:1, background:'var(--surface-raised)', border:'1px solid var(--border-alt)', borderRadius:6, padding:'6px 10px', color:'var(--text-primary)', fontSize:12, outline:'none' }}/>
-            <button onClick={() => { if (newModel.trim() && !models.includes(newModel.trim())) { onSetModels([...models, newModel.trim()]); setNewModel(''); } }}
-              disabled={!newModel.trim()}
-              style={{ fontSize:11, padding:'6px 14px', background: newModel.trim() ? '#00e676' : 'var(--border-alt)', border:'none', borderRadius:6, color: newModel.trim() ? '#000' : 'var(--text-dimmer)', fontWeight:600, cursor: newModel.trim() ? 'pointer' : 'default' }}>Add</button>
-          </div>
-        </div>
+            )}
 
-        <div style={{ borderTop:'1px solid var(--border)', paddingTop:16, marginBottom:16 }}>
-          <label style={{ display:'block', fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:10 }}>Navigation Tabs</label>
-          <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-            {OPTIONAL_TABS.map(tabKey => {
-              const on = visibleTabs.includes(tabKey);
-              return (
-                <div key={tabKey} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'6px 10px', background:'var(--surface-raised)', borderRadius:6, border:'1px solid var(--border-alt)' }}>
-                  <span style={{ fontSize:12, color: on ? 'var(--text-primary)' : 'var(--text-dimmer)' }}>{TAB_LABELS[tabKey]}</span>
-                  <button onClick={() => {
-                    const next = on ? visibleTabs.filter(t => t !== tabKey) : [...visibleTabs, tabKey];
-                    onSetVisibleTabs(next);
-                  }}
-                    style={{ fontSize:10, padding:'3px 12px', borderRadius:6, border:`1px solid ${on ? 'rgba(0,230,118,0.25)' : 'var(--border-alt)'}`, background: on ? 'rgba(0,230,118,0.08)' : 'transparent', color: on ? '#00e676' : 'var(--text-dimmer)', cursor:'pointer', fontWeight:500 }}>
-                    {on ? 'Visible' : 'Hidden'}
-                  </button>
-                </div>
-              );
-            })}
+            {section === 'account' && (
+              <div>
+                <div style={sectionHeadingStyle}>Account</div>
+                <label style={labelStyle}>Danger zone</label>
+                <button onClick={() => { if(window.confirm('Disconnect from this repo? Your data stays in GitHub.')) { onDisconnect(); onClose(); } }}
+                  style={{ padding:'10px 18px', background:'transparent', border:'1px solid rgba(239,83,80,0.25)', borderRadius:8, color:'#ef5350', fontSize:13, cursor:'pointer' }}>
+                  Disconnect Repo
+                </button>
+                <p style={{ fontSize:11, color:'var(--text-dimmer)', marginTop:8, lineHeight:1.5 }}>
+                  Your data stays safely in GitHub. You can reconnect any time from the landing page.
+                </p>
+              </div>
+            )}
           </div>
-          <p style={{ fontSize:10, color:'var(--text-dimmer)', marginTop:6 }}>Projects, Tasks, and Ideas are always shown.</p>
-        </div>
-
-        {hiddenProjects.length > 0 && (
-          <div style={{ borderTop:'1px solid var(--border)', paddingTop:16, marginBottom:16 }}>
-            <label style={{ display:'block', fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:8 }}>Hidden Projects ({hiddenProjects.length})</label>
-            <div style={{ display:'flex', flexDirection:'column', gap:4, maxHeight:160, overflowY:'auto' }}>
-              {hiddenProjects.map(p => (
-                <div key={p.id} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'6px 10px', background:'var(--surface-raised)', borderRadius:6, border:'1px solid var(--border-alt)' }}>
-                  <span style={{ fontSize:12, color:'var(--text-faint)' }}>{p.name}</span>
-                  <button onClick={() => onUnhide(p.id)}
-                    style={{ fontSize:10, padding:'3px 10px', background:'rgba(41,182,246,0.08)', border:'1px solid rgba(41,182,246,0.18)', borderRadius:6, color:'#29b6f6', cursor:'pointer' }}>
-                    Unhide
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div style={{ borderTop:'1px solid var(--border)', paddingTop:16 }}>
-          <button onClick={() => { if(window.confirm('Disconnect from this repo? Your data stays in GitHub.')) { onDisconnect(); onClose(); } }}
-            style={{ padding:'8px 16px', background:'transparent', border:'1px solid rgba(239,83,80,0.25)', borderRadius:8, color:'#ef5350', fontSize:12, cursor:'pointer' }}>
-            Disconnect Repo
-          </button>
         </div>
       </div>
     </div>

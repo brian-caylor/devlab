@@ -437,13 +437,13 @@
       "id": "1l3fewbai2dmo123jau",
       "name": "Story-Engine-Local-Edition",
       "description": "Desktop app for Story Engine using Gemma 4 locally via Ollama",
-      "status": "active",
+      "status": "released",
       "machines": [],
       "aiModel": "",
       "repo": "github.com/brian-caylor/Story-Engine-Local-Edition",
       "notes": "",
       "createdAt": "2026-04-10T23:52:12Z",
-      "lastUpdated": "2026-04-13T01:34:55Z"
+      "lastUpdated": "2026-04-17T18:37:59.560Z"
     },
     {
       "priority": "none",

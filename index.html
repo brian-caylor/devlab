@@ -833,6 +833,7 @@ function App() {
           onReorderTasks={reorderTasks}
           creds={creds}
           openTaskId={openTaskId}
+          onOpenReadme={setReadmeProject}
         />
       )}
 
@@ -1075,10 +1076,10 @@ function ProjectCard({ project, onOpen, onEdit, onDelete, onHide, onOpenReadme, 
           </div>
         </div>
         <div style={{ display:'flex', gap:2, flexShrink:0 }}>
-          <span className="drag-handle" style={{ display:'flex', alignItems:'center', padding:'5px 4px', fontSize:14, color:'var(--text-dim)' }}>⠿</span>
-          <button className="icon-btn" style={{ display:'flex', alignItems:'center', padding:'5px 6px', background:'transparent', border:'none', color:'var(--text-dim)', borderRadius:5, fontSize:14 }} onClick={onEdit}>✎</button>
-          <button className="icon-btn" title="Hide project" style={{ display:'flex', alignItems:'center', padding:'5px 6px', background:'transparent', border:'none', color:'var(--text-dim)', borderRadius:5, fontSize:13 }} onClick={onHide}>👁</button>
-          <button className="icon-btn" style={{ display:'flex', alignItems:'center', padding:'5px 6px', background:'transparent', border:'none', color:'#ef5350', borderRadius:5, fontSize:14 }} onClick={onDelete}>⊗</button>
+          <span className="drag-handle" title="Drag to reorder (switches to Custom sort)" style={{ display:'flex', alignItems:'center', padding:'5px 4px', fontSize:14, color:'var(--text-dim)' }}>⠿</span>
+          <button className="icon-btn" title="Edit project" style={{ display:'flex', alignItems:'center', padding:'5px 6px', background:'transparent', border:'none', color:'var(--text-dim)', borderRadius:5, fontSize:14 }} onClick={onEdit}>✎</button>
+          <button className="icon-btn" title="Hide project (view hidden in Settings)" style={{ display:'flex', alignItems:'center', padding:'5px 6px', background:'transparent', border:'none', color:'var(--text-dim)', borderRadius:5, fontSize:13 }} onClick={onHide}>👁</button>
+          <button className="icon-btn" title="Delete project" style={{ display:'flex', alignItems:'center', padding:'5px 6px', background:'transparent', border:'none', color:'#ef5350', borderRadius:5, fontSize:14 }} onClick={onDelete}>⊗</button>
         </div>
       </div>
 
@@ -1119,6 +1120,7 @@ function ProjectCard({ project, onOpen, onEdit, onDelete, onHide, onOpenReadme, 
           )}
           {project.repo && (
             <a href={`https://${project.repo.replace(/^https?:\/\//, '')}`} target="_blank" rel="noopener noreferrer"
+              title="Open repo on GitHub"
               style={{ color:'var(--text-dimmer)', marginLeft:2, fontSize:12 }}
               onClick={e => e.stopPropagation()}>↗</a>
           )}
@@ -1136,7 +1138,7 @@ function ProjectCard({ project, onOpen, onEdit, onDelete, onHide, onOpenReadme, 
 }
 
 // ── Project Detail View ───────────────────────────────────────────────────────
-function ProjectDetail({ project, onBack, onEdit, onUpdateProject, onAddTask, onUpdateTask, onDeleteTask, onReorderTasks, creds, openTaskId }) {
+function ProjectDetail({ project, onBack, onEdit, onUpdateProject, onAddTask, onUpdateTask, onDeleteTask, onReorderTasks, creds, openTaskId, onOpenReadme }) {
   const cfg = STATUS[project.status] || STATUS.idea;
 
   return (
@@ -1204,12 +1206,26 @@ function ProjectDetail({ project, onBack, onEdit, onUpdateProject, onAddTask, on
           onReorder={onReorderTasks}
           openTaskId={openTaskId}
         />
-        <NotesPanel
-          key={project.id}
-          projectId={project.id}
-          initialNotes={project.notes || ''}
-          onSave={(notes) => onUpdateProject(project.id, { notes })}
-        />
+        <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+          <NotesPanel
+            key={project.id}
+            projectId={project.id}
+            initialNotes={project.notes || ''}
+            onSave={(notes) => onUpdateProject(project.id, { notes })}
+          />
+          {project.repo && (
+            <button onClick={() => onOpenReadme(project)}
+              style={{ width:'100%', padding:'14px 18px', background:'var(--surface)', border:'1px solid var(--border)', borderRadius:12, color:'var(--text-faint)', fontSize:13, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'space-between', transition:'border-color .15s, color .15s' }}
+              onMouseOver={e => { e.currentTarget.style.borderColor='var(--border-emphasis)'; e.currentTarget.style.color='var(--text-primary)'; }}
+              onMouseOut={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.color='var(--text-faint)'; }}>
+              <span style={{ display:'flex', alignItems:'center', gap:10 }}>
+                <span style={{ fontSize:15 }}>📄</span>
+                <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:14, fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', color:'var(--text-primary)' }}>View README</span>
+              </span>
+              <span style={{ fontSize:12, color:'var(--text-dim)' }}>Open ↗</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* GitHub Activity */}

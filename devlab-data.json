@@ -291,7 +291,7 @@
           "title": "Add ability to sync project state and notes across computers automatically",
           "description": "",
           "status": "todo",
-          "priority": "medium",
+          "priority": "high",
           "dueDate": null,
           "order": 4,
           "createdAt": "2026-04-17T16:27:31.003Z",
@@ -342,7 +342,7 @@
       "repo": "github.com/brian-caylor/devlab",
       "notes": "",
       "createdAt": "2026-04-15T05:26:27Z",
-      "lastUpdated": "2026-04-17T16:27:43.125Z"
+      "lastUpdated": "2026-04-17T16:27:46.357Z"
     },
     {
       "priority": "none",

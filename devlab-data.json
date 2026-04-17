@@ -287,48 +287,64 @@
           "createdAt": "2026-04-17T16:09:33.341Z"
         },
         {
-          "id": "8beno8t4e7mmo34g117",
-          "title": "Add ability to sync project state and notes across computers automatically",
           "description": "",
-          "status": "todo",
           "priority": "high",
           "dueDate": null,
           "order": 4,
-          "createdAt": "2026-04-17T16:27:31.003Z",
-          "completedAt": null
+          "completedAt": null,
+          "labels": [],
+          "subtasks": [],
+          "githubLink": null,
+          "milestoneId": null,
+          "id": "8beno8t4e7mmo34g117",
+          "title": "Add ability to sync project state and notes across computers automatically",
+          "status": "todo",
+          "createdAt": "2026-04-17T16:27:31.003Z"
         },
         {
-          "id": "her9j4tf0sbmo34g118",
-          "title": "Add support for tagging or categorizing projects for better organization",
           "description": "",
-          "status": "todo",
           "priority": "low",
           "dueDate": null,
           "order": 5,
-          "createdAt": "2026-04-17T16:27:31.004Z",
-          "completedAt": null
+          "completedAt": null,
+          "labels": [],
+          "subtasks": [],
+          "githubLink": null,
+          "milestoneId": null,
+          "id": "her9j4tf0sbmo34g118",
+          "title": "Add support for tagging or categorizing projects for better organization",
+          "status": "todo",
+          "createdAt": "2026-04-17T16:27:31.004Z"
         },
         {
-          "id": "3tiv6joq6zmo34g118",
-          "title": "Create an export feature to back up all project data to a portable format",
           "description": "",
-          "status": "todo",
           "priority": "medium",
           "dueDate": null,
           "order": 6,
-          "createdAt": "2026-04-17T16:27:31.006Z",
-          "completedAt": null
+          "completedAt": null,
+          "labels": [],
+          "subtasks": [],
+          "githubLink": null,
+          "milestoneId": null,
+          "id": "3tiv6joq6zmo34g118",
+          "title": "Create an export feature to back up all project data to a portable format",
+          "status": "todo",
+          "createdAt": "2026-04-17T16:27:31.006Z"
         },
         {
-          "id": "gjd4gg473kmo34g118",
-          "title": "Add keyboard shortcuts for common actions like switching projects or adding tasks",
           "description": "",
-          "status": "todo",
           "priority": "low",
           "dueDate": null,
           "order": 7,
-          "createdAt": "2026-04-17T16:27:31.006Z",
-          "completedAt": null
+          "completedAt": null,
+          "labels": [],
+          "subtasks": [],
+          "githubLink": null,
+          "milestoneId": null,
+          "id": "gjd4gg473kmo34g118",
+          "title": "Add keyboard shortcuts for common actions like switching projects or adding tasks",
+          "status": "todo",
+          "createdAt": "2026-04-17T16:27:31.006Z"
         }
       ],
       "milestones": [],
@@ -432,7 +448,41 @@
     {
       "priority": "none",
       "order": 14,
-      "tasks": [],
+      "tasks": [
+        {
+          "id": "ay3vdoy9qyomo38sx6w",
+          "title": "Implement an export option that generates an HTML gallery from the manifest CSV, showing each cluster's images with their AI descriptions inline",
+          "description": "",
+          "status": "todo",
+          "priority": "medium",
+          "dueDate": null,
+          "order": 0,
+          "createdAt": "2026-04-17T18:29:31.017Z",
+          "completedAt": null
+        },
+        {
+          "id": "0j0056dj0m7mo38sx6x",
+          "title": "Support multiple Ollama model selection in the Setup phase so users can swap between available vision models without editing code",
+          "description": "",
+          "status": "todo",
+          "priority": "medium",
+          "dueDate": null,
+          "order": 1,
+          "createdAt": "2026-04-17T18:29:31.017Z",
+          "completedAt": null
+        },
+        {
+          "id": "89jlbnnfzx2mo38sx6x",
+          "title": "Add a confidence or coherence score to each cluster based on embedding variance, and surface low-confidence clusters with a warning in the Label & Merge phase so users know which groups need manual review",
+          "description": "",
+          "status": "todo",
+          "priority": "medium",
+          "dueDate": null,
+          "order": 2,
+          "createdAt": "2026-04-17T18:29:31.017Z",
+          "completedAt": null
+        }
+      ],
       "milestones": [],
       "hidden": false,
       "id": "g0dwqi12ayjmo123jau",
@@ -444,7 +494,7 @@
       "repo": "github.com/brian-caylor/Image-Analysis_and_Organizer",
       "notes": "",
       "createdAt": "2026-04-12T21:46:19Z",
-      "lastUpdated": "2026-04-13T01:28:00Z"
+      "lastUpdated": "2026-04-17T18:29:31.017Z"
     },
     {
       "priority": "none",

@@ -2059,7 +2059,7 @@ function DigestView({ projects, ideas }) {
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' },
-        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 400, messages: [{ role: 'user', content: prompt }] }),
+        body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 400, messages: [{ role: 'user', content: prompt }] }),
       });
       if (res.ok) { const data = await res.json(); setNarrative(data.content[0].text); }
     } catch {}
@@ -3061,9 +3061,19 @@ function AISuggestions({ project, onAddTasks, onClose }) {
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' },
-        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 800, messages: [{ role: 'user', content: prompt }] }),
+        body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 800, messages: [{ role: 'user', content: prompt }] }),
       });
-      if (!res.ok) { setError(res.status === 401 ? 'API key not accepted. Check your key in settings.' : 'Could not reach Claude API.'); setLoading(false); return; }
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        const apiMsg = body.error?.message || body.message || '';
+        let msg;
+        if (res.status === 401) msg = 'API key not accepted. Check your key in settings.';
+        else if (res.status === 400) msg = apiMsg || 'Bad request to Claude API.';
+        else if (res.status === 404) msg = `Model not found${apiMsg ? ': ' + apiMsg : ''}`;
+        else if (res.status === 429) msg = 'Rate limited. Try again in a moment.';
+        else msg = `API error ${res.status}${apiMsg ? ': ' + apiMsg : ''}`;
+        setError(msg); setLoading(false); return;
+      }
       const data = await res.json();
       const text = data.content[0].text.trim();
       const parsed = JSON.parse(text);

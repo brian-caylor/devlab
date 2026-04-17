@@ -1979,6 +1979,7 @@ function DigestView({ projects, ideas }) {
   const [copied, setCopied] = useState(false);
   const [narrative, setNarrative] = useState('');
   const [narLoading, setNarLoading] = useState(false);
+  const [narError, setNarError] = useState('');
 
   const sevenDaysAgo = useMemo(() => new Date(Date.now() - 7 * 86400000).toISOString(), []);
   const today = new Date();
@@ -2050,8 +2051,8 @@ function DigestView({ projects, ideas }) {
 
   const generateNarrative = async () => {
     const key = loadAnthropicKey();
-    if (!key) return;
-    setNarLoading(true);
+    if (!key) { setNarError('No Anthropic API key set. Add one in Settings.'); return; }
+    setNarLoading(true); setNarError(''); setNarrative('');
     try {
       const d = digest;
       const topProject = d.completed.sort((a,b) => b.tasks.length - a.tasks.length)[0]?.name || 'N/A';
@@ -2061,8 +2062,23 @@ function DigestView({ projects, ideas }) {
         headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' },
         body: JSON.stringify({ model: 'claude-haiku-4-5', max_tokens: 400, messages: [{ role: 'user', content: prompt }] }),
       });
-      if (res.ok) { const data = await res.json(); setNarrative(data.content[0].text); }
-    } catch {}
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        const apiMsg = body.error?.message || body.message || '';
+        let msg;
+        if (res.status === 401) msg = 'API key not accepted. Check your key in Settings.';
+        else if (res.status === 400) msg = apiMsg || 'Bad request to Claude API.';
+        else if (res.status === 404) msg = `Model not found${apiMsg ? ': ' + apiMsg : ''}`;
+        else if (res.status === 429) msg = 'Rate limited. Try again in a moment.';
+        else msg = `API error ${res.status}${apiMsg ? ': ' + apiMsg : ''}`;
+        setNarError(msg);
+      } else {
+        const data = await res.json();
+        setNarrative(data.content[0].text);
+      }
+    } catch (e) {
+      setNarError(`Network error: ${e.message || 'could not reach Claude API.'}`);
+    }
     setNarLoading(false);
   };
 
@@ -2090,6 +2106,12 @@ function DigestView({ projects, ideas }) {
           <div style={{ marginTop:16, padding:14, background:'rgba(206,147,216,0.05)', border:'1px solid rgba(206,147,216,0.15)', borderRadius:10 }}>
             <div style={{ fontSize:10, fontWeight:600, color:'#ce93d8', letterSpacing:'0.06em', textTransform:'uppercase', marginBottom:8 }}>✨ AI Summary</div>
             <div style={{ fontSize:13, color:'var(--text-primary)', lineHeight:1.7 }}>{narrative}</div>
+          </div>
+        )}
+        {narError && (
+          <div style={{ marginTop:16, padding:14, background:'rgba(239,83,80,0.06)', border:'1px solid rgba(239,83,80,0.20)', borderRadius:10 }}>
+            <div style={{ fontSize:10, fontWeight:600, color:'#ef5350', letterSpacing:'0.06em', textTransform:'uppercase', marginBottom:6 }}>Narrative failed</div>
+            <div style={{ fontSize:13, color:'#ef5350', lineHeight:1.6 }}>{narError}</div>
           </div>
         )}
       </div>
@@ -3055,13 +3077,13 @@ function AISuggestions({ project, onAddTasks, onClose }) {
     if (!key) { setError('No API key set.'); setLoading(false); return; }
     const doneTasks = (project.tasks||[]).filter(t => t.status === 'done');
     const openTasks = (project.tasks||[]).filter(t => t.status !== 'done');
-    const prompt = `You are helping a developer manage their personal project.\n\nProject: ${project.name}\nDescription: ${project.description || 'None'}\nStatus: ${project.status}\nNotes: ${project.notes || 'None'}\n\nOpen tasks (${openTasks.length}):\n${openTasks.map(t => `- [${t.priority}] ${t.title}`).join('\n') || 'None'}\n\nCompleted tasks (${doneTasks.length}):\n${doneTasks.slice(-5).map(t => `- ${t.title}`).join('\n') || 'None'}\n\nSuggest 4-5 specific, actionable next tasks. Each should be completable in one session, concrete, and not duplicate open tasks.\n\nOutput format: a single JSON array of strings only. No markdown code fences, no "Here are the suggestions:", no surrounding text. Your entire response must be parseable by JSON.parse().\n\nExample of a valid response:\n["Add error handling to the auth flow", "Write unit tests for the parser", "Update README with install instructions"]`;
+    const prompt = `You are helping a developer decide what to work on next in their personal project.\n\nProject: ${project.name}\nDescription: ${project.description || 'None'}\nStatus: ${project.status}\nNotes: ${project.notes || 'None'}\n\nAlready-completed tasks (DO NOT suggest any of these again, even if rephrased):\n${doneTasks.map(t => `- ${t.title}`).join('\n') || 'None'}\n\nCurrently open tasks (DO NOT duplicate these, even if rephrased):\n${openTasks.map(t => `- [${t.priority}] ${t.title}`).join('\n') || 'None'}\n\nBased on the project description, notes, and what's already done vs open, suggest 4-5 NEW next tasks that logically extend the work. Each should:\n- Be a concrete, single-session task (not vague like "improve code quality")\n- Not overlap semantically with any task in the two lists above\n- Reflect what the project's current state suggests as meaningful next steps\n\nIf you can't identify 4-5 genuinely new, valuable tasks given what's already listed, return fewer — quality over quantity. Return an empty array [] if everything obvious is already covered.\n\nOutput format: a single JSON array of strings only. No markdown code fences, no preamble, no surrounding text. Your entire response must be parseable by JSON.parse().\n\nExample:\n["Add error handling to the auth flow", "Write unit tests for the parser", "Update README with install instructions"]`;
 
     try {
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' },
-        body: JSON.stringify({ model: 'claude-haiku-4-5', max_tokens: 800, messages: [{ role: 'user', content: prompt }] }),
+        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 800, messages: [{ role: 'user', content: prompt }] }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));

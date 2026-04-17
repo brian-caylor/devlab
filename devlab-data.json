@@ -272,14 +272,62 @@
           "createdAt": "2026-04-16T06:58:06.292Z"
         },
         {
+          "description": "",
+          "priority": "low",
+          "dueDate": null,
+          "order": 3,
+          "completedAt": null,
+          "labels": [],
+          "subtasks": [],
+          "githubLink": null,
+          "milestoneId": null,
           "id": "spsvsn1ak3dmo33sxi5",
           "title": "Add project templates for common development setups to speed up new project creation",
+          "status": "todo",
+          "createdAt": "2026-04-17T16:09:33.341Z"
+        },
+        {
+          "id": "8beno8t4e7mmo34g117",
+          "title": "Add ability to sync project state and notes across computers automatically",
+          "description": "",
+          "status": "todo",
+          "priority": "high",
+          "dueDate": null,
+          "order": 4,
+          "createdAt": "2026-04-17T16:27:31.003Z",
+          "completedAt": null
+        },
+        {
+          "id": "her9j4tf0sbmo34g118",
+          "title": "Add support for tagging or categorizing projects for better organization",
+          "description": "",
+          "status": "todo",
+          "priority": "low",
+          "dueDate": null,
+          "order": 5,
+          "createdAt": "2026-04-17T16:27:31.004Z",
+          "completedAt": null
+        },
+        {
+          "id": "3tiv6joq6zmo34g118",
+          "title": "Create an export feature to back up all project data to a portable format",
           "description": "",
           "status": "todo",
           "priority": "medium",
           "dueDate": null,
-          "order": 3,
-          "createdAt": "2026-04-17T16:09:33.341Z",
+          "order": 6,
+          "createdAt": "2026-04-17T16:27:31.006Z",
+          "completedAt": null
+        },
+        {
+          "id": "gjd4gg473kmo34g118",
+          "title": "Add keyboard shortcuts for common actions like switching projects or adding tasks",
+          "description": "",
+          "status": "todo",
+          "priority": "low",
+          "dueDate": null,
+          "order": 7,
+          "createdAt": "2026-04-17T16:27:31.006Z",
           "completedAt": null
         }
       ],
@@ -294,7 +342,7 @@
       "repo": "github.com/brian-caylor/devlab",
       "notes": "",
       "createdAt": "2026-04-15T05:26:27Z",
-      "lastUpdated": "2026-04-17T16:09:33.341Z"
+      "lastUpdated": "2026-04-17T16:27:54.254Z"
     },
     {
       "priority": "none",

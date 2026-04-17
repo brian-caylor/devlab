@@ -187,11 +187,11 @@
       "id": "proj_ocean",
       "name": "3D Ocean Simulation",
       "description": "Photorealistic ocean using Three.js and custom GLSL shaders. Deeply satisfying to stare at.",
-      "status": "paused",
+      "status": "archived",
       "machines": [
         "MacBook"
       ],
-      "lastUpdated": "2026-03-20T00:00:00.000Z",
+      "lastUpdated": "2026-04-17T15:18:46.593Z",
       "repo": "",
       "notes": "Wave physics solid. Needs foam and spray pass.",
       "aiModel": "Claude",
@@ -290,7 +290,7 @@
       "order": 9,
       "tasks": [],
       "milestones": [],
-      "hidden": false,
+      "hidden": true,
       "id": "q96r0avi6ymo123jau",
       "name": "Brian-caylor",
       "description": "",

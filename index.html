@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
   <title>DEV LAB — Brian Caylor</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -50,6 +50,37 @@
       --scrollbar-track: #eaeaf0;
       --hover-overlay: rgba(0,0,0,0.05);
       --hover-overlay-soft: rgba(0,0,0,0.03);
+    }
+    [data-theme="cotton-candy"] {
+      color-scheme: light;
+      --bg: #fef4fa;
+      --surface: #ffffff;
+      --surface-raised: #fff0f7;
+      --border: #f5d4e6;
+      --border-alt: #efc1dc;
+      --border-emphasis: #d89ac4;
+      --text-primary: #3d2747;
+      --text-secondary: #5c3f6f;
+      --text-muted: #7a5a8f;
+      --text-faint: #8a6ea0;
+      --text-dim: #a488b8;
+      --text-dimmer: #bfa6cf;
+      --text-placeholder: #c7b2d6;
+      --scrollbar-thumb: #f0b8d8;
+      --scrollbar-track: #fbe4ef;
+      --hover-overlay: rgba(220,120,180,0.08);
+      --hover-overlay-soft: rgba(220,120,180,0.04);
+    }
+    [data-theme="cotton-candy"] body,
+    [data-theme="cotton-candy"] * {
+      font-family: 'Fredoka', 'DM Sans', sans-serif !important;
+    }
+    [data-theme="cotton-candy"] [style*="JetBrains Mono"],
+    [data-theme="cotton-candy"] .md-preview code,
+    [data-theme="cotton-candy"] .md-preview pre,
+    [data-theme="cotton-candy"] pre,
+    [data-theme="cotton-candy"] code {
+      font-family: 'JetBrains Mono', ui-monospace, monospace !important;
     }
     html, body { background: var(--bg); min-height: 100vh; }
     #root { min-height: 100vh; }
@@ -307,6 +338,10 @@ const THEME_KEY = 'devlab-theme';
 const loadTheme = () => { try { return localStorage.getItem(THEME_KEY) || 'dark'; } catch { return 'dark'; } };
 const saveTheme = (t) => { try { localStorage.setItem(THEME_KEY, t); } catch {} };
 
+const CC_UNLOCKED_KEY = 'devlab-cotton-candy-unlocked';
+const loadCcUnlocked = () => { try { return localStorage.getItem(CC_UNLOCKED_KEY) === '1'; } catch { return false; } };
+const saveCcUnlocked = () => { try { localStorage.setItem(CC_UNLOCKED_KEY, '1'); } catch {} };
+
 const MODELS_KEY = 'devlab-ai-models';
 const DEFAULT_MODELS = ['Claude', 'ChatGPT/Sol', 'Gemini', 'Mixed', 'Other'];
 const loadModels = () => { try { const v = JSON.parse(localStorage.getItem(MODELS_KEY)); return Array.isArray(v) && v.length ? v : DEFAULT_MODELS; } catch { return DEFAULT_MODELS; } };
@@ -545,10 +580,35 @@ function App() {
   const [models, setModels] = useState(loadModels);
   const [visibleTabs, setVisibleTabs] = useState(loadVisibleTabs);
   const [theme, setTheme] = useState(loadTheme);
+  const [ccUnlocked, setCcUnlocked] = useState(loadCcUnlocked);
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     saveTheme(theme);
   }, [theme]);
+
+  // ── 🍭 Konami easter egg: ↑↑↓↓←→←→BA unlocks Cotton Candy theme ──
+  useEffect(() => {
+    const seq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    let idx = 0;
+    const handler = (e) => {
+      const t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      if (key === seq[idx]) {
+        idx++;
+        if (idx === seq.length) {
+          idx = 0;
+          saveCcUnlocked();
+          setCcUnlocked(true);
+          setTheme('cotton-candy');
+        }
+      } else {
+        idx = key === seq[0] ? 1 : 0;
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
   const scrollRef  = useRef(0);
   const ideaRef    = useRef(null);
   const saveTimer  = useRef(null);
@@ -1016,7 +1076,7 @@ function App() {
         <SettingsModal onClose={() => setShowSettings(false)} onDisconnect={() => { dropCreds(); setCreds(null); }}
           hiddenProjects={projects.filter(p => p.hidden)} onUnhide={unhideProject}
           visibleTabs={visibleTabs} onSetVisibleTabs={(tabs) => { setVisibleTabs(tabs); saveVisibleTabs(tabs); }}
-          theme={theme} onSetTheme={setTheme}
+          theme={theme} onSetTheme={setTheme} ccUnlocked={ccUnlocked}
           models={models} onSetModels={(m) => { setModels(m); saveModels(m); }}
           creds={creds} onUpdateCreds={(c) => { saveCreds(c); setCreds(c); }} />
       )}
@@ -2877,7 +2937,7 @@ function ReadmeModal({ project, creds, onClose }) {
 }
 
 // ── Settings Modal ────────────────────────────────────────────────────────────
-function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibleTabs, onSetVisibleTabs, theme, onSetTheme, models, onSetModels, creds, onUpdateCreds }) {
+function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibleTabs, onSetVisibleTabs, theme, onSetTheme, ccUnlocked, models, onSetModels, creds, onUpdateCreds }) {
   const [section, setSection] = useState('keys');
   const [aiKey, setAiKey] = useState(loadAnthropicKey());
   const [ghToken, setGhToken] = useState('');
@@ -2997,7 +3057,11 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibl
                 <div style={sectionHeadingStyle}>Appearance</div>
                 <label style={labelStyle}>Theme</label>
                 <div style={{ display:'flex', gap:8 }}>
-                  {[{ key:'dark', label:'🌙 Dark' }, { key:'light', label:'☀ Light' }].map(opt => {
+                  {[
+                    { key:'dark', label:'🌙 Dark' },
+                    { key:'light', label:'☀ Light' },
+                    ...(ccUnlocked ? [{ key:'cotton-candy', label:'🍭 Cotton Candy' }] : []),
+                  ].map(opt => {
                     const on = theme === opt.key;
                     return (
                       <button key={opt.key} onClick={() => onSetTheme(opt.key)}

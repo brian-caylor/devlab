@@ -167,12 +167,12 @@
       "id": "proj_dani",
       "name": "Dani Calder Autonomous Persona System",
       "description": "Fully AI-generated social media persona — green-skinned former biochemist in Portland. Full technical architecture: LLM orchestration, voice consistency pipeline, image gen, social posting automation.",
-      "status": "active",
+      "status": "archived",
       "machines": [
         "Windows Desktop",
         "Mac Mini M4"
       ],
-      "lastUpdated": "2026-04-13T00:00:00.000Z",
+      "lastUpdated": "2026-04-17T18:38:33.414Z",
       "repo": "",
       "notes": "Phase 2a (life simulation) in design. Three-phase system spec'd. Steady-state cost ~$105/mo modeled.",
       "aiModel": "Claude",

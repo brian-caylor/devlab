@@ -473,13 +473,7 @@
       "lastUpdated": "2025-11-13T06:59:12Z"
     }
   ],
-  "ideas": [
-    {
-      "id": "idea_tabsummarizer",
-      "text": "Browser extension that auto-summarizes any open tab using Claude API — one-click summary sidebar",
-      "createdAt": "2026-04-13T00:00:00.000Z"
-    }
-  ],
+  "ideas": [],
   "_syncedRepos": [
     "brian-caylor/devlab",
     "brian-caylor/brian-caylor",

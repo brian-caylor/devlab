@@ -576,6 +576,7 @@ function App() {
   const [openTaskId, setOpenTaskId] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
   const [readmeProject, setReadmeProject] = useState(null);
   const [models, setModels] = useState(loadModels);
   const [visibleTabs, setVisibleTabs] = useState(loadVisibleTabs);
@@ -620,14 +621,68 @@ function App() {
   projRef.current      = projects;
   ideaStateRef.current = ideas;
 
-  // ── ⌘K shortcut ──
+  // ── Keyboard shortcuts (⌘K search, N new-task, ⌘←/→ nav, G-chord, ?, Esc) ──
   useEffect(() => {
+    let gPending = false;
+    let gTimer = null;
+    const isTextField = (el) => {
+      if (!el) return false;
+      const tag = el.tagName;
+      return tag === 'INPUT' || tag === 'TEXTAREA' || el.isContentEditable;
+    };
     const handler = (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); setShowSearch(true); }
+      const cmd = e.metaKey || e.ctrlKey;
+      const inText = isTextField(e.target);
+
+      if (cmd && e.key === 'k') { e.preventDefault(); setShowSearch(true); return; }
+
+      if (e.key === 'Escape') {
+        if (showSearch) return; // SearchOverlay handles its own Esc
+        if (showSettings) { setShowSettings(false); return; }
+        if (showShortcuts) { setShowShortcuts(false); return; }
+        window.dispatchEvent(new CustomEvent('devlab:collapse-task'));
+        return;
+      }
+
+      if (inText) return; // remaining shortcuts don't fire while typing
+
+      if (e.key === '?' && !cmd) { e.preventDefault(); setShowShortcuts(true); return; }
+
+      if (e.key === 'n' && !cmd && view === 'project') {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent('devlab:focus-new-task'));
+        return;
+      }
+
+      if (cmd && view === 'project' && activeProjectId) {
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+          const list = projects.filter(p => !p.hidden).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+          const idx = list.findIndex(p => p.id === activeProjectId);
+          if (idx >= 0) {
+            const target = e.key === 'ArrowLeft' ? list[idx - 1] : list[idx + 1];
+            if (target) { e.preventDefault(); setActiveProjectId(target.id); return; }
+          }
+        }
+      }
+
+      if (gPending) {
+        clearTimeout(gTimer);
+        gPending = false;
+        if (e.key === 'd') { setView('dashboard'); setActiveProjectId(null); setTab('projects'); return; }
+        if (e.key === 'f' && visibleTabs.includes('focus')) { setView('dashboard'); setActiveProjectId(null); setTab('focus'); return; }
+        if (e.key === 'l' && visibleTabs.includes('labels')) { setView('dashboard'); setActiveProjectId(null); setTab('labels'); return; }
+        return;
+      }
+      if (e.key === 'g' && !cmd) {
+        gPending = true;
+        clearTimeout(gTimer);
+        gTimer = setTimeout(() => { gPending = false; }, 1500);
+        return;
+      }
     };
     window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, []);
+    return () => { window.removeEventListener('keydown', handler); clearTimeout(gTimer); };
+  }, [view, activeProjectId, showSearch, showSettings, showShortcuts, projects, visibleTabs]);
 
   // ── Load from GitHub ──
   useEffect(() => {
@@ -727,6 +782,21 @@ function App() {
   };
   const mutateIdeas = (fn) => {
     setIdeas(prev => { const next = fn(prev); ideaStateRef.current = next; triggerSave(); return next; });
+  };
+
+  // ── Import backup ──
+  const importData = (payload) => {
+    const normalized = normalizeData({ projects: payload.projects, ideas: payload.ideas });
+    setProjects(normalized.projects);
+    projRef.current = normalized.projects;
+    setIdeas(normalized.ideas);
+    ideaStateRef.current = normalized.ideas;
+    if (Array.isArray(payload.visibleTabs)) { setVisibleTabs(payload.visibleTabs); saveVisibleTabs(payload.visibleTabs); }
+    if (Array.isArray(payload.models) && payload.models.length) { setModels(payload.models); saveModels(payload.models); }
+    if (payload.digestSummaries && typeof payload.digestSummaries === 'object') { saveDigestSummaries(payload.digestSummaries); }
+    if (typeof payload.theme === 'string') { setTheme(payload.theme); }
+    if (payload.ccUnlocked) { saveCcUnlocked(); setCcUnlocked(true); }
+    triggerSave();
   };
 
   // ── Project ops ──
@@ -1078,8 +1148,12 @@ function App() {
           visibleTabs={visibleTabs} onSetVisibleTabs={(tabs) => { setVisibleTabs(tabs); saveVisibleTabs(tabs); }}
           theme={theme} onSetTheme={setTheme} ccUnlocked={ccUnlocked}
           models={models} onSetModels={(m) => { setModels(m); saveModels(m); }}
-          creds={creds} onUpdateCreds={(c) => { saveCreds(c); setCreds(c); }} />
+          creds={creds} onUpdateCreds={(c) => { saveCreds(c); setCreds(c); }}
+          projects={projects} ideas={ideas}
+          onImportData={importData} />
       )}
+
+      {showShortcuts && <ShortcutsHelp onClose={() => setShowShortcuts(false)} />}
 
       {modal && (
         <ProjectModal mode={modal.mode} data={modal.data}
@@ -1341,8 +1415,21 @@ function TaskList({ project, projectId, tasks, onAdd, onUpdate, onDelete, onReor
 
   // Open a specific task from search / focus view
   useEffect(() => { if (openTaskId) setExpandedId(openTaskId); }, [openTaskId]);
+
   const inputRef = useRef(null);
   const listRef = useRef(null);
+
+  // Keyboard shortcut bridges
+  useEffect(() => {
+    const focus = () => inputRef.current?.focus();
+    const collapse = () => setExpandedId(null);
+    window.addEventListener('devlab:focus-new-task', focus);
+    window.addEventListener('devlab:collapse-task', collapse);
+    return () => {
+      window.removeEventListener('devlab:focus-new-task', focus);
+      window.removeEventListener('devlab:collapse-task', collapse);
+    };
+  }, []);
   const dragRef = useRef({ dragIdx: -1, overIdx: -1 });
   const touchRef = useRef({ idx: -1, startY: 0, curY: 0, el: null, listEl: null, rects: [], moved: false });
 
@@ -2950,7 +3037,7 @@ function ReadmeModal({ project, creds, onClose }) {
 }
 
 // ── Settings Modal ────────────────────────────────────────────────────────────
-function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibleTabs, onSetVisibleTabs, theme, onSetTheme, ccUnlocked, models, onSetModels, creds, onUpdateCreds }) {
+function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibleTabs, onSetVisibleTabs, theme, onSetTheme, ccUnlocked, models, onSetModels, creds, onUpdateCreds, projects, ideas, onImportData }) {
   const [section, setSection] = useState('keys');
   const [aiKey, setAiKey] = useState(loadAnthropicKey());
   const [ghToken, setGhToken] = useState('');
@@ -2996,8 +3083,63 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibl
     { key: 'ai-models', label: 'AI Models', badge: models.length },
     { key: 'nav-tabs', label: 'Navigation Tabs' },
     { key: 'hidden', label: 'Hidden Projects', badge: hiddenProjects.length },
+    { key: 'data', label: 'Export / Import' },
     { key: 'account', label: 'Account' },
   ];
+
+  // ── Export / Import handlers ──
+  const [importMsg, setImportMsg] = useState('');
+  const [importErr, setImportErr] = useState('');
+  const fileInputRef = useRef(null);
+
+  const handleExport = () => {
+    const payload = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      projects,
+      ideas,
+      digestSummaries: loadDigestSummaries(),
+      visibleTabs,
+      models,
+      theme,
+      ccUnlocked: !!ccUnlocked,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const date = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `devlab-backup-${date}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportFile = async (e) => {
+    setImportMsg(''); setImportErr('');
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const payload = JSON.parse(text);
+      if (payload.version !== 1 || !Array.isArray(payload.projects) || !Array.isArray(payload.ideas)) {
+        setImportErr('Not a valid DevLab backup file.');
+        e.target.value = '';
+        return;
+      }
+      const pCount = payload.projects.length;
+      const iCount = payload.ideas.length;
+      const ok = window.confirm(`Replace all current data with backup?\n\n${pCount} project${pCount===1?'':'s'}, ${iCount} idea${iCount===1?'':'s'}.\n\nThis cannot be undone.`);
+      if (!ok) { e.target.value = ''; return; }
+      onImportData(payload);
+      setImportMsg(`✓ Imported ${pCount} projects, ${iCount} ideas.`);
+      setTimeout(() => setImportMsg(''), 4000);
+    } catch (err) {
+      setImportErr('Could not parse file: ' + err.message);
+    }
+    e.target.value = '';
+  };
 
   const SidebarItem = ({ item }) => {
     const active = section === item.key;
@@ -3178,6 +3320,34 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibl
               </div>
             )}
 
+            {section === 'data' && (
+              <div>
+                <div style={sectionHeadingStyle}>Export / Import</div>
+                <label style={labelStyle}>Backup</label>
+                <p style={{ fontSize:12, color:'var(--text-faint)', lineHeight:1.55, marginBottom:10 }}>
+                  Download a JSON file with all projects, tasks, subtasks, milestones, ideas, digest summaries, nav tabs, AI model list, theme, and easter-egg unlock state. API keys and GitHub credentials are not included.
+                </p>
+                <button onClick={handleExport}
+                  style={{ padding:'10px 18px', background:'var(--border-alt)', border:'1px solid var(--border-emphasis)', borderRadius:8, color:'var(--text-primary)', fontSize:13, fontWeight:500, cursor:'pointer' }}>
+                  ⬇ Export backup
+                </button>
+
+                <div style={{ height:1, background:'var(--border)', margin:'22px 0 18px' }}/>
+
+                <label style={labelStyle}>Restore</label>
+                <p style={{ fontSize:12, color:'var(--text-faint)', lineHeight:1.55, marginBottom:10 }}>
+                  Replace your current DevLab data with a previously exported backup. This overwrites everything in GitHub after confirming.
+                </p>
+                <input ref={fileInputRef} type="file" accept="application/json,.json" onChange={handleImportFile} style={{ display:'none' }}/>
+                <button onClick={() => fileInputRef.current?.click()}
+                  style={{ padding:'10px 18px', background:'transparent', border:'1px solid var(--border-emphasis)', borderRadius:8, color:'var(--text-primary)', fontSize:13, fontWeight:500, cursor:'pointer' }}>
+                  ⬆ Import backup…
+                </button>
+                {importMsg && <div style={{ marginTop:10, fontSize:12, color:'#00e676' }}>{importMsg}</div>}
+                {importErr && <div style={{ marginTop:10, fontSize:12, color:'#ef5350' }}>{importErr}</div>}
+              </div>
+            )}
+
             {section === 'account' && (
               <div>
                 <div style={sectionHeadingStyle}>Account</div>
@@ -3192,6 +3362,59 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibl
               </div>
             )}
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Keyboard Shortcuts Help ───────────────────────────────────────────────────
+function ShortcutsHelp({ onClose }) {
+  const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
+  const mod = isMac ? '⌘' : 'Ctrl';
+  const groups = [
+    { label: 'Global', items: [
+      [`${mod} K`, 'Open search'],
+      ['?', 'Show this help'],
+      ['Esc', 'Close modal / collapse expanded task'],
+    ]},
+    { label: 'Navigation', items: [
+      ['G then D', 'Go to Dashboard (Projects)'],
+      ['G then F', 'Go to Focus tab'],
+      ['G then L', 'Go to Labels tab'],
+      [`${mod} ←  /  ${mod} →`, 'Previous / next project (inside a project)'],
+    ]},
+    { label: 'Tasks', items: [
+      ['N', 'Focus the new-task input (inside a project)'],
+      ['Enter', 'Save task title / add task (when focused in input)'],
+    ]},
+  ];
+  const Key = ({ children }) => (
+    <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:11, padding:'3px 8px', borderRadius:5, background:'var(--surface-raised)', border:'1px solid var(--border-alt)', color:'var(--text-primary)', whiteSpace:'nowrap' }}>{children}</span>
+  );
+  return (
+    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', backdropFilter:'blur(6px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:250, padding:16 }}
+      onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="fade-in" style={{ background:'var(--surface)', border:'1px solid var(--border-emphasis)', borderRadius:16, width:'100%', maxWidth:520, maxHeight:'85vh', overflow:'auto' }}>
+        <div style={{ padding:'18px 22px 14px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'1px solid var(--border)' }}>
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:21, fontWeight:700, color:'var(--text-primary)', letterSpacing:'0.05em' }}>Keyboard Shortcuts</span>
+          <button className="icon-btn" onClick={onClose}
+            style={{ padding:'4px 6px', background:'transparent', border:'none', color:'var(--text-dim)', borderRadius:5, fontSize:17, cursor:'pointer' }}>✕</button>
+        </div>
+        <div style={{ padding:'16px 22px 20px', display:'flex', flexDirection:'column', gap:18 }}>
+          {groups.map(g => (
+            <div key={g.label}>
+              <div style={{ fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:8 }}>{g.label}</div>
+              <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                {g.items.map(([k, desc], i) => (
+                  <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', gap:12 }}>
+                    <span style={{ fontSize:13, color:'var(--text-primary)' }}>{desc}</span>
+                    <Key>{k}</Key>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

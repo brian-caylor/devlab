@@ -302,7 +302,7 @@
           "title": "Add support for tagging or categorizing projects for better organization",
           "description": "",
           "status": "todo",
-          "priority": "medium",
+          "priority": "low",
           "dueDate": null,
           "order": 5,
           "createdAt": "2026-04-17T16:27:31.004Z",
@@ -342,7 +342,7 @@
       "repo": "github.com/brian-caylor/devlab",
       "notes": "",
       "createdAt": "2026-04-15T05:26:27Z",
-      "lastUpdated": "2026-04-17T16:27:39.147Z"
+      "lastUpdated": "2026-04-17T16:27:43.125Z"
     },
     {
       "priority": "none",

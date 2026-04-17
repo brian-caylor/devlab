@@ -273,7 +273,7 @@
         },
         {
           "description": "",
-          "priority": "medium",
+          "priority": "low",
           "dueDate": null,
           "order": 3,
           "completedAt": null,
@@ -342,7 +342,7 @@
       "repo": "github.com/brian-caylor/devlab",
       "notes": "",
       "createdAt": "2026-04-15T05:26:27Z",
-      "lastUpdated": "2026-04-17T16:27:46.357Z"
+      "lastUpdated": "2026-04-17T16:27:54.254Z"
     },
     {
       "priority": "none",

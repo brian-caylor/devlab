@@ -809,9 +809,10 @@ function App() {
     setModal(null);
   };
   const deleteProject = (id) => {
-    if (!window.confirm('Delete this project?')) return;
+    if (!window.confirm('Delete this project?')) return false;
     mutateProjects(p => p.filter(x => x.id !== id));
     if (activeProjectId === id) { setView('dashboard'); setActiveProjectId(null); }
+    return true;
   };
   const hideProject = (id) => {
     mutateProjects(ps => ps.map(p => p.id === id ? { ...p, hidden: true } : p));
@@ -1159,6 +1160,7 @@ function App() {
         <ProjectModal mode={modal.mode} data={modal.data}
           onSave={saveProject}
           onClose={() => setModal(null)}
+          onDelete={modal.mode === 'edit' ? (id) => { if (deleteProject(id)) setModal(null); } : null}
           models={models}/>
       )}
     </div>
@@ -2890,7 +2892,7 @@ function NotesPanel({ projectId, initialNotes, onSave }) {
 }
 
 // ── Project Modal ──────────────────────────────────────────────────────────────
-function ProjectModal({ mode, data, onSave, onClose, models }) {
+function ProjectModal({ mode, data, onSave, onClose, onDelete, models }) {
   const [form, setForm] = useState({ priority: 'none', ...data });
   const upd    = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
   const toggle = (k, v) => setForm(f => ({ ...f, [k]: (f[k]||[]).includes(v) ? f[k].filter(x=>x!==v) : [...(f[k]||[]),v] }));
@@ -2974,13 +2976,23 @@ function ProjectModal({ mode, data, onSave, onClose, models }) {
           </div>
         </div>
 
-        <div style={{ padding:'16px 24px', borderTop:'1px solid var(--border)', display:'flex', justifyContent:'flex-end', gap:10 }}>
-          <button style={{ padding:'9px 18px', background:'transparent', border:'1px solid var(--border-alt)', borderRadius:8, color:'var(--text-faint)', fontSize:14, cursor:'pointer' }} onClick={onClose}>Cancel</button>
-          <button
-            style={{ padding:'9px 20px', background:'#00e676', border:'none', borderRadius:8, color:'#000', fontSize:14, fontWeight:600, cursor:'pointer', opacity: form.name?.trim()?1:.4, transition:'opacity .15s' }}
-            onClick={() => form.name?.trim() && onSave({ ...form, lastUpdated: now() })}>
-            {mode==='add' ? 'Add Project' : 'Save Changes'}
-          </button>
+        <div style={{ padding:'16px 24px', borderTop:'1px solid var(--border)', display:'flex', justifyContent:'space-between', alignItems:'center', gap:10, flexWrap:'wrap' }}>
+          <div>
+            {mode === 'edit' && onDelete && (
+              <button onClick={() => onDelete(form.id)}
+                style={{ padding:'9px 16px', background:'transparent', border:'1px solid rgba(239,83,80,0.35)', borderRadius:8, color:'#ef5350', fontSize:13, cursor:'pointer' }}>
+                Delete Project
+              </button>
+            )}
+          </div>
+          <div style={{ display:'flex', gap:10 }}>
+            <button style={{ padding:'9px 18px', background:'transparent', border:'1px solid var(--border-alt)', borderRadius:8, color:'var(--text-faint)', fontSize:14, cursor:'pointer' }} onClick={onClose}>Cancel</button>
+            <button
+              style={{ padding:'9px 20px', background:'#00e676', border:'none', borderRadius:8, color:'#000', fontSize:14, fontWeight:600, cursor:'pointer', opacity: form.name?.trim()?1:.4, transition:'opacity .15s' }}
+              onClick={() => form.name?.trim() && onSave({ ...form, lastUpdated: now() })}>
+              {mode==='add' ? 'Add Project' : 'Save Changes'}
+            </button>
+          </div>
         </div>
       </div>
     </div>

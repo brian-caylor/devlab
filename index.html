@@ -3082,6 +3082,7 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibl
     { key: 'appearance', label: 'Appearance' },
     { key: 'ai-models', label: 'AI Models', badge: models.length },
     { key: 'nav-tabs', label: 'Navigation Tabs' },
+    { key: 'shortcuts', label: 'Keyboard Shortcuts' },
     { key: 'hidden', label: 'Hidden Projects', badge: hiddenProjects.length },
     { key: 'data', label: 'Export / Import' },
     { key: 'account', label: 'Account' },
@@ -3320,6 +3321,16 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibl
               </div>
             )}
 
+            {section === 'shortcuts' && (
+              <div>
+                <div style={sectionHeadingStyle}>Keyboard Shortcuts</div>
+                <p style={{ fontSize:12, color:'var(--text-faint)', lineHeight:1.55, marginBottom:14 }}>
+                  Press <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:11, padding:'2px 6px', borderRadius:4, background:'var(--surface-raised)', border:'1px solid var(--border-alt)', color:'var(--text-primary)' }}>?</span> anywhere to open this list as a modal.
+                </p>
+                <ShortcutsList />
+              </div>
+            )}
+
             {section === 'data' && (
               <div>
                 <div style={sectionHeadingStyle}>Export / Import</div>
@@ -3369,29 +3380,50 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibl
 }
 
 // ── Keyboard Shortcuts Help ───────────────────────────────────────────────────
-function ShortcutsHelp({ onClose }) {
+const shortcutGroups = (mod) => [
+  { label: 'Global', items: [
+    [`${mod} K`, 'Open search'],
+    ['?', 'Show keyboard shortcuts'],
+    ['Esc', 'Close modal / collapse expanded task'],
+  ]},
+  { label: 'Navigation', items: [
+    ['G then D', 'Go to Dashboard (Projects)'],
+    ['G then F', 'Go to Focus tab'],
+    ['G then L', 'Go to Labels tab'],
+    [`${mod} ←  /  ${mod} →`, 'Previous / next project (inside a project)'],
+  ]},
+  { label: 'Tasks', items: [
+    ['N', 'Focus the new-task input (inside a project)'],
+    ['Enter', 'Save task title / add task (when focused in input)'],
+  ]},
+];
+
+function ShortcutsList() {
   const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
-  const mod = isMac ? '⌘' : 'Ctrl';
-  const groups = [
-    { label: 'Global', items: [
-      [`${mod} K`, 'Open search'],
-      ['?', 'Show this help'],
-      ['Esc', 'Close modal / collapse expanded task'],
-    ]},
-    { label: 'Navigation', items: [
-      ['G then D', 'Go to Dashboard (Projects)'],
-      ['G then F', 'Go to Focus tab'],
-      ['G then L', 'Go to Labels tab'],
-      [`${mod} ←  /  ${mod} →`, 'Previous / next project (inside a project)'],
-    ]},
-    { label: 'Tasks', items: [
-      ['N', 'Focus the new-task input (inside a project)'],
-      ['Enter', 'Save task title / add task (when focused in input)'],
-    ]},
-  ];
+  const groups = shortcutGroups(isMac ? '⌘' : 'Ctrl');
   const Key = ({ children }) => (
     <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:11, padding:'3px 8px', borderRadius:5, background:'var(--surface-raised)', border:'1px solid var(--border-alt)', color:'var(--text-primary)', whiteSpace:'nowrap' }}>{children}</span>
   );
+  return (
+    <div style={{ display:'flex', flexDirection:'column', gap:18 }}>
+      {groups.map(g => (
+        <div key={g.label}>
+          <div style={{ fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:8 }}>{g.label}</div>
+          <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+            {g.items.map(([k, desc], i) => (
+              <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', gap:12 }}>
+                <span style={{ fontSize:13, color:'var(--text-primary)' }}>{desc}</span>
+                <Key>{k}</Key>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ShortcutsHelp({ onClose }) {
   return (
     <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', backdropFilter:'blur(6px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:250, padding:16 }}
       onClick={e => e.target === e.currentTarget && onClose()}>
@@ -3401,20 +3433,8 @@ function ShortcutsHelp({ onClose }) {
           <button className="icon-btn" onClick={onClose}
             style={{ padding:'4px 6px', background:'transparent', border:'none', color:'var(--text-dim)', borderRadius:5, fontSize:17, cursor:'pointer' }}>✕</button>
         </div>
-        <div style={{ padding:'16px 22px 20px', display:'flex', flexDirection:'column', gap:18 }}>
-          {groups.map(g => (
-            <div key={g.label}>
-              <div style={{ fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:8 }}>{g.label}</div>
-              <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-                {g.items.map(([k, desc], i) => (
-                  <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', gap:12 }}>
-                    <span style={{ fontSize:13, color:'var(--text-primary)' }}>{desc}</span>
-                    <Key>{k}</Key>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+        <div style={{ padding:'16px 22px 20px' }}>
+          <ShortcutsList />
         </div>
       </div>
     </div>

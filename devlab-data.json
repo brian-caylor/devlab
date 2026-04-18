@@ -59,36 +59,6 @@
           "description": "",
           "priority": "low",
           "dueDate": null,
-          "order": 3,
-          "completedAt": null,
-          "labels": [],
-          "subtasks": [],
-          "githubLink": null,
-          "milestoneId": null,
-          "id": "spsvsn1ak3dmo33sxi5",
-          "title": "Add project templates for common development setups to speed up new project creation",
-          "status": "todo",
-          "createdAt": "2026-04-17T16:09:33.341Z"
-        },
-        {
-          "description": "",
-          "priority": "high",
-          "dueDate": null,
-          "order": 4,
-          "completedAt": null,
-          "labels": [],
-          "subtasks": [],
-          "githubLink": null,
-          "milestoneId": null,
-          "id": "8beno8t4e7mmo34g117",
-          "title": "Add ability to sync project state and notes across computers automatically",
-          "status": "todo",
-          "createdAt": "2026-04-17T16:27:31.003Z"
-        },
-        {
-          "description": "",
-          "priority": "low",
-          "dueDate": null,
           "order": 5,
           "completedAt": null,
           "labels": [],
@@ -105,14 +75,14 @@
           "priority": "medium",
           "dueDate": null,
           "order": 6,
-          "completedAt": null,
+          "completedAt": "2026-04-18T01:02:33.550Z",
           "labels": [],
           "subtasks": [],
           "githubLink": null,
           "milestoneId": null,
           "id": "3tiv6joq6zmo34g118",
           "title": "Create an export feature to back up all project data to a portable format",
-          "status": "todo",
+          "status": "done",
           "createdAt": "2026-04-17T16:27:31.006Z"
         },
         {
@@ -120,14 +90,14 @@
           "priority": "low",
           "dueDate": null,
           "order": 7,
-          "completedAt": null,
+          "completedAt": "2026-04-18T01:02:38.152Z",
           "labels": [],
           "subtasks": [],
           "githubLink": null,
           "milestoneId": null,
           "id": "gjd4gg473kmo34g118",
           "title": "Add keyboard shortcuts for common actions like switching projects or adding tasks",
-          "status": "todo",
+          "status": "done",
           "createdAt": "2026-04-17T16:27:31.006Z"
         }
       ],
@@ -142,44 +112,56 @@
       "repo": "github.com/brian-caylor/devlab",
       "notes": "",
       "createdAt": "2026-04-15T05:26:27Z",
-      "lastUpdated": "2026-04-17T16:27:54.254Z"
+      "lastUpdated": "2026-04-18T01:02:38.152Z"
     },
     {
       "priority": "none",
       "order": 1,
       "tasks": [
         {
-          "id": "ay3vdoy9qyomo38sx6w",
-          "title": "Implement an export option that generates an HTML gallery from the manifest CSV, showing each cluster's images with their AI descriptions inline",
           "description": "",
-          "status": "todo",
           "priority": "medium",
           "dueDate": null,
           "order": 0,
-          "createdAt": "2026-04-17T18:29:31.017Z",
-          "completedAt": null
+          "completedAt": null,
+          "labels": [],
+          "subtasks": [],
+          "githubLink": null,
+          "milestoneId": null,
+          "id": "ay3vdoy9qyomo38sx6w",
+          "title": "Implement an export option that generates an HTML gallery from the manifest CSV, showing each cluster's images with their AI descriptions inline",
+          "status": "todo",
+          "createdAt": "2026-04-17T18:29:31.017Z"
         },
         {
-          "id": "0j0056dj0m7mo38sx6x",
-          "title": "Support multiple Ollama model selection in the Setup phase so users can swap between available vision models without editing code",
           "description": "",
-          "status": "todo",
           "priority": "medium",
           "dueDate": null,
           "order": 1,
-          "createdAt": "2026-04-17T18:29:31.017Z",
-          "completedAt": null
+          "completedAt": null,
+          "labels": [],
+          "subtasks": [],
+          "githubLink": null,
+          "milestoneId": null,
+          "id": "0j0056dj0m7mo38sx6x",
+          "title": "Support multiple Ollama model selection in the Setup phase so users can swap between available vision models without editing code",
+          "status": "todo",
+          "createdAt": "2026-04-17T18:29:31.017Z"
         },
         {
-          "id": "89jlbnnfzx2mo38sx6x",
-          "title": "Add a confidence or coherence score to each cluster based on embedding variance, and surface low-confidence clusters with a warning in the Label & Merge phase so users know which groups need manual review",
           "description": "",
-          "status": "todo",
           "priority": "medium",
           "dueDate": null,
           "order": 2,
-          "createdAt": "2026-04-17T18:29:31.017Z",
-          "completedAt": null
+          "completedAt": null,
+          "labels": [],
+          "subtasks": [],
+          "githubLink": null,
+          "milestoneId": null,
+          "id": "89jlbnnfzx2mo38sx6x",
+          "title": "Add a confidence or coherence score to each cluster based on embedding variance, and surface low-confidence clusters with a warning in the Label & Merge phase so users know which groups need manual review",
+          "status": "todo",
+          "createdAt": "2026-04-17T18:29:31.017Z"
         }
       ],
       "milestones": [],
@@ -194,42 +176,6 @@
       "notes": "",
       "createdAt": "2026-04-12T21:46:19Z",
       "lastUpdated": "2026-04-17T18:29:31.017Z"
-    },
-    {
-      "priority": "none",
-      "order": 2,
-      "tasks": [
-        {
-          "description": "",
-          "priority": "medium",
-          "dueDate": null,
-          "order": 0,
-          "completedAt": null,
-          "labels": [],
-          "subtasks": [],
-          "githubLink": null,
-          "milestoneId": null,
-          "id": "xzqkkc7tafmo09h434",
-          "title": "do more user testing for persistent data memory",
-          "status": "todo",
-          "createdAt": "2026-04-15T16:25:01.168Z"
-        }
-      ],
-      "milestones": [],
-      "hidden": false,
-      "id": "proj_dgcharacter",
-      "name": "Delta Green Character Manager",
-      "description": "React app with KIA tracking, drag-and-drop reordering, and PDF import via the Claude API.",
-      "status": "active",
-      "machines": [
-        "Windows Desktop",
-        "Mac Mini M4"
-      ],
-      "lastUpdated": "2026-04-16T21:28:24.345Z",
-      "repo": "",
-      "notes": "PDF import working. Next: character sharing and export to printable sheet.",
-      "aiModel": "Claude",
-      "createdAt": "2026-03-15T00:00:00.000Z"
     },
     {
       "priority": "none",

@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <meta name="devlab-build" content="sha=__BUILD_SHA__;branch=__BUILD_BRANCH__;context=__BUILD_CONTEXT__"/>
   <title>DEV LAB — Brian Caylor</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -50,6 +51,37 @@
       --scrollbar-track: #eaeaf0;
       --hover-overlay: rgba(0,0,0,0.05);
       --hover-overlay-soft: rgba(0,0,0,0.03);
+    }
+    [data-theme="cotton-candy"] {
+      color-scheme: light;
+      --bg: #fef4fa;
+      --surface: #ffffff;
+      --surface-raised: #fff0f7;
+      --border: #f5d4e6;
+      --border-alt: #efc1dc;
+      --border-emphasis: #d89ac4;
+      --text-primary: #3d2747;
+      --text-secondary: #5c3f6f;
+      --text-muted: #7a5a8f;
+      --text-faint: #8a6ea0;
+      --text-dim: #a488b8;
+      --text-dimmer: #bfa6cf;
+      --text-placeholder: #c7b2d6;
+      --scrollbar-thumb: #f0b8d8;
+      --scrollbar-track: #fbe4ef;
+      --hover-overlay: rgba(220,120,180,0.08);
+      --hover-overlay-soft: rgba(220,120,180,0.04);
+    }
+    [data-theme="cotton-candy"] body,
+    [data-theme="cotton-candy"] * {
+      font-family: 'Fredoka', 'DM Sans', sans-serif !important;
+    }
+    [data-theme="cotton-candy"] [style*="JetBrains Mono"],
+    [data-theme="cotton-candy"] .md-preview code,
+    [data-theme="cotton-candy"] .md-preview pre,
+    [data-theme="cotton-candy"] pre,
+    [data-theme="cotton-candy"] code {
+      font-family: 'JetBrains Mono', ui-monospace, monospace !important;
     }
     html, body { background: var(--bg); min-height: 100vh; }
     #root { min-height: 100vh; }
@@ -307,6 +339,30 @@ const THEME_KEY = 'devlab-theme';
 const loadTheme = () => { try { return localStorage.getItem(THEME_KEY) || 'dark'; } catch { return 'dark'; } };
 const saveTheme = (t) => { try { localStorage.setItem(THEME_KEY, t); } catch {} };
 
+const CC_UNLOCKED_KEY = 'devlab-cotton-candy-unlocked';
+const loadCcUnlocked = () => { try { return localStorage.getItem(CC_UNLOCKED_KEY) === '1'; } catch { return false; } };
+const saveCcUnlocked = () => { try { localStorage.setItem(CC_UNLOCKED_KEY, '1'); } catch {} };
+
+// ── Build info (populated by Netlify at build time via sed in netlify.toml) ──
+const BUILD_INFO = (() => {
+  const fallback = { sha: '', shortSha: 'local', branch: 'local', context: 'local' };
+  try {
+    const meta = document.querySelector('meta[name="devlab-build"]');
+    const content = meta?.getAttribute('content') || '';
+    const parts = Object.fromEntries(content.split(';').map(kv => { const i = kv.indexOf('='); return i < 0 ? [kv, ''] : [kv.slice(0, i), kv.slice(i + 1)]; }));
+    const clean = (v) => (v && !v.startsWith('__')) ? v : '';
+    const sha = clean(parts.sha);
+    return {
+      sha,
+      shortSha: sha ? sha.slice(0, 7) : 'local',
+      branch: clean(parts.branch) || 'local',
+      context: clean(parts.context) || 'local',
+    };
+  } catch { return fallback; }
+})();
+const isProdBuild = BUILD_INFO.context === 'production';
+const isLocalBuild = BUILD_INFO.context === 'local';
+
 const MODELS_KEY = 'devlab-ai-models';
 const DEFAULT_MODELS = ['Claude', 'ChatGPT/Sol', 'Gemini', 'Mixed', 'Other'];
 const loadModels = () => { try { const v = JSON.parse(localStorage.getItem(MODELS_KEY)); return Array.isArray(v) && v.length ? v : DEFAULT_MODELS; } catch { return DEFAULT_MODELS; } };
@@ -541,14 +597,40 @@ function App() {
   const [openTaskId, setOpenTaskId] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
   const [readmeProject, setReadmeProject] = useState(null);
   const [models, setModels] = useState(loadModels);
   const [visibleTabs, setVisibleTabs] = useState(loadVisibleTabs);
   const [theme, setTheme] = useState(loadTheme);
+  const [ccUnlocked, setCcUnlocked] = useState(loadCcUnlocked);
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     saveTheme(theme);
   }, [theme]);
+
+  // ── 🍭 Konami easter egg: ↑↑↓↓←→←→BA unlocks Cotton Candy theme ──
+  useEffect(() => {
+    const seq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    let idx = 0;
+    const handler = (e) => {
+      const t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      if (key === seq[idx]) {
+        idx++;
+        if (idx === seq.length) {
+          idx = 0;
+          saveCcUnlocked();
+          setCcUnlocked(true);
+          setTheme('cotton-candy');
+        }
+      } else {
+        idx = key === seq[0] ? 1 : 0;
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
   const scrollRef  = useRef(0);
   const ideaRef    = useRef(null);
   const saveTimer  = useRef(null);
@@ -560,14 +642,68 @@ function App() {
   projRef.current      = projects;
   ideaStateRef.current = ideas;
 
-  // ── ⌘K shortcut ──
+  // ── Keyboard shortcuts (⌘K search, N new-task, ⌘←/→ nav, G-chord, ?, Esc) ──
   useEffect(() => {
+    let gPending = false;
+    let gTimer = null;
+    const isTextField = (el) => {
+      if (!el) return false;
+      const tag = el.tagName;
+      return tag === 'INPUT' || tag === 'TEXTAREA' || el.isContentEditable;
+    };
     const handler = (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); setShowSearch(true); }
+      const cmd = e.metaKey || e.ctrlKey;
+      const inText = isTextField(e.target);
+
+      if (cmd && e.key === 'k') { e.preventDefault(); setShowSearch(true); return; }
+
+      if (e.key === 'Escape') {
+        if (showSearch) return; // SearchOverlay handles its own Esc
+        if (showSettings) { setShowSettings(false); return; }
+        if (showShortcuts) { setShowShortcuts(false); return; }
+        window.dispatchEvent(new CustomEvent('devlab:collapse-task'));
+        return;
+      }
+
+      if (inText) return; // remaining shortcuts don't fire while typing
+
+      if (e.key === '?' && !cmd) { e.preventDefault(); setShowShortcuts(true); return; }
+
+      if (e.key === 'n' && !cmd && view === 'project') {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent('devlab:focus-new-task'));
+        return;
+      }
+
+      if (cmd && view === 'project' && activeProjectId) {
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+          const list = projects.filter(p => !p.hidden).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+          const idx = list.findIndex(p => p.id === activeProjectId);
+          if (idx >= 0) {
+            const target = e.key === 'ArrowLeft' ? list[idx - 1] : list[idx + 1];
+            if (target) { e.preventDefault(); setActiveProjectId(target.id); return; }
+          }
+        }
+      }
+
+      if (gPending) {
+        clearTimeout(gTimer);
+        gPending = false;
+        if (e.key === 'd') { setView('dashboard'); setActiveProjectId(null); setTab('projects'); return; }
+        if (e.key === 'f' && visibleTabs.includes('focus')) { setView('dashboard'); setActiveProjectId(null); setTab('focus'); return; }
+        if (e.key === 'l' && visibleTabs.includes('labels')) { setView('dashboard'); setActiveProjectId(null); setTab('labels'); return; }
+        return;
+      }
+      if (e.key === 'g' && !cmd) {
+        gPending = true;
+        clearTimeout(gTimer);
+        gTimer = setTimeout(() => { gPending = false; }, 1500);
+        return;
+      }
     };
     window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, []);
+    return () => { window.removeEventListener('keydown', handler); clearTimeout(gTimer); };
+  }, [view, activeProjectId, showSearch, showSettings, showShortcuts, projects, visibleTabs]);
 
   // ── Load from GitHub ──
   useEffect(() => {
@@ -669,6 +805,21 @@ function App() {
     setIdeas(prev => { const next = fn(prev); ideaStateRef.current = next; triggerSave(); return next; });
   };
 
+  // ── Import backup ──
+  const importData = (payload) => {
+    const normalized = normalizeData({ projects: payload.projects, ideas: payload.ideas });
+    setProjects(normalized.projects);
+    projRef.current = normalized.projects;
+    setIdeas(normalized.ideas);
+    ideaStateRef.current = normalized.ideas;
+    if (Array.isArray(payload.visibleTabs)) { setVisibleTabs(payload.visibleTabs); saveVisibleTabs(payload.visibleTabs); }
+    if (Array.isArray(payload.models) && payload.models.length) { setModels(payload.models); saveModels(payload.models); }
+    if (payload.digestSummaries && typeof payload.digestSummaries === 'object') { saveDigestSummaries(payload.digestSummaries); }
+    if (typeof payload.theme === 'string') { setTheme(payload.theme); }
+    if (payload.ccUnlocked) { saveCcUnlocked(); setCcUnlocked(true); }
+    triggerSave();
+  };
+
   // ── Project ops ──
   const saveProject = (data) => {
     if (modal.mode === 'add') {
@@ -679,9 +830,10 @@ function App() {
     setModal(null);
   };
   const deleteProject = (id) => {
-    if (!window.confirm('Delete this project?')) return;
+    if (!window.confirm('Delete this project?')) return false;
     mutateProjects(p => p.filter(x => x.id !== id));
     if (activeProjectId === id) { setView('dashboard'); setActiveProjectId(null); }
+    return true;
   };
   const hideProject = (id) => {
     mutateProjects(ps => ps.map(p => p.id === id ? { ...p, hidden: true } : p));
@@ -1016,19 +1168,48 @@ function App() {
         <SettingsModal onClose={() => setShowSettings(false)} onDisconnect={() => { dropCreds(); setCreds(null); }}
           hiddenProjects={projects.filter(p => p.hidden)} onUnhide={unhideProject}
           visibleTabs={visibleTabs} onSetVisibleTabs={(tabs) => { setVisibleTabs(tabs); saveVisibleTabs(tabs); }}
-          theme={theme} onSetTheme={setTheme}
+          theme={theme} onSetTheme={setTheme} ccUnlocked={ccUnlocked}
           models={models} onSetModels={(m) => { setModels(m); saveModels(m); }}
-          creds={creds} onUpdateCreds={(c) => { saveCreds(c); setCreds(c); }} />
+          creds={creds} onUpdateCreds={(c) => { saveCreds(c); setCreds(c); }}
+          projects={projects} ideas={ideas}
+          onImportData={importData} />
       )}
+
+      {showShortcuts && <ShortcutsHelp onClose={() => setShowShortcuts(false)} />}
 
       {modal && (
         <ProjectModal mode={modal.mode} data={modal.data}
           onSave={saveProject}
           onClose={() => setModal(null)}
+          onDelete={modal.mode === 'edit' ? (id) => { if (deleteProject(id)) setModal(null); } : null}
           models={models}/>
       )}
+
+      <BuildBadge />
     </div>
   );
+}
+
+// ── Build Badge ───────────────────────────────────────────────────────────────
+function BuildBadge() {
+  const { shortSha, branch, context, sha } = BUILD_INFO;
+  const prod = context === 'production';
+  const local = context === 'local';
+  const color = prod ? '#00e676' : local ? 'var(--text-dim)' : '#ce93d8';
+  const bg = prod ? 'rgba(0,230,118,0.08)' : local ? 'var(--surface-raised)' : 'rgba(206,147,216,0.08)';
+  const borderColor = prod ? 'rgba(0,230,118,0.22)' : local ? 'var(--border-alt)' : 'rgba(206,147,216,0.22)';
+  const prefix = prod ? 'prod' : local ? 'local' : (branch || 'dev');
+  const label = local ? 'local' : `${prefix} · ${shortSha}`;
+  const href = sha ? `https://github.com/brian-caylor/devlab/commit/${sha}` : null;
+  const common = { position:'fixed', right:10, bottom:10, fontSize:10, fontFamily:"'JetBrains Mono',monospace", padding:'4px 9px', borderRadius:99, background:bg, border:`1px solid ${borderColor}`, color, opacity:0.85, zIndex:50, letterSpacing:'0.02em', textDecoration:'none', whiteSpace:'nowrap', userSelect:'text' };
+  if (href) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" title={`Context: ${context}\nBranch: ${branch}\nCommit: ${sha}\n\nClick to open on GitHub`} style={common}>
+        {label}
+      </a>
+    );
+  }
+  return <span title="Opened locally — not a Netlify build" style={common}>{label}</span>;
 }
 
 // ── Project Grid (dashboard with DnD) ─────────────────────────────────────────
@@ -1281,8 +1462,21 @@ function TaskList({ project, projectId, tasks, onAdd, onUpdate, onDelete, onReor
 
   // Open a specific task from search / focus view
   useEffect(() => { if (openTaskId) setExpandedId(openTaskId); }, [openTaskId]);
+
   const inputRef = useRef(null);
   const listRef = useRef(null);
+
+  // Keyboard shortcut bridges
+  useEffect(() => {
+    const focus = () => inputRef.current?.focus();
+    const collapse = () => setExpandedId(null);
+    window.addEventListener('devlab:focus-new-task', focus);
+    window.addEventListener('devlab:collapse-task', collapse);
+    return () => {
+      window.removeEventListener('devlab:focus-new-task', focus);
+      window.removeEventListener('devlab:collapse-task', collapse);
+    };
+  }, []);
   const dragRef = useRef({ dragIdx: -1, overIdx: -1 });
   const touchRef = useRef({ idx: -1, startY: 0, curY: 0, el: null, listEl: null, rects: [], moved: false });
 
@@ -1450,10 +1644,12 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
   const ts = TASK_STATUS[task.status] || TASK_STATUS.todo;
   const pr = PRIORITY[task.priority] || PRIORITY.medium;
 
+  const [title, setTitle] = useState(task.title || '');
   const [desc, setDesc] = useState(task.description || '');
   const [dueDate, setDueDate] = useState(task.dueDate || '');
 
   // Sync from props when task changes externally
+  useEffect(() => { setTitle(task.title || ''); }, [task.title]);
   useEffect(() => { setDesc(task.description || ''); }, [task.description]);
   useEffect(() => { setDueDate(task.dueDate || ''); }, [task.dueDate]);
 
@@ -1485,6 +1681,11 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
     onUpdate(projectId, task.id, { priority: next });
   };
 
+  const saveTitle = () => {
+    const trimmed = title.trim();
+    if (!trimmed) { setTitle(task.title || ''); return; }
+    if (trimmed !== task.title) onUpdate(projectId, task.id, { title: trimmed });
+  };
   const saveDesc = () => {
     if (desc !== (task.description || '')) onUpdate(projectId, task.id, { description: desc });
   };
@@ -1586,6 +1787,12 @@ function TaskRow({ task, idx, expanded, onToggleExpand, projectId, onUpdate, onD
       {/* Expanded panel */}
       {expanded && (
         <div style={{ marginLeft:36, padding:'10px 14px', background:'var(--surface-raised)', borderRadius:8, border:'1px solid var(--border-alt)', marginTop:2, marginBottom:4, display:'flex', flexDirection:'column', gap:10 }}>
+          <div>
+            <label style={{ fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Title</label>
+            <input type="text" value={title} onChange={e => setTitle(e.target.value)} onBlur={saveTitle}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+              style={{ width:'100%', background:'var(--surface)', border:'1px solid var(--border-alt)', borderRadius:6, padding:'8px 10px', color:'var(--text-primary)', fontSize:13, outline:'none', fontFamily:"'DM Sans',sans-serif" }}/>
+          </div>
           <div>
             <label style={{ fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:4 }}>Description</label>
             <textarea value={desc} onChange={e => setDesc(e.target.value)} onBlur={saveDesc}
@@ -2730,7 +2937,7 @@ function NotesPanel({ projectId, initialNotes, onSave }) {
 }
 
 // ── Project Modal ──────────────────────────────────────────────────────────────
-function ProjectModal({ mode, data, onSave, onClose, models }) {
+function ProjectModal({ mode, data, onSave, onClose, onDelete, models }) {
   const [form, setForm] = useState({ priority: 'none', ...data });
   const upd    = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
   const toggle = (k, v) => setForm(f => ({ ...f, [k]: (f[k]||[]).includes(v) ? f[k].filter(x=>x!==v) : [...(f[k]||[]),v] }));
@@ -2814,13 +3021,23 @@ function ProjectModal({ mode, data, onSave, onClose, models }) {
           </div>
         </div>
 
-        <div style={{ padding:'16px 24px', borderTop:'1px solid var(--border)', display:'flex', justifyContent:'flex-end', gap:10 }}>
-          <button style={{ padding:'9px 18px', background:'transparent', border:'1px solid var(--border-alt)', borderRadius:8, color:'var(--text-faint)', fontSize:14, cursor:'pointer' }} onClick={onClose}>Cancel</button>
-          <button
-            style={{ padding:'9px 20px', background:'#00e676', border:'none', borderRadius:8, color:'#000', fontSize:14, fontWeight:600, cursor:'pointer', opacity: form.name?.trim()?1:.4, transition:'opacity .15s' }}
-            onClick={() => form.name?.trim() && onSave({ ...form, lastUpdated: now() })}>
-            {mode==='add' ? 'Add Project' : 'Save Changes'}
-          </button>
+        <div style={{ padding:'16px 24px', borderTop:'1px solid var(--border)', display:'flex', justifyContent:'space-between', alignItems:'center', gap:10, flexWrap:'wrap' }}>
+          <div>
+            {mode === 'edit' && onDelete && (
+              <button onClick={() => onDelete(form.id)}
+                style={{ padding:'9px 16px', background:'transparent', border:'1px solid rgba(239,83,80,0.35)', borderRadius:8, color:'#ef5350', fontSize:13, cursor:'pointer' }}>
+                Delete Project
+              </button>
+            )}
+          </div>
+          <div style={{ display:'flex', gap:10 }}>
+            <button style={{ padding:'9px 18px', background:'transparent', border:'1px solid var(--border-alt)', borderRadius:8, color:'var(--text-faint)', fontSize:14, cursor:'pointer' }} onClick={onClose}>Cancel</button>
+            <button
+              style={{ padding:'9px 20px', background:'#00e676', border:'none', borderRadius:8, color:'#000', fontSize:14, fontWeight:600, cursor:'pointer', opacity: form.name?.trim()?1:.4, transition:'opacity .15s' }}
+              onClick={() => form.name?.trim() && onSave({ ...form, lastUpdated: now() })}>
+              {mode==='add' ? 'Add Project' : 'Save Changes'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -2877,7 +3094,7 @@ function ReadmeModal({ project, creds, onClose }) {
 }
 
 // ── Settings Modal ────────────────────────────────────────────────────────────
-function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibleTabs, onSetVisibleTabs, theme, onSetTheme, models, onSetModels, creds, onUpdateCreds }) {
+function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibleTabs, onSetVisibleTabs, theme, onSetTheme, ccUnlocked, models, onSetModels, creds, onUpdateCreds, projects, ideas, onImportData }) {
   const [section, setSection] = useState('keys');
   const [aiKey, setAiKey] = useState(loadAnthropicKey());
   const [ghToken, setGhToken] = useState('');
@@ -2922,9 +3139,66 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibl
     { key: 'appearance', label: 'Appearance' },
     { key: 'ai-models', label: 'AI Models', badge: models.length },
     { key: 'nav-tabs', label: 'Navigation Tabs' },
+    { key: 'shortcuts', label: 'Keyboard Shortcuts' },
     { key: 'hidden', label: 'Hidden Projects', badge: hiddenProjects.length },
+    { key: 'data', label: 'Export / Import' },
     { key: 'account', label: 'Account' },
+    { key: 'about', label: 'About' },
   ];
+
+  // ── Export / Import handlers ──
+  const [importMsg, setImportMsg] = useState('');
+  const [importErr, setImportErr] = useState('');
+  const fileInputRef = useRef(null);
+
+  const handleExport = () => {
+    const payload = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      projects,
+      ideas,
+      digestSummaries: loadDigestSummaries(),
+      visibleTabs,
+      models,
+      theme,
+      ccUnlocked: !!ccUnlocked,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const date = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `devlab-backup-${date}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportFile = async (e) => {
+    setImportMsg(''); setImportErr('');
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const payload = JSON.parse(text);
+      if (payload.version !== 1 || !Array.isArray(payload.projects) || !Array.isArray(payload.ideas)) {
+        setImportErr('Not a valid DevLab backup file.');
+        e.target.value = '';
+        return;
+      }
+      const pCount = payload.projects.length;
+      const iCount = payload.ideas.length;
+      const ok = window.confirm(`Replace all current data with backup?\n\n${pCount} project${pCount===1?'':'s'}, ${iCount} idea${iCount===1?'':'s'}.\n\nThis cannot be undone.`);
+      if (!ok) { e.target.value = ''; return; }
+      onImportData(payload);
+      setImportMsg(`✓ Imported ${pCount} projects, ${iCount} ideas.`);
+      setTimeout(() => setImportMsg(''), 4000);
+    } catch (err) {
+      setImportErr('Could not parse file: ' + err.message);
+    }
+    e.target.value = '';
+  };
 
   const SidebarItem = ({ item }) => {
     const active = section === item.key;
@@ -2997,7 +3271,11 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibl
                 <div style={sectionHeadingStyle}>Appearance</div>
                 <label style={labelStyle}>Theme</label>
                 <div style={{ display:'flex', gap:8 }}>
-                  {[{ key:'dark', label:'🌙 Dark' }, { key:'light', label:'☀ Light' }].map(opt => {
+                  {[
+                    { key:'dark', label:'🌙 Dark' },
+                    { key:'light', label:'☀ Light' },
+                    ...(ccUnlocked ? [{ key:'cotton-candy', label:'🍭 Cotton Candy' }] : []),
+                  ].map(opt => {
                     const on = theme === opt.key;
                     return (
                       <button key={opt.key} onClick={() => onSetTheme(opt.key)}
@@ -3101,6 +3379,44 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibl
               </div>
             )}
 
+            {section === 'shortcuts' && (
+              <div>
+                <div style={sectionHeadingStyle}>Keyboard Shortcuts</div>
+                <p style={{ fontSize:12, color:'var(--text-faint)', lineHeight:1.55, marginBottom:14 }}>
+                  Press <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:11, padding:'2px 6px', borderRadius:4, background:'var(--surface-raised)', border:'1px solid var(--border-alt)', color:'var(--text-primary)' }}>?</span> anywhere to open this list as a modal.
+                </p>
+                <ShortcutsList />
+              </div>
+            )}
+
+            {section === 'data' && (
+              <div>
+                <div style={sectionHeadingStyle}>Export / Import</div>
+                <label style={labelStyle}>Backup</label>
+                <p style={{ fontSize:12, color:'var(--text-faint)', lineHeight:1.55, marginBottom:10 }}>
+                  Download a JSON file with all projects, tasks, subtasks, milestones, ideas, digest summaries, nav tabs, AI model list, theme, and easter-egg unlock state. API keys and GitHub credentials are not included.
+                </p>
+                <button onClick={handleExport}
+                  style={{ padding:'10px 18px', background:'var(--border-alt)', border:'1px solid var(--border-emphasis)', borderRadius:8, color:'var(--text-primary)', fontSize:13, fontWeight:500, cursor:'pointer' }}>
+                  ⬇ Export backup
+                </button>
+
+                <div style={{ height:1, background:'var(--border)', margin:'22px 0 18px' }}/>
+
+                <label style={labelStyle}>Restore</label>
+                <p style={{ fontSize:12, color:'var(--text-faint)', lineHeight:1.55, marginBottom:10 }}>
+                  Replace your current DevLab data with a previously exported backup. This overwrites everything in GitHub after confirming.
+                </p>
+                <input ref={fileInputRef} type="file" accept="application/json,.json" onChange={handleImportFile} style={{ display:'none' }}/>
+                <button onClick={() => fileInputRef.current?.click()}
+                  style={{ padding:'10px 18px', background:'transparent', border:'1px solid var(--border-emphasis)', borderRadius:8, color:'var(--text-primary)', fontSize:13, fontWeight:500, cursor:'pointer' }}>
+                  ⬆ Import backup…
+                </button>
+                {importMsg && <div style={{ marginTop:10, fontSize:12, color:'#00e676' }}>{importMsg}</div>}
+                {importErr && <div style={{ marginTop:10, fontSize:12, color:'#ef5350' }}>{importErr}</div>}
+              </div>
+            )}
+
             {section === 'account' && (
               <div>
                 <div style={sectionHeadingStyle}>Account</div>
@@ -3114,7 +3430,113 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibl
                 </p>
               </div>
             )}
+
+            {section === 'about' && (() => {
+              const { sha, shortSha, branch, context } = BUILD_INFO;
+              const prod = context === 'production';
+              const local = context === 'local';
+              const envColor = prod ? '#00e676' : local ? 'var(--text-dim)' : '#ce93d8';
+              const envLabel = prod ? 'Production' : local ? 'Local (not a Netlify deploy)' : `Branch deploy${context === 'deploy-preview' ? ' (PR preview)' : ''}`;
+              const commitUrl = sha ? `https://github.com/brian-caylor/devlab/commit/${sha}` : null;
+              const monoStyle = { fontFamily:"'JetBrains Mono',monospace", fontSize:12, color:'var(--text-primary)' };
+              const rowStyle = { display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 0', borderBottom:'1px solid var(--border)', gap:16 };
+              const keyStyle = { fontSize:11, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.06em', textTransform:'uppercase' };
+              return (
+                <div>
+                  <div style={sectionHeadingStyle}>About</div>
+                  <div style={{ marginBottom:4 }}>
+                    <div style={rowStyle}>
+                      <span style={keyStyle}>Environment</span>
+                      <span style={{ fontSize:12, color:envColor, fontWeight:600 }}>{envLabel}</span>
+                    </div>
+                    <div style={rowStyle}>
+                      <span style={keyStyle}>Branch</span>
+                      <span style={monoStyle}>{branch}</span>
+                    </div>
+                    <div style={rowStyle}>
+                      <span style={keyStyle}>Commit</span>
+                      {commitUrl ? (
+                        <a href={commitUrl} target="_blank" rel="noopener noreferrer" style={{ ...monoStyle, color:'#29b6f6', textDecoration:'none' }}>
+                          {shortSha} ↗
+                        </a>
+                      ) : <span style={monoStyle}>{shortSha}</span>}
+                    </div>
+                    {sha && (
+                      <div style={rowStyle}>
+                        <span style={keyStyle}>Full SHA</span>
+                        <span style={{ ...monoStyle, fontSize:10, color:'var(--text-faint)', wordBreak:'break-all', textAlign:'right' }}>{sha}</span>
+                      </div>
+                    )}
+                  </div>
+                  <p style={{ fontSize:11, color:'var(--text-dimmer)', marginTop:12, lineHeight:1.55 }}>
+                    Build info is injected by Netlify at build time. The chip in the bottom-right corner shows the same commit at a glance — green on production, purple-pink on dev/branch deploys.
+                  </p>
+                </div>
+              );
+            })()}
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Keyboard Shortcuts Help ───────────────────────────────────────────────────
+const shortcutGroups = (mod) => [
+  { label: 'Global', items: [
+    [`${mod} K`, 'Open search'],
+    ['?', 'Show keyboard shortcuts'],
+    ['Esc', 'Close modal / collapse expanded task'],
+  ]},
+  { label: 'Navigation', items: [
+    ['G then D', 'Go to Dashboard (Projects)'],
+    ['G then F', 'Go to Focus tab'],
+    ['G then L', 'Go to Labels tab'],
+    [`${mod} ←  /  ${mod} →`, 'Previous / next project (inside a project)'],
+  ]},
+  { label: 'Tasks', items: [
+    ['N', 'Focus the new-task input (inside a project)'],
+    ['Enter', 'Save task title / add task (when focused in input)'],
+  ]},
+];
+
+function ShortcutsList() {
+  const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
+  const groups = shortcutGroups(isMac ? '⌘' : 'Ctrl');
+  const Key = ({ children }) => (
+    <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:11, padding:'3px 8px', borderRadius:5, background:'var(--surface-raised)', border:'1px solid var(--border-alt)', color:'var(--text-primary)', whiteSpace:'nowrap' }}>{children}</span>
+  );
+  return (
+    <div style={{ display:'flex', flexDirection:'column', gap:18 }}>
+      {groups.map(g => (
+        <div key={g.label}>
+          <div style={{ fontSize:10, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.08em', textTransform:'uppercase', marginBottom:8 }}>{g.label}</div>
+          <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+            {g.items.map(([k, desc], i) => (
+              <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', gap:12 }}>
+                <span style={{ fontSize:13, color:'var(--text-primary)' }}>{desc}</span>
+                <Key>{k}</Key>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ShortcutsHelp({ onClose }) {
+  return (
+    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', backdropFilter:'blur(6px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:250, padding:16 }}
+      onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="fade-in" style={{ background:'var(--surface)', border:'1px solid var(--border-emphasis)', borderRadius:16, width:'100%', maxWidth:520, maxHeight:'85vh', overflow:'auto' }}>
+        <div style={{ padding:'18px 22px 14px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'1px solid var(--border)' }}>
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:21, fontWeight:700, color:'var(--text-primary)', letterSpacing:'0.05em' }}>Keyboard Shortcuts</span>
+          <button className="icon-btn" onClick={onClose}
+            style={{ padding:'4px 6px', background:'transparent', border:'none', color:'var(--text-dim)', borderRadius:5, fontSize:17, cursor:'pointer' }}>✕</button>
+        </div>
+        <div style={{ padding:'16px 22px 20px' }}>
+          <ShortcutsList />
         </div>
       </div>
     </div>

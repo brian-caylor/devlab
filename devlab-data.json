@@ -179,42 +179,6 @@
     },
     {
       "priority": "none",
-      "order": 2,
-      "tasks": [
-        {
-          "description": "",
-          "priority": "medium",
-          "dueDate": null,
-          "order": 0,
-          "completedAt": null,
-          "labels": [],
-          "subtasks": [],
-          "githubLink": null,
-          "milestoneId": null,
-          "id": "xzqkkc7tafmo09h434",
-          "title": "do more user testing for persistent data memory",
-          "status": "todo",
-          "createdAt": "2026-04-15T16:25:01.168Z"
-        }
-      ],
-      "milestones": [],
-      "hidden": false,
-      "id": "proj_dgcharacter",
-      "name": "Delta Green Character Manager",
-      "description": "React app with KIA tracking, drag-and-drop reordering, and PDF import via the Claude API.",
-      "status": "active",
-      "machines": [
-        "Windows Desktop",
-        "Mac Mini M4"
-      ],
-      "lastUpdated": "2026-04-16T21:28:24.345Z",
-      "repo": "",
-      "notes": "PDF import working. Next: character sharing and export to printable sheet.",
-      "aiModel": "Claude",
-      "createdAt": "2026-03-15T00:00:00.000Z"
-    },
-    {
-      "priority": "none",
       "order": 3,
       "tasks": [],
       "milestones": [],

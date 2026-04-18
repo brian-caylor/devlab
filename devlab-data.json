@@ -90,14 +90,14 @@
           "priority": "low",
           "dueDate": null,
           "order": 7,
-          "completedAt": null,
+          "completedAt": "2026-04-18T01:02:38.152Z",
           "labels": [],
           "subtasks": [],
           "githubLink": null,
           "milestoneId": null,
           "id": "gjd4gg473kmo34g118",
           "title": "Add keyboard shortcuts for common actions like switching projects or adding tasks",
-          "status": "todo",
+          "status": "done",
           "createdAt": "2026-04-17T16:27:31.006Z"
         }
       ],
@@ -112,7 +112,7 @@
       "repo": "github.com/brian-caylor/devlab",
       "notes": "",
       "createdAt": "2026-04-15T05:26:27Z",
-      "lastUpdated": "2026-04-18T01:02:33.551Z"
+      "lastUpdated": "2026-04-18T01:02:38.152Z"
     },
     {
       "priority": "none",

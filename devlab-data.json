@@ -75,14 +75,14 @@
           "priority": "medium",
           "dueDate": null,
           "order": 6,
-          "completedAt": null,
+          "completedAt": "2026-04-18T01:02:33.550Z",
           "labels": [],
           "subtasks": [],
           "githubLink": null,
           "milestoneId": null,
           "id": "3tiv6joq6zmo34g118",
           "title": "Create an export feature to back up all project data to a portable format",
-          "status": "todo",
+          "status": "done",
           "createdAt": "2026-04-17T16:27:31.006Z"
         },
         {
@@ -112,7 +112,7 @@
       "repo": "github.com/brian-caylor/devlab",
       "notes": "",
       "createdAt": "2026-04-15T05:26:27Z",
-      "lastUpdated": "2026-04-17T20:08:11.598Z"
+      "lastUpdated": "2026-04-18T01:02:33.551Z"
     },
     {
       "priority": "none",

@@ -180,7 +180,19 @@
     {
       "priority": "none",
       "order": 3,
-      "tasks": [],
+      "tasks": [
+        {
+          "id": "oj4u0rwc6ymo6c7vq6",
+          "title": "adapt Claude Design prototype design into existing code",
+          "description": "",
+          "status": "todo",
+          "priority": "medium",
+          "dueDate": null,
+          "order": 0,
+          "createdAt": "2026-04-19T22:28:26.335Z",
+          "completedAt": null
+        }
+      ],
       "milestones": [],
       "hidden": false,
       "id": "q5rsijc6xcgmo123jau",
@@ -192,7 +204,7 @@
       "repo": "github.com/brian-caylor/delta-green-dossiers",
       "notes": "",
       "createdAt": "2026-03-16T04:47:07Z",
-      "lastUpdated": "2026-04-13T02:01:23Z"
+      "lastUpdated": "2026-04-19T22:28:26.341Z"
     }
   ],
   "ideas": [],

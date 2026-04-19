@@ -204,7 +204,10 @@
           "dueDate": null,
           "order": 1,
           "createdAt": "2026-04-19T22:31:16.612Z",
-          "completedAt": null
+          "completedAt": null,
+          "labels": [
+            "feature"
+          ]
         }
       ],
       "milestones": [],
@@ -218,7 +221,7 @@
       "repo": "github.com/brian-caylor/delta-green-dossiers",
       "notes": "",
       "createdAt": "2026-03-16T04:47:07Z",
-      "lastUpdated": "2026-04-19T22:31:16.612Z"
+      "lastUpdated": "2026-04-19T22:31:27.879Z"
     }
   ],
   "ideas": [],

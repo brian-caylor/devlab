@@ -184,7 +184,7 @@
         {
           "id": "oj4u0rwc6ymo6c7vq6",
           "title": "adapt Claude Design prototype design into existing code",
-          "description": "",
+          "description": "Start at a branch,' feat/claude-design-ui'",
           "status": "in_progress",
           "priority": "medium",
           "dueDate": null,
@@ -221,7 +221,7 @@
       "repo": "github.com/brian-caylor/delta-green-dossiers",
       "notes": "",
       "createdAt": "2026-03-16T04:47:07Z",
-      "lastUpdated": "2026-04-19T22:31:33.276Z"
+      "lastUpdated": "2026-04-19T22:32:24.210Z"
     }
   ],
   "ideas": [],

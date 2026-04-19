@@ -214,7 +214,7 @@
           "title": "Add campaign/ handler connections into the app",
           "description": "",
           "status": "todo",
-          "priority": "medium",
+          "priority": "low",
           "dueDate": null,
           "order": 2,
           "createdAt": "2026-04-19T23:06:42.051Z",
@@ -232,7 +232,7 @@
       "repo": "github.com/brian-caylor/delta-green-dossiers",
       "notes": "",
       "createdAt": "2026-03-16T04:47:07Z",
-      "lastUpdated": "2026-04-19T23:06:42.052Z"
+      "lastUpdated": "2026-04-19T23:06:45.001Z"
     }
   ],
   "ideas": [],

@@ -212,13 +212,16 @@
         {
           "id": "n1augmvgmdmmo6dl343",
           "title": "Add campaign/ handler connections into the app",
-          "description": "",
+          "description": "Handler/DM account that can start campaigns/missions and connect players/agents to specific campaigns. Build the GM a dashboard to quickly view player details, but also ability to view full character sheet data",
           "status": "todo",
           "priority": "low",
           "dueDate": null,
           "order": 2,
           "createdAt": "2026-04-19T23:06:42.051Z",
-          "completedAt": null
+          "completedAt": null,
+          "labels": [
+            "feature"
+          ]
         }
       ],
       "milestones": [],
@@ -232,7 +235,7 @@
       "repo": "github.com/brian-caylor/delta-green-dossiers",
       "notes": "",
       "createdAt": "2026-03-16T04:47:07Z",
-      "lastUpdated": "2026-04-19T23:06:45.001Z"
+      "lastUpdated": "2026-04-19T23:07:45.398Z"
     }
   ],
   "ideas": [],

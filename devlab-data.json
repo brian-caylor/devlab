@@ -194,6 +194,17 @@
           "labels": [
             "feature"
           ]
+        },
+        {
+          "id": "lswxhez69xamo6cbj43",
+          "title": "create login system, so others can use this without needing to worry about localdb, just login and it's there",
+          "description": "",
+          "status": "todo",
+          "priority": "medium",
+          "dueDate": null,
+          "order": 1,
+          "createdAt": "2026-04-19T22:31:16.612Z",
+          "completedAt": null
         }
       ],
       "milestones": [],
@@ -207,7 +218,7 @@
       "repo": "github.com/brian-caylor/delta-green-dossiers",
       "notes": "",
       "createdAt": "2026-03-16T04:47:07Z",
-      "lastUpdated": "2026-04-19T22:28:33.755Z"
+      "lastUpdated": "2026-04-19T22:31:16.612Z"
     }
   ],
   "ideas": [],

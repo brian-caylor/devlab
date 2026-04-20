@@ -235,13 +235,16 @@
         {
           "id": "s333arcl9mmo7dc1q5",
           "title": "Add a dice roller",
-          "description": "",
+          "description": "- can we do a full-screen takeover of dice actually rolling?\n- if not, a generic simple pop-up\n- should be able to also click on any skills or feats to roll",
           "status": "todo",
           "priority": "medium",
           "dueDate": null,
           "order": 3,
           "createdAt": "2026-04-20T15:47:26.526Z",
-          "completedAt": null
+          "completedAt": null,
+          "labels": [
+            "feature"
+          ]
         }
       ],
       "milestones": [],
@@ -255,7 +258,7 @@
       "repo": "github.com/brian-caylor/delta-green-dossiers",
       "notes": "",
       "createdAt": "2026-03-16T04:47:07Z",
-      "lastUpdated": "2026-04-20T15:47:36.984Z"
+      "lastUpdated": "2026-04-20T15:48:11.562Z"
     },
     {
       "priority": "none",

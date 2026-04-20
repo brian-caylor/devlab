@@ -234,7 +234,7 @@
         },
         {
           "id": "s333arcl9mmo7dc1q5",
-          "title": "Add a dice roller - can we do a full-screen takeover of dice actually rolling?",
+          "title": "Add a dice roller",
           "description": "",
           "status": "todo",
           "priority": "medium",
@@ -255,7 +255,7 @@
       "repo": "github.com/brian-caylor/delta-green-dossiers",
       "notes": "",
       "createdAt": "2026-03-16T04:47:07Z",
-      "lastUpdated": "2026-04-20T15:47:26.530Z"
+      "lastUpdated": "2026-04-20T15:47:36.984Z"
     },
     {
       "priority": "none",

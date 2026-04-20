@@ -182,46 +182,55 @@
       "order": 3,
       "tasks": [
         {
-          "id": "oj4u0rwc6ymo6c7vq6",
-          "title": "adapt Claude Design prototype design into existing code",
           "description": "Start at a branch,' feat/claude-design-ui'",
-          "status": "in_progress",
           "priority": "medium",
           "dueDate": null,
           "order": 0,
-          "createdAt": "2026-04-19T22:28:26.335Z",
           "completedAt": null,
           "labels": [
             "feature"
-          ]
+          ],
+          "subtasks": [],
+          "githubLink": null,
+          "milestoneId": null,
+          "id": "oj4u0rwc6ymo6c7vq6",
+          "title": "adapt Claude Design prototype design into existing code",
+          "status": "in_progress",
+          "createdAt": "2026-04-19T22:28:26.335Z"
         },
         {
-          "id": "lswxhez69xamo6cbj43",
-          "title": "create login system, so others can use this without needing to worry about localdb, just login and it's there",
           "description": "",
-          "status": "todo",
           "priority": "high",
           "dueDate": null,
           "order": 1,
-          "createdAt": "2026-04-19T22:31:16.612Z",
           "completedAt": null,
           "labels": [
             "feature"
-          ]
+          ],
+          "subtasks": [],
+          "githubLink": null,
+          "milestoneId": null,
+          "id": "lswxhez69xamo6cbj43",
+          "title": "create login system, so others can use this without needing to worry about localdb, just login and it's there",
+          "status": "todo",
+          "createdAt": "2026-04-19T22:31:16.612Z"
         },
         {
-          "id": "n1augmvgmdmmo6dl343",
-          "title": "Add campaign/ handler connections into the app",
           "description": "Handler/DM account that can start campaigns/missions and connect players/agents to specific campaigns. Build the GM a dashboard to quickly view player details, but also ability to view full character sheet data",
-          "status": "todo",
           "priority": "low",
           "dueDate": null,
           "order": 2,
-          "createdAt": "2026-04-19T23:06:42.051Z",
           "completedAt": null,
           "labels": [
             "feature"
-          ]
+          ],
+          "subtasks": [],
+          "githubLink": null,
+          "milestoneId": null,
+          "id": "n1augmvgmdmmo6dl343",
+          "title": "Add campaign/ handler connections into the app",
+          "status": "todo",
+          "createdAt": "2026-04-19T23:06:42.051Z"
         }
       ],
       "milestones": [],
@@ -236,6 +245,22 @@
       "notes": "",
       "createdAt": "2026-03-16T04:47:07Z",
       "lastUpdated": "2026-04-19T23:07:45.398Z"
+    },
+    {
+      "priority": "none",
+      "order": 3,
+      "tasks": [],
+      "milestones": [],
+      "hidden": false,
+      "id": "fljprz5gjormo7dbc9j",
+      "name": "devlab-sandbox",
+      "description": "Sandbox data repo for external DevLab reviewers. Safe to modify.",
+      "status": "active",
+      "aiModel": "",
+      "repo": "github.com/brian-caylor/devlab-sandbox",
+      "notes": "",
+      "createdAt": "2026-04-18T21:01:15Z",
+      "lastUpdated": "2026-04-18T21:52:56Z"
     }
   ],
   "ideas": [],
@@ -251,6 +276,7 @@
     "brian-caylor/oddlyuseful-app",
     "brian-caylor/reeve-tracker",
     "brian-caylor/promptvault",
-    "brian-caylor/test"
+    "brian-caylor/test",
+    "brian-caylor/devlab-sandbox"
   ]
 }

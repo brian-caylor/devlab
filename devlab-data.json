@@ -203,7 +203,7 @@
           "priority": "high",
           "dueDate": null,
           "order": 1,
-          "completedAt": null,
+          "completedAt": "2026-04-20T20:38:12.585Z",
           "labels": [
             "feature"
           ],
@@ -212,7 +212,7 @@
           "milestoneId": null,
           "id": "lswxhez69xamo6cbj43",
           "title": "create login system, so others can use this without needing to worry about localdb, just login and it's there",
-          "status": "todo",
+          "status": "done",
           "createdAt": "2026-04-19T22:31:16.612Z"
         },
         {
@@ -258,7 +258,7 @@
       "repo": "github.com/brian-caylor/delta-green-dossiers",
       "notes": "",
       "createdAt": "2026-03-16T04:47:07Z",
-      "lastUpdated": "2026-04-20T20:38:09.189Z"
+      "lastUpdated": "2026-04-20T20:38:12.586Z"
     },
     {
       "priority": "none",

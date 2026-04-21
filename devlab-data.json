@@ -8,7 +8,7 @@
       "repo": "https://github.com/brian-caylor/PhysiqueOS",
       "notes": "",
       "aiModel": "ChatGPT",
-      "lastUpdated": "2026-04-21T04:41:57.489Z",
+      "lastUpdated": "2026-04-21T04:42:04.897Z",
       "id": "gnxhqggxc1vmo84yhb6",
       "createdAt": "2026-04-21T04:40:42.786Z",
       "tasks": [
@@ -21,7 +21,10 @@
           "dueDate": null,
           "order": 0,
           "createdAt": "2026-04-21T04:41:57.487Z",
-          "completedAt": null
+          "completedAt": null,
+          "labels": [
+            "research"
+          ]
         }
       ],
       "order": 0

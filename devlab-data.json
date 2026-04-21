@@ -8,10 +8,22 @@
       "repo": "https://github.com/brian-caylor/PhysiqueOS",
       "notes": "",
       "aiModel": "ChatGPT",
-      "lastUpdated": "2026-04-21T04:40:42.785Z",
+      "lastUpdated": "2026-04-21T04:41:57.489Z",
       "id": "gnxhqggxc1vmo84yhb6",
       "createdAt": "2026-04-21T04:40:42.786Z",
-      "tasks": [],
+      "tasks": [
+        {
+          "id": "miv15725e2mmo8502y7",
+          "title": "build out spec and project outline",
+          "description": "",
+          "status": "todo",
+          "priority": "medium",
+          "dueDate": null,
+          "order": 0,
+          "createdAt": "2026-04-21T04:41:57.487Z",
+          "completedAt": null
+        }
+      ],
       "order": 0
     },
     {

@@ -134,7 +134,7 @@
           "title": "Fix Task reporting",
           "description": "in Tasks tab, the priority tags will count tasks that are completed. need to add in logic to exclude completed tasks within the priority filters.",
           "status": "todo",
-          "priority": "medium",
+          "priority": "high",
           "dueDate": "2026-04-21",
           "order": 6,
           "createdAt": "2026-04-21T04:43:19.753Z",
@@ -155,7 +155,7 @@
       "repo": "github.com/brian-caylor/devlab",
       "notes": "",
       "createdAt": "2026-04-15T05:26:27Z",
-      "lastUpdated": "2026-04-21T04:44:04.284Z"
+      "lastUpdated": "2026-04-21T04:44:09.527Z"
     },
     {
       "priority": "none",

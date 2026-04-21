@@ -1,8 +1,22 @@
 {
   "projects": [
     {
+      "priority": "low",
+      "name": "PhysiqueOS",
+      "description": "hypertrophy planning app",
+      "status": "active",
+      "repo": "https://github.com/brian-caylor/PhysiqueOS",
+      "notes": "",
+      "aiModel": "ChatGPT",
+      "lastUpdated": "2026-04-21T04:40:42.785Z",
+      "id": "gnxhqggxc1vmo84yhb6",
+      "createdAt": "2026-04-21T04:40:42.786Z",
+      "tasks": [],
+      "order": 0
+    },
+    {
       "priority": "high",
-      "order": 0,
+      "order": 1,
       "tasks": [
         {
           "description": "Confirmed to work from my iPhone.  ",
@@ -116,7 +130,7 @@
     },
     {
       "priority": "none",
-      "order": 1,
+      "order": 2,
       "tasks": [
         {
           "description": "",
@@ -179,7 +193,7 @@
     },
     {
       "priority": "none",
-      "order": 3,
+      "order": 4,
       "tasks": [
         {
           "description": "Start at a branch,' feat/claude-design-ui'",
@@ -265,7 +279,7 @@
     },
     {
       "priority": "none",
-      "order": 3,
+      "order": 4,
       "tasks": [],
       "milestones": [],
       "hidden": false,

@@ -2,7 +2,21 @@
   "projects": [
     {
       "priority": "low",
-      "order": 0,
+      "name": "ScriptMagic",
+      "description": "A scriptwriting program designed specifically for comicbook/graphic novels writers.",
+      "status": "active",
+      "repo": "https://github.com/brian-caylor/ScriptMagic.git",
+      "notes": "Built a basic version, but redesigning from the ground up as full-featured.",
+      "aiModel": "ChatGPT/Sol",
+      "lastUpdated": "2026-04-24T15:46:34.793Z",
+      "id": "eer45gchpp4mod32ch7",
+      "createdAt": "2026-04-24T15:46:34.795Z",
+      "tasks": [],
+      "order": 0
+    },
+    {
+      "priority": "low",
+      "order": 1,
       "tasks": [
         {
           "description": "",
@@ -36,7 +50,7 @@
     },
     {
       "priority": "high",
-      "order": 1,
+      "order": 2,
       "tasks": [
         {
           "description": "Confirmed to work from my iPhone.  ",
@@ -167,7 +181,7 @@
     },
     {
       "priority": "none",
-      "order": 2,
+      "order": 3,
       "tasks": [
         {
           "description": "",
@@ -230,7 +244,7 @@
     },
     {
       "priority": "none",
-      "order": 4,
+      "order": 5,
       "tasks": [
         {
           "description": "Start at a branch,' feat/claude-design-ui'",
@@ -316,7 +330,7 @@
     },
     {
       "priority": "none",
-      "order": 4,
+      "order": 5,
       "tasks": [],
       "milestones": [],
       "hidden": false,
@@ -332,7 +346,7 @@
     },
     {
       "priority": "none",
-      "order": 5,
+      "order": 6,
       "tasks": [],
       "milestones": [],
       "hidden": false,

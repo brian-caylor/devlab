@@ -2,6 +2,28 @@
   "projects": [
     {
       "priority": "low",
+      "order": 0,
+      "tasks": [
+        {
+          "description": "",
+          "priority": "medium",
+          "dueDate": null,
+          "order": 0,
+          "completedAt": "2026-04-21T23:38:59.488Z",
+          "labels": [
+            "research"
+          ],
+          "subtasks": [],
+          "githubLink": null,
+          "milestoneId": null,
+          "id": "miv15725e2mmo8502y7",
+          "title": "build out spec and project outline",
+          "status": "done",
+          "createdAt": "2026-04-21T04:41:57.487Z"
+        }
+      ],
+      "milestones": [],
+      "hidden": false,
       "name": "PhysiqueOS",
       "description": "hypertrophy planning app",
       "status": "active",
@@ -10,24 +32,7 @@
       "aiModel": "ChatGPT",
       "lastUpdated": "2026-04-21T23:38:59.502Z",
       "id": "gnxhqggxc1vmo84yhb6",
-      "createdAt": "2026-04-21T04:40:42.786Z",
-      "tasks": [
-        {
-          "id": "miv15725e2mmo8502y7",
-          "title": "build out spec and project outline",
-          "description": "",
-          "status": "done",
-          "priority": "medium",
-          "dueDate": null,
-          "order": 0,
-          "createdAt": "2026-04-21T04:41:57.487Z",
-          "completedAt": "2026-04-21T23:38:59.488Z",
-          "labels": [
-            "research"
-          ]
-        }
-      ],
-      "order": 0
+      "createdAt": "2026-04-21T04:40:42.786Z"
     },
     {
       "priority": "high",
@@ -130,18 +135,21 @@
           "createdAt": "2026-04-17T16:27:31.006Z"
         },
         {
-          "id": "5t2i2u3f3q3mo851ufd",
-          "title": "Fix Task reporting",
           "description": "in Tasks tab, the priority tags will count tasks that are completed. need to add in logic to exclude completed tasks within the priority filters.",
-          "status": "todo",
           "priority": "high",
           "dueDate": "2026-04-21",
           "order": 6,
-          "createdAt": "2026-04-21T04:43:19.753Z",
           "completedAt": null,
           "labels": [
             "bug"
-          ]
+          ],
+          "subtasks": [],
+          "githubLink": null,
+          "milestoneId": null,
+          "id": "5t2i2u3f3q3mo851ufd",
+          "title": "Fix Task reporting",
+          "status": "todo",
+          "createdAt": "2026-04-21T04:43:19.753Z"
         }
       ],
       "milestones": [],
@@ -321,6 +329,22 @@
       "notes": "",
       "createdAt": "2026-04-18T21:01:15Z",
       "lastUpdated": "2026-04-18T21:52:56Z"
+    },
+    {
+      "priority": "none",
+      "order": 5,
+      "tasks": [],
+      "milestones": [],
+      "hidden": false,
+      "id": "14erlnatxysjmod30vey",
+      "name": "ScriptMagic",
+      "description": "",
+      "status": "active",
+      "aiModel": "",
+      "repo": "github.com/brian-caylor/ScriptMagic",
+      "notes": "",
+      "createdAt": "2026-04-23T22:06:24Z",
+      "lastUpdated": "2026-04-24T00:35:41Z"
     }
   ],
   "ideas": [],
@@ -337,6 +361,8 @@
     "brian-caylor/reeve-tracker",
     "brian-caylor/promptvault",
     "brian-caylor/test",
-    "brian-caylor/devlab-sandbox"
+    "brian-caylor/devlab-sandbox",
+    "brian-caylor/scriptmagic",
+    "brian-caylor/physiqueos"
   ]
 }

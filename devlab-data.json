@@ -2,6 +2,10 @@
   "projects": [
     {
       "priority": "low",
+      "order": 0,
+      "tasks": [],
+      "milestones": [],
+      "hidden": false,
       "name": "ScriptMagic",
       "description": "A scriptwriting program designed specifically for comicbook/graphic novels writers.",
       "status": "active",
@@ -10,9 +14,7 @@
       "aiModel": "ChatGPT/Sol",
       "lastUpdated": "2026-04-24T15:46:34.793Z",
       "id": "eer45gchpp4mod32ch7",
-      "createdAt": "2026-04-24T15:46:34.795Z",
-      "tasks": [],
-      "order": 0
+      "createdAt": "2026-04-24T15:46:34.795Z"
     },
     {
       "priority": "low",
@@ -343,6 +345,22 @@
       "notes": "",
       "createdAt": "2026-04-18T21:01:15Z",
       "lastUpdated": "2026-04-18T21:52:56Z"
+    },
+    {
+      "priority": "none",
+      "order": 6,
+      "tasks": [],
+      "milestones": [],
+      "hidden": false,
+      "id": "45afqc4bzgvmod6ybyj",
+      "name": "ScriptMagicDX",
+      "description": "Comicbook/Graphic Novel focused script writing software",
+      "status": "active",
+      "aiModel": "",
+      "repo": "github.com/brian-caylor/ScriptMagicDX",
+      "notes": "",
+      "createdAt": "2026-04-24T16:00:38Z",
+      "lastUpdated": "2026-04-24T16:00:38Z"
     }
   ],
   "ideas": [],
@@ -361,6 +379,7 @@
     "brian-caylor/test",
     "brian-caylor/devlab-sandbox",
     "brian-caylor/scriptmagic",
-    "brian-caylor/physiqueos"
+    "brian-caylor/physiqueos",
+    "brian-caylor/scriptmagicdx"
   ]
 }

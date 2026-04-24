@@ -343,22 +343,6 @@
       "notes": "",
       "createdAt": "2026-04-18T21:01:15Z",
       "lastUpdated": "2026-04-18T21:52:56Z"
-    },
-    {
-      "priority": "none",
-      "order": 6,
-      "tasks": [],
-      "milestones": [],
-      "hidden": false,
-      "id": "14erlnatxysjmod30vey",
-      "name": "ScriptMagic",
-      "description": "",
-      "status": "active",
-      "aiModel": "",
-      "repo": "github.com/brian-caylor/ScriptMagic",
-      "notes": "",
-      "createdAt": "2026-04-23T22:06:24Z",
-      "lastUpdated": "2026-04-24T00:35:41Z"
     }
   ],
   "ideas": [],

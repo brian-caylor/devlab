@@ -361,6 +361,22 @@
       "notes": "",
       "createdAt": "2026-04-24T16:00:38Z",
       "lastUpdated": "2026-04-24T16:00:38Z"
+    },
+    {
+      "priority": "none",
+      "order": 7,
+      "tasks": [],
+      "milestones": [],
+      "hidden": false,
+      "id": "k69e5qjomumodojbci",
+      "name": "GrabGemini_Image_Chrome_Extension",
+      "description": "",
+      "status": "active",
+      "aiModel": "",
+      "repo": "github.com/brian-caylor/GrabGemini_Image_Chrome_Extension",
+      "notes": "",
+      "createdAt": "2026-04-25T01:11:45Z",
+      "lastUpdated": "2026-04-25T01:19:53Z"
     }
   ],
   "ideas": [],
@@ -380,6 +396,7 @@
     "brian-caylor/devlab-sandbox",
     "brian-caylor/scriptmagic",
     "brian-caylor/physiqueos",
-    "brian-caylor/scriptmagicdx"
+    "brian-caylor/scriptmagicdx",
+    "brian-caylor/grabgemini_image_chrome_extension"
   ]
 }

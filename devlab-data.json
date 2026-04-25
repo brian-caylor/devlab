@@ -371,12 +371,12 @@
       "id": "k69e5qjomumodojbci",
       "name": "GrabGemini_Image_Chrome_Extension",
       "description": "",
-      "status": "active",
+      "status": "released",
       "aiModel": "",
       "repo": "github.com/brian-caylor/GrabGemini_Image_Chrome_Extension",
       "notes": "",
       "createdAt": "2026-04-25T01:11:45Z",
-      "lastUpdated": "2026-04-25T01:19:53Z"
+      "lastUpdated": "2026-04-25T08:02:58.664Z"
     }
   ],
   "ideas": [],

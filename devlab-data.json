@@ -335,7 +335,7 @@
       "order": 5,
       "tasks": [],
       "milestones": [],
-      "hidden": false,
+      "hidden": true,
       "id": "fljprz5gjormo7dbc9j",
       "name": "devlab-sandbox",
       "description": "Sandbox data repo for external DevLab reviewers. Safe to modify.",

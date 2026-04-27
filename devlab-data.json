@@ -377,6 +377,22 @@
       "notes": "",
       "createdAt": "2026-04-25T01:11:45Z",
       "lastUpdated": "2026-04-25T08:02:58.664Z"
+    },
+    {
+      "priority": "none",
+      "order": 8,
+      "tasks": [],
+      "milestones": [],
+      "hidden": false,
+      "id": "iw0s8ltx0komohmizps",
+      "name": "PDFEditor",
+      "description": "A basic PDF editor",
+      "status": "active",
+      "aiModel": "",
+      "repo": "github.com/brian-caylor/PDFEditor",
+      "notes": "",
+      "createdAt": "2026-04-27T01:24:51Z",
+      "lastUpdated": "2026-04-27T01:24:51Z"
     }
   ],
   "ideas": [],
@@ -397,6 +413,7 @@
     "brian-caylor/scriptmagic",
     "brian-caylor/physiqueos",
     "brian-caylor/scriptmagicdx",
-    "brian-caylor/grabgemini_image_chrome_extension"
+    "brian-caylor/grabgemini_image_chrome_extension",
+    "brian-caylor/pdfeditor"
   ]
 }

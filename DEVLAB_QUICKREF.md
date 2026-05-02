@@ -1,7 +1,7 @@
 # DevLab — Quick Reference
 
 ## Repo
-- GitHub: `Brian-Caylor/devlab`
+- GitHub: `your-username/devlab`
 - Branch: `main`
 - Data file: `devlab-data.json`
 - App: `index.html` (single file, no build)

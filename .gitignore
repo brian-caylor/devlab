@@ -1,0 +1,20 @@
+# macOS
+.DS_Store
+._*
+
+# Editor / OS
+*.swp
+*~
+.idea/
+.vscode/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Node (in case of future tooling)
+node_modules/
+
+# Netlify CLI
+.netlify/

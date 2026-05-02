@@ -406,7 +406,7 @@ Nothing else. No package.json, no node_modules, no build output.
 
 ## GitHub repository
 
-- Owner: `Brian-Caylor`
+- Owner: `your-username`
 - Repo: `devlab`
 - Branch: `main`
 - Data file: `devlab-data.json`

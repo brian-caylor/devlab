@@ -89,12 +89,12 @@ Set these in Site configuration > Environment variables:
 | Key | Value | Secret |
 |-----|-------|--------|
 | `DEVLAB_GH_TOKEN` | Your GitHub PAT | Yes |
-| `DEVLAB_GH_OWNER` | `Brian-Caylor` | No |
-| `DEVLAB_GH_REPO` | `devlab` | No |
+| `DEVLAB_GH_OWNER` | Your GitHub username (e.g., `your-username`) | No |
+| `DEVLAB_GH_REPO` | Your data repo name (e.g., `devlab`) | No |
 | `DEVLAB_IDEA_TOKEN` | Any random string (auth for Siri endpoint) | Yes |
 
-The first three power the Siri idea capture function. `DEVLAB_IDEA_TOKEN` is the
-bearer token your Apple Shortcut sends.
+All four are required. The first three power the Siri idea capture function;
+`DEVLAB_IDEA_TOKEN` is the bearer token your Apple Shortcut sends.
 
 ### 5. First launch
 
@@ -144,3 +144,28 @@ devlab/
 - Credentials stored only in browser localStorage
 - New fields are auto-normalized on load (backward compatible)
 - If two devices save simultaneously, the second write fails with 409 — tap Retry
+
+---
+
+## Security notes
+
+This is a single-user app designed for personal use, with credentials stored
+client-side. Be aware:
+
+- **GitHub PAT scope.** The token requires `repo` scope (full read/write access
+  to *all* your repos, public and private). Treat it like a password.
+- **localStorage.** Your PAT and Anthropic API key live in browser localStorage
+  in plaintext. Any browser extension you install, or any XSS bug in the app,
+  can read both. Use a dedicated browser profile if that's a concern.
+- **Anthropic key direct-from-browser.** The app sets
+  `anthropic-dangerous-direct-browser-access: true` to call the Claude API
+  without a backend proxy. Appropriate for a single-user app, but means your
+  key is sent from the browser on every request — don't share your deployed
+  URL with someone you don't want using your quota.
+- **Siri endpoint.** `add-idea.js` accepts any text up to 2000 chars from
+  whoever holds `DEVLAB_IDEA_TOKEN`. CORS is restricted to your Netlify URL.
+  Rotate `DEVLAB_IDEA_TOKEN` if your phone is ever lost / shortcut leaks.
+- **Public fork.** If you publish your fork publicly, make sure your data repo
+  (the one referenced by `DEVLAB_GH_OWNER` / `DEVLAB_GH_REPO`) is **private**,
+  or you'll publish your project history and ideas. The empty
+  `devlab-data.json` shipped here is a stub, not your actual data.

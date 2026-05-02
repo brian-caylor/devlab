@@ -2,10 +2,16 @@
 // Accepts { "text": "My idea" } with Bearer token auth
 // Reads devlab-data.json from GitHub, appends idea, commits back
 
+const MAX_TEXT_LENGTH = 2000;
+
 exports.handler = async (event) => {
+  // Apple Shortcuts don't send Origin headers, so CORS isn't needed for Siri.
+  // We expose the endpoint only to the site's own origin for any browser-based callers.
+  const allowedOrigin = process.env.URL || '';
   const headers = {
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': allowedOrigin,
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Vary': 'Origin',
     'Content-Type': 'application/json',
   };
 
@@ -35,15 +41,18 @@ exports.handler = async (event) => {
   if (!text) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: 'text is required' }) };
   }
+  if (text.length > MAX_TEXT_LENGTH) {
+    return { statusCode: 413, headers, body: JSON.stringify({ error: `text exceeds ${MAX_TEXT_LENGTH} chars` }) };
+  }
 
-  // GitHub config from env
+  // GitHub config from env — all required, no defaults to avoid cross-account writes
   const ghToken = process.env.DEVLAB_GH_TOKEN;
-  const owner = process.env.DEVLAB_GH_OWNER || 'Brian-Caylor';
-  const repo = process.env.DEVLAB_GH_REPO || 'devlab';
+  const owner = process.env.DEVLAB_GH_OWNER;
+  const repo = process.env.DEVLAB_GH_REPO;
   const path = 'devlab-data.json';
 
-  if (!ghToken) {
-    return { statusCode: 500, headers, body: JSON.stringify({ error: 'Server misconfigured: no GH token' }) };
+  if (!ghToken || !owner || !repo) {
+    return { statusCode: 500, headers, body: JSON.stringify({ error: 'Server misconfigured: missing DEVLAB_GH_TOKEN / DEVLAB_GH_OWNER / DEVLAB_GH_REPO' }) };
   }
 
   const ghHeaders = {
@@ -74,11 +83,12 @@ exports.handler = async (event) => {
 
     // Write back
     const encoded = Buffer.from(JSON.stringify(data, null, 2), 'utf-8').toString('base64');
+    const summary = text.replace(/\s+/g, ' ').slice(0, 40);
     const putRes = await fetch(apiBase, {
       method: 'PUT',
       headers: ghHeaders,
       body: JSON.stringify({
-        message: `devlab: idea via Siri — "${text.slice(0, 40)}${text.length > 40 ? '…' : ''}"`,
+        message: `devlab: idea via Siri — "${summary}${text.length > 40 ? '…' : ''}"`,
         content: encoded,
         sha: file.sha,
       }),
@@ -102,5 +112,3 @@ exports.handler = async (event) => {
     };
   }
 };
-
-// redeploy

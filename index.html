@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
   <meta name="devlab-build" content="sha=__BUILD_SHA__;branch=__BUILD_BRANCH__;context=__BUILD_CONTEXT__"/>
-  <title>DEV LAB — Brian Caylor</title>
+  <title>DEV LAB</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
@@ -379,12 +379,13 @@ const formatWeekLabel = (key) => { const start = fromWeekKey(key); const end = n
 // ── Markdown parser ───────────────────────────────────────────────────────────
 function renderMarkdown(text) {
   if (!text) return '';
-  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const safeUrl = u => /^(https?:|mailto:|\/|#)/i.test(u.trim()) ? u.trim() : '#';
   const inl = s => esc(s)
     .replace(/`([^`]+)`/g, '<code>$1</code>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, t, u) => `<a href="${safeUrl(u)}" target="_blank" rel="noopener noreferrer">${t}</a>`);
   let html = '', inCode = false, inList = false, codeBlock = '';
   for (const line of text.split('\n')) {
     if (line.startsWith('```')) {
@@ -1185,13 +1186,13 @@ function App() {
           models={models}/>
       )}
 
-      <BuildBadge />
+      <BuildBadge creds={creds} />
     </div>
   );
 }
 
 // ── Build Badge ───────────────────────────────────────────────────────────────
-function BuildBadge() {
+function BuildBadge({ creds }) {
   const { shortSha, branch, context, sha } = BUILD_INFO;
   const prod = context === 'production';
   const local = context === 'local';
@@ -1200,7 +1201,9 @@ function BuildBadge() {
   const borderColor = prod ? 'rgba(0,230,118,0.22)' : local ? 'var(--border-alt)' : 'rgba(206,147,216,0.22)';
   const prefix = prod ? 'prod' : local ? 'local' : (branch || 'dev');
   const label = local ? 'local' : `${prefix} · ${shortSha}`;
-  const href = sha ? `https://github.com/brian-caylor/devlab/commit/${sha}` : null;
+  const href = sha && creds?.owner && creds?.repo
+    ? `https://github.com/${creds.owner}/${creds.repo}/commit/${sha}`
+    : null;
   const common = { position:'fixed', right:10, bottom:10, fontSize:10, fontFamily:"'JetBrains Mono',monospace", padding:'4px 9px', borderRadius:99, background:bg, border:`1px solid ${borderColor}`, color, opacity:0.85, zIndex:50, letterSpacing:'0.02em', textDecoration:'none', whiteSpace:'nowrap', userSelect:'text' };
   if (href) {
     return (
@@ -3013,7 +3016,7 @@ function ProjectModal({ mode, data, onSave, onClose, onDelete, models }) {
           </div>
           <div>
             <label style={labelStyle}>Repo / URL</label>
-            <input style={inputStyle} value={form.repo||''} onChange={upd('repo')} placeholder="github.com/Brian-Caylor/repo-name"/>
+            <input style={inputStyle} value={form.repo||''} onChange={upd('repo')} placeholder="github.com/your-username/repo-name"/>
           </div>
           <div>
             <label style={labelStyle}>Notes / Current State</label>
@@ -3437,7 +3440,9 @@ function SettingsModal({ onClose, onDisconnect, hiddenProjects, onUnhide, visibl
               const local = context === 'local';
               const envColor = prod ? '#00e676' : local ? 'var(--text-dim)' : '#ce93d8';
               const envLabel = prod ? 'Production' : local ? 'Local (not a Netlify deploy)' : `Branch deploy${context === 'deploy-preview' ? ' (PR preview)' : ''}`;
-              const commitUrl = sha ? `https://github.com/brian-caylor/devlab/commit/${sha}` : null;
+              const commitUrl = sha && creds?.owner && creds?.repo
+                ? `https://github.com/${creds.owner}/${creds.repo}/commit/${sha}`
+                : null;
               const monoStyle = { fontFamily:"'JetBrains Mono',monospace", fontSize:12, color:'var(--text-primary)' };
               const rowStyle = { display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 0', borderBottom:'1px solid var(--border)', gap:16 };
               const keyStyle = { fontSize:11, fontWeight:600, color:'var(--text-muted)', letterSpacing:'0.06em', textTransform:'uppercase' };

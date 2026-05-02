@@ -393,6 +393,38 @@
       "notes": "",
       "createdAt": "2026-04-27T01:24:51Z",
       "lastUpdated": "2026-04-27T01:24:51Z"
+    },
+    {
+      "priority": "none",
+      "order": 9,
+      "tasks": [],
+      "milestones": [],
+      "hidden": false,
+      "id": "wofvyjznhwmoolxslt",
+      "name": "Story-Engine-Studio",
+      "description": "Story Engine re-built using inspiration from OpenAI Symphony",
+      "status": "active",
+      "aiModel": "",
+      "repo": "github.com/brian-caylor/Story-Engine-Studio",
+      "notes": "",
+      "createdAt": "2026-04-28T04:19:55Z",
+      "lastUpdated": "2026-04-28T19:51:28Z"
+    },
+    {
+      "priority": "none",
+      "order": 10,
+      "tasks": [],
+      "milestones": [],
+      "hidden": false,
+      "id": "bms82ru609wmoolxsxa",
+      "name": "strength-lab",
+      "description": "Dashboard overview of strength training data",
+      "status": "active",
+      "aiModel": "",
+      "repo": "github.com/brian-caylor/strength-lab",
+      "notes": "",
+      "createdAt": "2026-04-28T16:39:48Z",
+      "lastUpdated": "2026-04-28T16:56:58Z"
     }
   ],
   "ideas": [],
@@ -414,6 +446,8 @@
     "brian-caylor/physiqueos",
     "brian-caylor/scriptmagicdx",
     "brian-caylor/grabgemini_image_chrome_extension",
-    "brian-caylor/pdfeditor"
+    "brian-caylor/pdfeditor",
+    "brian-caylor/story-engine-studio",
+    "brian-caylor/strength-lab"
   ]
 }

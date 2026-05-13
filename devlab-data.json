@@ -19,18 +19,162 @@
     {
       "priority": "none",
       "order": 1,
-      "tasks": [],
+      "tasks": [
+        {
+          "id": "task-20260513-pv-phase1-foundation",
+          "title": "Phase 1: Build & tooling foundation",
+          "description": "Tailwind v4 via @tailwindcss/vite (killed the CDN script + importmap), TS strict + noUncheckedIndexedAccess, Biome lint/format, Vitest skeleton, netlify.toml with SPA redirect, Node engines pinned to >=20.",
+          "status": "completed",
+          "priority": "none",
+          "dueDate": null,
+          "order": 0,
+          "createdAt": "2026-05-12T16:00:00Z",
+          "completedAt": "2026-05-12T17:00:00Z"
+        },
+        {
+          "id": "task-20260513-pv-phase2-mobile",
+          "title": "Phase 2: Mobile UX fixes",
+          "description": "Playground stacks vertically <md, PromptEditor full-screen on mobile, off-canvas sidebar drawer, Gallery responsive columns 1/2/3, search row visible on mobile, touch targets >=44px, alert() -> sonner toasts.",
+          "status": "completed",
+          "priority": "none",
+          "dueDate": null,
+          "order": 1,
+          "createdAt": "2026-05-12T17:00:00Z",
+          "completedAt": "2026-05-12T18:00:00Z"
+        },
+        {
+          "id": "task-20260513-pv-phase3-shadcn",
+          "title": "Phase 3a-c: shadcn/ui primitives + bottom tab bar + modal migrations",
+          "description": "Button, Dialog, Sheet primitives on Radix. Migrated ApiSettings, History, PromptEditor, Stats, Settings, Image modals to shadcn Dialog (focus trap + Esc + animations). Mobile bottom tab bar; top tabs hidden <md to avoid duplication.",
+          "status": "completed",
+          "priority": "none",
+          "dueDate": null,
+          "order": 2,
+          "createdAt": "2026-05-12T18:00:00Z",
+          "completedAt": "2026-05-12T20:00:00Z"
+        },
+        {
+          "id": "task-20260513-pv-phase5-multiprovider",
+          "title": "Phase 5: Multi-provider image-gen with dynamic discovery",
+          "description": "ImageProvider interface. Google (Imagen + Gemini-image) via /v1beta/models, OpenAI (DALL-E + gpt-image) via /v1/models with id-prefix capability allowlist. 24h localStorage cache. Playground gates providers by configured key + nonempty discovered model list. BYOK in browser. Anthropic intentionally absent (no image-gen).",
+          "status": "completed",
+          "priority": "none",
+          "dueDate": null,
+          "order": 3,
+          "createdAt": "2026-05-12T20:00:00Z",
+          "completedAt": "2026-05-12T21:00:00Z"
+        },
+        {
+          "id": "task-20260513-pv-phase4-firebase",
+          "title": "Phase 4: Firebase auth + Firestore sync",
+          "description": "Google sign-in via popup, Firestore sync for prompts/folders with real-time listeners, first-sign-in migrateLocalToCloud (idempotent via migratedAt). Account section in SettingsModal + auth indicator in sidebar footer. firestore.rules + storage.rules committed.",
+          "status": "completed",
+          "priority": "none",
+          "dueDate": null,
+          "order": 4,
+          "createdAt": "2026-05-12T21:00:00Z",
+          "completedAt": "2026-05-12T22:00:00Z"
+        },
+        {
+          "id": "task-20260513-pv-phase4.5-storage-pwa",
+          "title": "Phase 4.5: Image Storage uploads + settings sync + PWA",
+          "description": "Playground generations auto-upload to users/{uid}/generations/ in Firebase Storage when signed in (URL replaces base64). darkMode + modelOptions sync to Firestore; API keys deliberately stay browser-local. vite-plugin-pwa with manifest, SVG favicon, apple-touch-icon, Workbox precache excluding Firebase URLs from nav fallback.",
+          "status": "completed",
+          "priority": "none",
+          "dueDate": null,
+          "order": 5,
+          "createdAt": "2026-05-12T22:00:00Z",
+          "completedAt": "2026-05-12T22:30:00Z"
+        },
+        {
+          "id": "task-20260513-pv-netlify-cli",
+          "title": "Netlify CLI local-build deploy workflow",
+          "description": "`netlify deploy --build` runs build locally (no Netlify build minutes) and pulls env vars from linked site at build time. npm run deploy:preview / deploy:prod scripts. Stable `preview--the-promptvault.netlify.app` alias authorized once in Firebase Auth.",
+          "status": "completed",
+          "priority": "none",
+          "dueDate": null,
+          "order": 6,
+          "createdAt": "2026-05-12T23:00:00Z",
+          "completedAt": "2026-05-12T23:15:00Z"
+        },
+        {
+          "id": "task-20260513-pv-fix-mobile-sidebar",
+          "title": "Fix mobile sidebar bottom padding (Settings link covered by tab bar)",
+          "description": "Sidebar inner container had no bottom padding; Settings link was hidden behind bottom tab bar on mobile portrait (z-30 over z-20). Added pb-20 md:pb-4. PR #4 merged.",
+          "status": "completed",
+          "priority": "none",
+          "dueDate": null,
+          "order": 7,
+          "createdAt": "2026-05-12T23:30:00Z",
+          "completedAt": "2026-05-12T23:37:00Z"
+        },
+        {
+          "id": "task-20260513-pv-deploy-prod",
+          "title": "First production deploy on Netlify",
+          "description": "Deployed via `npm run deploy:prod` after preview QA. Live at https://the-promptvault.netlify.app. Sign-in + sync + image gen verified on iOS Safari (private window).",
+          "status": "completed",
+          "priority": "none",
+          "dueDate": null,
+          "order": 8,
+          "createdAt": "2026-05-12T23:40:00Z",
+          "completedAt": "2026-05-12T23:55:00Z"
+        },
+        {
+          "id": "task-20260513-pv-readme-rewrite",
+          "title": "Rewrite README",
+          "description": "Replaced AI Studio scaffold README with full doc: features, tech stack, quick start, Firebase setup, Netlify CLI deploy workflow, architecture, sync model, dev commands, privacy notes. PR #5 open, awaiting merge.",
+          "status": "completed",
+          "priority": "none",
+          "dueDate": null,
+          "order": 9,
+          "createdAt": "2026-05-13T01:00:00Z",
+          "completedAt": "2026-05-13T01:30:00Z"
+        },
+        {
+          "id": "task-20260513-pv-ci-workflow",
+          "title": "Re-add .github/workflows/ci.yml",
+          "description": "CI workflow file was excluded from PR #1 due to gh OAuth lacking `workflow` scope at push time. File is on disk locally but untracked. Re-add via the GitHub web UI, or after a working `gh auth refresh -s workflow`. Runs lint, typecheck, test, build on PR.",
+          "status": "open",
+          "priority": "none",
+          "dueDate": null,
+          "order": 10,
+          "createdAt": "2026-05-13T01:30:00Z",
+          "completedAt": null
+        },
+        {
+          "id": "task-20260513-pv-phase3d-deferred",
+          "title": "Phase 3d (deferred): App.tsx split + react-router + Zustand",
+          "description": "App.tsx is still ~2400 lines with 26+ useState hooks. Split into per-feature components, add react-router for deep-linking, Zustand for global state. Invisible to users but unlocks maintainability.",
+          "status": "open",
+          "priority": "none",
+          "dueDate": null,
+          "order": 11,
+          "createdAt": "2026-05-13T01:30:00Z",
+          "completedAt": null
+        },
+        {
+          "id": "task-20260513-pv-phase6-deferred",
+          "title": "Phase 6 (deferred): A11y pass, cmdK palette, form validation, lint cleanup",
+          "description": "Full a11y audit (aria-labels, focus mgmt), cmdK command palette via shadcn Command, react-hook-form + zod in PromptEditor and Settings, address ~46 remaining lint warnings.",
+          "status": "open",
+          "priority": "none",
+          "dueDate": null,
+          "order": 12,
+          "createdAt": "2026-05-13T01:30:00Z",
+          "completedAt": null
+        }
+      ],
       "milestones": [],
       "hidden": false,
       "id": "wzgvnjuo7ajmp3atzfd",
       "name": "PromptVault",
-      "description": "An app to store favorite AI prompts",
+      "description": "Local-first vault for storing, organizing, and testing image-generation prompts. Multi-provider (Google + OpenAI) with dynamic model discovery, optional Firebase cloud sync, BYOK in browser, mobile-installable PWA.",
       "status": "active",
       "aiModel": "Claude",
       "repo": "github.com/brian-caylor/PromptVault",
-      "notes": "",
+      "notes": "## 2026-05-12 / 2026-05-13 — full overhaul shipped\n\nStarted as the AI Studio scaffold (CDN React via importmap, no build, hardcoded models, no auth or sync, Tailwind via CDN script, ~1500-line App.tsx with 26 useState hooks). Now a real local-first PWA on Netlify with optional Firebase backend.\n\n### Tech stack\nReact 19 + TS strict + Vite 6, Tailwind v4 via @tailwindcss/vite, shadcn/ui on Radix, Biome, Vitest, Firebase (Auth + Firestore + Storage), vite-plugin-pwa, sonner toasts.\n\n### Key decisions\n- **Multi-provider image-gen via dynamic discovery**: ImageProvider interface; Google models discovered via /v1beta/models filtered by Imagen/Gemini-image families; OpenAI via /v1/models filtered by dall-e/gpt-image id prefixes (capability allowlist, not version list). New provider models appear automatically with no app update. 24h localStorage cache. Anthropic excluded — no image-gen capability today.\n- **BYOK in browser**: API keys live in IndexedDB only, never written to Firestore. Settings sync is intentionally scoped to darkMode + modelOptions only; API keys stay browser-local to preserve this trust model.\n- **Offline-first sync**: IndexedDB stays source of truth on-device. When signed in, mutations write to BOTH IndexedDB and Firestore. Firestore real-time listeners merge remote changes back into local state. First sign-in idempotently migrates local data to cloud via migrateLocalToCloud + settings.migratedAt flag.\n- **Image generations to Storage**: signed-in Playground outputs upload to users/{uid}/generations/, prompt stores the durable URL (not base64). Unauthenticated users keep base64 in IndexedDB.\n- **Netlify CLI deploy workflow (no build minutes)**: `netlify deploy --build` runs build locally and auto-injects env vars from the linked site. `npm run deploy:preview` / `deploy:prod`. Stable `preview--the-promptvault.netlify.app` alias authorized once in Firebase Auth so previews can sign in.\n\n### Deployed\n- Production: https://the-promptvault.netlify.app\n- Preview: https://preview--the-promptvault.netlify.app\n- Firebase project: promptvault-8b249\n- Verified on desktop (1280x800) and iOS Safari (375x812 portrait, both signed-in and private)\n\n### Open follow-ups\n- Re-add .github/workflows/ci.yml (couldn't push from PR #1 — gh OAuth missing workflow scope; file is on disk locally)\n- PR #5 (README rewrite) awaiting merge\n- Phase 3d: App.tsx split + react-router + Zustand (still ~2400 lines)\n- Phase 6: a11y pass, cmdK palette, react-hook-form + zod, ~46 lint warning cleanup\n",
       "createdAt": "2025-11-22T23:10:31Z",
-      "lastUpdated": "2026-05-12T23:49:01Z"
+      "lastUpdated": "2026-05-13T01:30:00Z"
     },
     {
       "priority": "none",

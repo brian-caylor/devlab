@@ -444,18 +444,30 @@
     {
       "priority": "none",
       "order": 5,
-      "tasks": [],
+      "tasks": [
+        {
+          "id": "task-20260513-ou-promptvault-card",
+          "title": "Add Prompt Vault app card to Oddly Useful site",
+          "description": "Created src/content/apps/prompt-vault.md (order: 5, sparkles icon, tags: prompts/ai/image generation/productivity) and copied public/thumbnails/PromptVault_640x352.png into the worktree. astro build passes; rendered HTML contains the card. Pending visual verification in the browser / deploy.",
+          "status": "in_progress",
+          "priority": "medium",
+          "dueDate": null,
+          "order": 0,
+          "createdAt": "2026-05-13T09:11:00Z",
+          "completedAt": null
+        }
+      ],
       "milestones": [],
       "hidden": false,
       "id": "pp3a93ju50amp3au0q4",
       "name": "oddlyuseful-app",
       "description": "",
-      "status": "paused",
+      "status": "active",
       "aiModel": "Claude",
       "repo": "github.com/brian-caylor/oddlyuseful-app",
-      "notes": "",
+      "notes": "## 2026-05-13\n- Added Prompt Vault as the 5th app card (`src/content/apps/prompt-vault.md`, order: 5) plus `public/thumbnails/PromptVault_640x352.png`. Build passes; rendered HTML contains the card. Pending visual verification.\n",
       "createdAt": "2026-03-15T19:07:49Z",
-      "lastUpdated": "2026-04-28T20:14:23Z"
+      "lastUpdated": "2026-05-13T09:11:00Z"
     },
     {
       "priority": "none",

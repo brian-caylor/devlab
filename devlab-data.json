@@ -67,7 +67,6 @@
     {
       "priority": "none",
       "order": 4,
-      "tasks": [],
       "milestones": [],
       "hidden": false,
       "id": "la63izom61mp3au0e9",
@@ -76,9 +75,22 @@
       "status": "active",
       "aiModel": "Claude",
       "repo": "github.com/brian-caylor/devlab",
-      "notes": "",
+      "notes": "## 2026-05-13\n- Updated root AGENTS.md so Codex DevLab saves use `git pull --rebase` before `git push`, protecting against remote changes written directly by the app.\n",
       "createdAt": "2026-04-15T05:26:27Z",
-      "lastUpdated": "2026-05-02T17:28:04Z"
+      "lastUpdated": "2026-05-13T00:42:05Z",
+      "tasks": [
+        {
+          "id": "task-20260513004205-agents-save-workflow",
+          "title": "Update AGENTS DevLab save workflow",
+          "description": "Add pull --rebase before push in the DevLab auto-sync instructions.",
+          "status": "completed",
+          "priority": "none",
+          "dueDate": null,
+          "order": 0,
+          "createdAt": "2026-05-13T00:42:05Z",
+          "completedAt": "2026-05-13T00:42:05Z"
+        }
+      ]
     },
     {
       "priority": "none",

@@ -57,12 +57,12 @@
       "id": "868e5lxjjfjmp3au031",
       "name": "SeedLockStudio",
       "description": "",
-      "status": "active",
+      "status": "archived",
       "aiModel": "",
       "repo": "github.com/brian-caylor/SeedLockStudio",
       "notes": "",
       "createdAt": "2026-05-05T15:40:17Z",
-      "lastUpdated": "2026-05-05T15:40:18Z"
+      "lastUpdated": "2026-05-13T00:09:07.780Z"
     },
     {
       "priority": "none",

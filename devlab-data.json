@@ -216,7 +216,7 @@
       "hidden": false,
       "id": "6q5zpsbiitamp3au3qa",
       "name": "delta-green-dossiers",
-      "description": "Delta Green TTRPG character sheet manager — React PWA with offline support, dice roller, and skill advancement",
+      "description": "Delta Green TTRPG character sheet manager \u2014 React PWA with offline support, dice roller, and skill advancement",
       "status": "paused",
       "aiModel": "",
       "repo": "github.com/brian-caylor/delta-green-dossiers",
@@ -264,7 +264,7 @@
       "hidden": false,
       "id": "af3wbcjr5ctmp3au4vh",
       "name": "StoryEngine_Template",
-      "description": "A project scaffold and prompt system for writing long-form fiction with Claude Code — world-building, character arcs, iterative drafting, continuity tracking, and manuscript export.",
+      "description": "A project scaffold and prompt system for writing long-form fiction with Claude Code \u2014 world-building, character arcs, iterative drafting, continuity tracking, and manuscript export.",
       "status": "paused",
       "aiModel": "Claude",
       "repo": "github.com/brian-caylor/StoryEngine_Template",
@@ -296,7 +296,7 @@
       "hidden": false,
       "id": "4ocekdhmq7kmp3au5k7",
       "name": "Image-Analysis_and_Organizer",
-      "description": "Local AI image organizer — uses Ollama vision to analyze and sort AI-generated images by character. Streamlit UI with clustering, labeling, and similarity search.",
+      "description": "Local AI image organizer \u2014 uses Ollama vision to analyze and sort AI-generated images by character. Streamlit UI with clustering, labeling, and similarity search.",
       "status": "paused",
       "aiModel": "Claude",
       "repo": "github.com/brian-caylor/Image-Analysis_and_Organizer",
@@ -351,6 +351,31 @@
       "notes": "",
       "createdAt": "2025-06-03T19:14:56Z",
       "lastUpdated": "2025-11-13T06:59:12Z"
+    },
+    {
+      "id": "proj-1747094400000",
+      "name": "TEST_Clock",
+      "description": "Minimal static analog clock \u2014 single index.html, SVG hands, local time.",
+      "status": "complete",
+      "aiModel": "claude",
+      "repo": "apps/TEST_Clock",
+      "notes": "Single-file static app at apps/TEST_Clock/index.html. SVG clock face, 12 tick marks, hour/minute/second hands driven by requestAnimationFrame for a smooth sweep. No build step, no dependencies.",
+      "priority": "none",
+      "tasks": [
+        {
+          "id": "task-1747094400001",
+          "title": "Build single-file analog clock at apps/TEST_Clock/index.html",
+          "description": "SVG face + ticks + three hands, RAF loop, local time.",
+          "status": "completed",
+          "priority": "none",
+          "dueDate": null,
+          "order": 1,
+          "createdAt": "2026-05-12T00:00:00.000Z",
+          "completedAt": "2026-05-12T00:00:00.000Z"
+        }
+      ],
+      "createdAt": "2026-05-12T00:00:00.000Z",
+      "lastUpdated": "2026-05-12T00:00:00.000Z"
     }
   ],
   "ideas": [],

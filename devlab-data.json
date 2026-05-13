@@ -67,6 +67,38 @@
     {
       "priority": "none",
       "order": 4,
+      "tasks": [
+        {
+          "description": "Add pull --rebase before push in the DevLab auto-sync instructions.",
+          "priority": "none",
+          "dueDate": null,
+          "order": 0,
+          "completedAt": "2026-05-13T00:54:31.917Z",
+          "labels": [],
+          "subtasks": [],
+          "githubLink": null,
+          "milestoneId": null,
+          "id": "task-20260513004205-agents-save-workflow",
+          "title": "Update AGENTS DevLab save workflow",
+          "status": "done",
+          "createdAt": "2026-05-13T00:42:05Z"
+        },
+        {
+          "description": "Visit the Netlify app and confirm the pushed DevLab update is visible.",
+          "priority": "none",
+          "dueDate": null,
+          "order": 1,
+          "completedAt": "2026-05-13T00:54:30.619Z",
+          "labels": [],
+          "subtasks": [],
+          "githubLink": null,
+          "milestoneId": null,
+          "id": "task-20260513004852-verify-live-devlab",
+          "title": "Verify live DevLab deployment",
+          "status": "done",
+          "createdAt": "2026-05-13T00:48:52Z"
+        }
+      ],
       "milestones": [],
       "hidden": false,
       "id": "la63izom61mp3au0e9",
@@ -77,31 +109,7 @@
       "repo": "github.com/brian-caylor/devlab",
       "notes": "## 2026-05-13\n- Updated root AGENTS.md so Codex DevLab saves use `git pull --rebase` before `git push`, protecting against remote changes written directly by the app.\n- Verified the live Netlify app loaded production commit `5277a61` after refresh and displayed the Codex-created note/task on the devlab project.\n",
       "createdAt": "2026-04-15T05:26:27Z",
-      "lastUpdated": "2026-05-13T00:48:52Z",
-      "tasks": [
-        {
-          "id": "task-20260513004205-agents-save-workflow",
-          "title": "Update AGENTS DevLab save workflow",
-          "description": "Add pull --rebase before push in the DevLab auto-sync instructions.",
-          "status": "completed",
-          "priority": "none",
-          "dueDate": null,
-          "order": 0,
-          "createdAt": "2026-05-13T00:42:05Z",
-          "completedAt": "2026-05-13T00:42:05Z"
-        },
-        {
-          "id": "task-20260513004852-verify-live-devlab",
-          "title": "Verify live DevLab deployment",
-          "description": "Visit the Netlify app and confirm the pushed DevLab update is visible.",
-          "status": "completed",
-          "priority": "none",
-          "dueDate": null,
-          "order": 1,
-          "createdAt": "2026-05-13T00:48:52Z",
-          "completedAt": "2026-05-13T00:48:52Z"
-        }
-      ]
+      "lastUpdated": "2026-05-13T00:54:31.917Z"
     },
     {
       "priority": "none",

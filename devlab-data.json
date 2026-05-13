@@ -35,7 +35,63 @@
     {
       "priority": "none",
       "order": 2,
-      "tasks": [],
+      "tasks": [
+        {
+          "id": "task-20260513005937-trainer-handoff-export",
+          "title": "Build historical trainer handoff export",
+          "description": "Generate a self-contained Strength Lab dashboard from Strong export data with trainer handoff context and local assets.",
+          "status": "completed",
+          "priority": "none",
+          "dueDate": null,
+          "order": 0,
+          "createdAt": "2026-05-13T00:59:37Z",
+          "completedAt": "2026-05-13T00:59:37Z"
+        },
+        {
+          "id": "task-20260513005938-dashboard-filters-sorting",
+          "title": "Add dashboard filters and sorting",
+          "description": "Add date, muscle, exercise, equipment, and search filters plus sorting controls across overview, history, exercises, PRs, and forecasts.",
+          "status": "completed",
+          "priority": "none",
+          "dueDate": null,
+          "order": 1,
+          "createdAt": "2026-05-13T00:59:38Z",
+          "completedAt": "2026-05-13T00:59:38Z"
+        },
+        {
+          "id": "task-20260513005939-collapsible-grouped-filters",
+          "title": "Make filters compact and grouped",
+          "description": "Collapse the search/filter panel by default and add Upper body / Lower body grouped muscle filters while preserving detailed muscle labels.",
+          "status": "completed",
+          "priority": "none",
+          "dueDate": null,
+          "order": 2,
+          "createdAt": "2026-05-13T00:59:39Z",
+          "completedAt": "2026-05-13T00:59:39Z"
+        },
+        {
+          "id": "task-20260513005940-forecast-capacity-model",
+          "title": "Improve forecast baseline model",
+          "description": "Default forecasts to a 90-day recent-capacity baseline with 30d, 60d, and all-history basis options so deload weeks do not drag projections down.",
+          "status": "completed",
+          "priority": "none",
+          "dueDate": null,
+          "order": 3,
+          "createdAt": "2026-05-13T00:59:40Z",
+          "completedAt": "2026-05-13T00:59:40Z"
+        },
+        {
+          "id": "task-20260513005941-remove-trainer-pdf-block",
+          "title": "Remove trainer dashboard PDF block",
+          "description": "Edit the generated trainer dashboard file to remove the now-unneeded print/PDF handoff surface.",
+          "status": "completed",
+          "priority": "none",
+          "dueDate": null,
+          "order": 4,
+          "createdAt": "2026-05-13T00:59:41Z",
+          "completedAt": "2026-05-13T00:59:41Z"
+        }
+      ],
       "milestones": [],
       "hidden": false,
       "id": "mvwuc0pnximp3atztz",
@@ -44,9 +100,9 @@
       "status": "active",
       "aiModel": "",
       "repo": "github.com/brian-caylor/strength-lab",
-      "notes": "",
+      "notes": "## 2026-05-13\n- Completed the Strength Lab historical trainer handoff milestone: Strong export parsing, default `strong_workouts.csv` handling, a self-contained trainer dashboard export, and safeguards to keep personal CSV data out of Git.\n- Added dashboard-wide filters, sorting, collapsible search/filter controls, Upper body / Lower body grouped muscle filters, and trainer-facing exercise grouping by name plus equipment.\n- Reworked Forecast so projections default to a 90-day recent-capacity baseline with 30d, 60d, and all-history options, preventing planned deload weeks from dragging the forecast anchor down.\n- Removed the unneeded PDF/print handoff block from the generated trainer dashboard file.\n- Verification included Python parser/build checks, JavaScript syntax checks, regenerated public and trainer dashboard HTML, browser smoke tests across Overview, History, Exercises, and Forecast, and console checks with no relevant warnings or errors.\n",
       "createdAt": "2026-04-28T16:39:48Z",
-      "lastUpdated": "2026-05-11T20:27:36Z"
+      "lastUpdated": "2026-05-13T00:59:37Z"
     },
     {
       "priority": "none",

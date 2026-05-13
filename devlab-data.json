@@ -448,13 +448,13 @@
         {
           "id": "task-20260513-ou-promptvault-card",
           "title": "Add Prompt Vault app card to Oddly Useful site",
-          "description": "Created src/content/apps/prompt-vault.md (order: 5, sparkles icon, tags: prompts/ai/image generation/productivity) and copied public/thumbnails/PromptVault_640x352.png into the worktree. astro build passes; rendered HTML contains the card. Pending visual verification in the browser / deploy.",
-          "status": "in_progress",
+          "description": "Created src/content/apps/prompt-vault.md (order: 5, sparkles icon, tags: prompts/ai/image generation/productivity) plus public/thumbnails/PromptVault_640x352.png. Build passes; HTML output contains the card. Merged to master as b6346ff and pushed — Netlify will deploy.",
+          "status": "done",
           "priority": "medium",
           "dueDate": null,
           "order": 0,
           "createdAt": "2026-05-13T09:11:00Z",
-          "completedAt": null
+          "completedAt": "2026-05-13T09:45:00Z"
         }
       ],
       "milestones": [],

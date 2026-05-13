@@ -467,7 +467,7 @@
       "repo": "github.com/brian-caylor/oddlyuseful-app",
       "notes": "## 2026-05-13\n- Added Prompt Vault as the 5th app card (`src/content/apps/prompt-vault.md`, order: 5) plus `public/thumbnails/PromptVault_640x352.png`. Build passes; rendered HTML contains the card. Pending visual verification.\n",
       "createdAt": "2026-03-15T19:07:49Z",
-      "lastUpdated": "2026-05-13T09:11:00Z"
+      "lastUpdated": "2026-05-13T09:35:00Z"
     },
     {
       "priority": "none",

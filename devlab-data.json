@@ -122,13 +122,13 @@
         {
           "id": "task-20260513-pv-readme-rewrite",
           "title": "Rewrite README",
-          "description": "Replaced AI Studio scaffold README with full doc: features, tech stack, quick start, Firebase setup, Netlify CLI deploy workflow, architecture, sync model, dev commands, privacy notes. PR #5 open and awaiting merge — task stays in-progress until merged.",
-          "status": "in-progress",
+          "description": "Replaced AI Studio scaffold README with full doc: features, tech stack, quick start, Firebase setup, Netlify CLI deploy workflow, architecture, sync model, dev commands, privacy notes. PR #5 squash-merged to main.",
+          "status": "done",
           "priority": "none",
           "dueDate": null,
           "order": 9,
           "createdAt": "2026-05-13T01:00:00Z",
-          "completedAt": null
+          "completedAt": "2026-05-12T23:45:49Z"
         },
         {
           "id": "task-20260513-pv-ci-workflow",

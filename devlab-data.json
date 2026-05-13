@@ -122,13 +122,13 @@
         {
           "id": "task-20260513-pv-readme-rewrite",
           "title": "Rewrite README",
-          "description": "Replaced AI Studio scaffold README with full doc: features, tech stack, quick start, Firebase setup, Netlify CLI deploy workflow, architecture, sync model, dev commands, privacy notes. PR #5 open, awaiting merge.",
-          "status": "completed",
+          "description": "Replaced AI Studio scaffold README with full doc: features, tech stack, quick start, Firebase setup, Netlify CLI deploy workflow, architecture, sync model, dev commands, privacy notes. PR #5 open and awaiting merge — task stays in-progress until merged.",
+          "status": "in-progress",
           "priority": "none",
           "dueDate": null,
           "order": 9,
           "createdAt": "2026-05-13T01:00:00Z",
-          "completedAt": "2026-05-13T01:30:00Z"
+          "completedAt": null
         },
         {
           "id": "task-20260513-pv-ci-workflow",
@@ -162,6 +162,94 @@
           "order": 12,
           "createdAt": "2026-05-13T01:30:00Z",
           "completedAt": null
+        },
+        {
+          "id": "task-20260513-pv-codesplit-firebase",
+          "title": "Code-split Firebase to reduce initial bundle",
+          "description": "Bundle is 1.18MB / 294KB gzipped; Firebase SDK is most of it. Dynamic-import Firebase modules so unauthenticated visitors don't pay for them on first paint. Lazy-init firebase.ts on first sign-in attempt.",
+          "status": "open",
+          "priority": "none",
+          "dueDate": null,
+          "order": 13,
+          "createdAt": "2026-05-13T01:40:00Z",
+          "completedAt": null
+        },
+        {
+          "id": "task-20260513-pv-migrate-base64-generations",
+          "title": "One-time migration: existing base64 generations to Firebase Storage",
+          "description": "Prompts imported before Phase 4.5 still have base64 image data in `generatedResults[].content`. On first sign-in (or via a Settings button), upload each base64 image to users/{uid}/generations/, swap the URL, push the updated prompt. Keep an `imageMigratedAt` flag in settings to make it idempotent.",
+          "status": "open",
+          "priority": "none",
+          "dueDate": null,
+          "order": 14,
+          "createdAt": "2026-05-13T01:40:00Z",
+          "completedAt": null
+        },
+        {
+          "id": "task-20260513-pv-folder-delete-rename",
+          "title": "Folder delete + rename UI in Sidebar",
+          "description": "Sidebar currently only supports adding folders. No delete, no rename. Add a context menu (or hover icons) on each folder row, wire to setFolders + cloudPushFolder/cloudDeleteFolder. Confirm-on-delete since prompts in the folder would become unfolded.",
+          "status": "open",
+          "priority": "none",
+          "dueDate": null,
+          "order": 15,
+          "createdAt": "2026-05-13T01:40:00Z",
+          "completedAt": null
+        },
+        {
+          "id": "task-20260513-pv-aspect-ratio-picker",
+          "title": "Aspect ratio picker in Playground",
+          "description": "Playground hardcodes 1:1 in ImageGenerateInput. Add a small selector for 1:1, 3:4, 4:3, 9:16, 16:9. Map to OpenAI sizes via existing aspectToSize() in openai provider; pass through directly for Google.",
+          "status": "open",
+          "priority": "none",
+          "dueDate": null,
+          "order": 16,
+          "createdAt": "2026-05-13T01:40:00Z",
+          "completedAt": null
+        },
+        {
+          "id": "task-20260513-pv-real-pwa-icons",
+          "title": "Add real PNG icons for iOS home-screen + Android maskable",
+          "description": "Manifest currently points to /favicon.svg with `purpose: any maskable`. iOS doesn't honor SVG for Add-to-Home-Screen; Android prefers maskable PNGs. Generate 192px + 512px PNGs (plus a maskable variant with safe-area padding) and reference them in vite.config.ts manifest.",
+          "status": "open",
+          "priority": "none",
+          "dueDate": null,
+          "order": 17,
+          "createdAt": "2026-05-13T01:40:00Z",
+          "completedAt": null
+        },
+        {
+          "id": "task-20260513-pv-live-settings-sync",
+          "title": "Live settings sync subscription",
+          "description": "settings sync today is a one-shot pull at sign-in. Add `subscribeToSettings(uid, cb)` (Firestore onSnapshot on users/{uid}/settings/main) and wire it into App.tsx so a darkMode toggle on device A flips device B in real time.",
+          "status": "open",
+          "priority": "none",
+          "dueDate": null,
+          "order": 18,
+          "createdAt": "2026-05-13T01:40:00Z",
+          "completedAt": null
+        },
+        {
+          "id": "task-20260513-pv-service-tests",
+          "title": "Add unit tests for service layer",
+          "description": "Only a smoke test exists today. Cover: aiService (provider routing, model cache TTL, force refresh), google/openai providers (listImageModels filters, generate error paths), syncService (clean() stripping undefined, migrateLocalToCloud idempotency), imageStorage (data-URL detection, MIME parsing).",
+          "status": "open",
+          "priority": "none",
+          "dueDate": null,
+          "order": 19,
+          "createdAt": "2026-05-13T01:40:00Z",
+          "completedAt": null
+        },
+        {
+          "id": "task-20260513-pv-disable-netlify-auto-publish",
+          "title": "Disable Netlify auto-publish on main",
+          "description": "Netlify still auto-builds on push to main by default — that burns build minutes when commits land via PR merges. Toggle off in Netlify → Site settings → Build & deploy → Continuous deployment → Stop auto publishing. Production deploys then only happen via `npm run deploy:prod`.",
+          "status": "open",
+          "priority": "none",
+          "dueDate": null,
+          "order": 20,
+          "createdAt": "2026-05-13T01:40:00Z",
+          "completedAt": null
         }
       ],
       "milestones": [],
@@ -174,7 +262,7 @@
       "repo": "github.com/brian-caylor/PromptVault",
       "notes": "## 2026-05-12 / 2026-05-13 — full overhaul shipped\n\nStarted as the AI Studio scaffold (CDN React via importmap, no build, hardcoded models, no auth or sync, Tailwind via CDN script, ~1500-line App.tsx with 26 useState hooks). Now a real local-first PWA on Netlify with optional Firebase backend.\n\n### Tech stack\nReact 19 + TS strict + Vite 6, Tailwind v4 via @tailwindcss/vite, shadcn/ui on Radix, Biome, Vitest, Firebase (Auth + Firestore + Storage), vite-plugin-pwa, sonner toasts.\n\n### Key decisions\n- **Multi-provider image-gen via dynamic discovery**: ImageProvider interface; Google models discovered via /v1beta/models filtered by Imagen/Gemini-image families; OpenAI via /v1/models filtered by dall-e/gpt-image id prefixes (capability allowlist, not version list). New provider models appear automatically with no app update. 24h localStorage cache. Anthropic excluded — no image-gen capability today.\n- **BYOK in browser**: API keys live in IndexedDB only, never written to Firestore. Settings sync is intentionally scoped to darkMode + modelOptions only; API keys stay browser-local to preserve this trust model.\n- **Offline-first sync**: IndexedDB stays source of truth on-device. When signed in, mutations write to BOTH IndexedDB and Firestore. Firestore real-time listeners merge remote changes back into local state. First sign-in idempotently migrates local data to cloud via migrateLocalToCloud + settings.migratedAt flag.\n- **Image generations to Storage**: signed-in Playground outputs upload to users/{uid}/generations/, prompt stores the durable URL (not base64). Unauthenticated users keep base64 in IndexedDB.\n- **Netlify CLI deploy workflow (no build minutes)**: `netlify deploy --build` runs build locally and auto-injects env vars from the linked site. `npm run deploy:preview` / `deploy:prod`. Stable `preview--the-promptvault.netlify.app` alias authorized once in Firebase Auth so previews can sign in.\n\n### Deployed\n- Production: https://the-promptvault.netlify.app\n- Preview: https://preview--the-promptvault.netlify.app\n- Firebase project: promptvault-8b249\n- Verified on desktop (1280x800) and iOS Safari (375x812 portrait, both signed-in and private)\n\n### Open follow-ups\n- Re-add .github/workflows/ci.yml (couldn't push from PR #1 — gh OAuth missing workflow scope; file is on disk locally)\n- PR #5 (README rewrite) awaiting merge\n- Phase 3d: App.tsx split + react-router + Zustand (still ~2400 lines)\n- Phase 6: a11y pass, cmdK palette, react-hook-form + zod, ~46 lint warning cleanup\n",
       "createdAt": "2025-11-22T23:10:31Z",
-      "lastUpdated": "2026-05-13T01:30:00Z"
+      "lastUpdated": "2026-05-13T01:40:00Z"
     },
     {
       "priority": "none",

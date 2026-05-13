@@ -5,7 +5,7 @@
       "order": 0,
       "tasks": [],
       "milestones": [],
-      "hidden": false,
+      "hidden": true,
       "id": "db3mfoymnb6mp3atz2f",
       "name": "TEST_Clock",
       "description": "test",

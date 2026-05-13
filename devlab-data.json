@@ -405,6 +405,28 @@
           "title": "Verify live DevLab deployment",
           "status": "done",
           "createdAt": "2026-05-13T00:48:52Z"
+        },
+        {
+          "id": "task-20260513-devlab-live-refresh",
+          "title": "Auto-refresh project/task UI when devlab-data.json changes",
+          "description": "Today, edits committed by Claude (or any other source) only appear in the UI after a manual page refresh. Approach: (1) refetch on `visibilitychange === 'visible'` so switching back to the tab catches new commits cheaply; (2) poll the GitHub raw URL (or contents API) every 30–60s with conditional GET (ETag + If-None-Match) so 304s don't count against API limits; (3) optional bonus — pair with SWR/react-query so revalidation doesn't flicker. Truly real-time (push) would need a GitHub webhook → Netlify Function → SSE/EventSource client, but (1)+(2) cover the common case with zero infra.",
+          "status": "open",
+          "priority": "none",
+          "dueDate": null,
+          "order": 2,
+          "createdAt": "2026-05-13T02:00:00Z",
+          "completedAt": null
+        },
+        {
+          "id": "task-20260513-devlab-id-strategy-audit",
+          "title": "Audit project/task ID strategy",
+          "description": "Question raised: do we still need opaque IDs (e.g. `wzgvnjuo7ajmp3atzfd`) given each project/task has a human-readable name? Argument for keeping IDs: names can be edited (rename a task and any reference survives), names can collide (two folders called 'Ideas'), and stable IDs let history/links/dependencies keep their target. Argument for dropping them: simpler data file, names already feel unique enough in practice. Compromise: keep IDs but switch to slug-style IDs derived from initial name (e.g. `promptvault-phase4-firebase`) so the file is grep-friendly. Action: scan existing data for name collisions, decide whether to (a) keep current opaque IDs, (b) migrate existing items to slug IDs, or (c) move to name-as-key. Most of the new PromptVault tasks I added already use slug-style IDs as a reference.",
+          "status": "open",
+          "priority": "none",
+          "dueDate": null,
+          "order": 3,
+          "createdAt": "2026-05-13T02:00:00Z",
+          "completedAt": null
         }
       ],
       "milestones": [],

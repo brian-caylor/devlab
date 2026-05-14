@@ -862,7 +862,7 @@
           "title": "Fix viewing, at 100% most of all type is too small to read without enlarging the view from the browser",
           "description": "",
           "status": "todo",
-          "priority": "medium",
+          "priority": "high",
           "dueDate": null,
           "order": 0,
           "createdAt": "2026-05-14T00:45:01.864Z",
@@ -879,7 +879,7 @@
       "repo": "github.com/brian-caylor/the-compliance-officer",
       "notes": "",
       "createdAt": "2026-05-13T23:08:50Z",
-      "lastUpdated": "2026-05-14T00:45:01.865Z"
+      "lastUpdated": "2026-05-14T00:45:05.364Z"
     }
   ],
   "ideas": [],

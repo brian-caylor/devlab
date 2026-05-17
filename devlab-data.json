@@ -858,15 +858,19 @@
       "order": 23,
       "tasks": [
         {
-          "id": "7yz8hamm9imp4rnzfs",
-          "title": "Fix viewing, at 100% most of all type is too small to read without enlarging the view from the browser",
           "description": "",
-          "status": "todo",
           "priority": "high",
           "dueDate": null,
           "order": 0,
-          "createdAt": "2026-05-14T00:45:01.864Z",
-          "completedAt": null
+          "completedAt": "2026-05-17T21:30:24.859Z",
+          "labels": [],
+          "subtasks": [],
+          "githubLink": null,
+          "milestoneId": null,
+          "id": "7yz8hamm9imp4rnzfs",
+          "title": "Fix viewing, at 100% most of all type is too small to read without enlarging the view from the browser",
+          "status": "done",
+          "createdAt": "2026-05-14T00:45:01.864Z"
         }
       ],
       "milestones": [],
@@ -879,7 +883,7 @@
       "repo": "github.com/brian-caylor/the-compliance-officer",
       "notes": "",
       "createdAt": "2026-05-13T23:08:50Z",
-      "lastUpdated": "2026-05-14T00:45:05.364Z"
+      "lastUpdated": "2026-05-17T21:30:24.860Z"
     }
   ],
   "ideas": [],
